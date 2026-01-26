@@ -133,4 +133,13 @@ char * dl_strcasestr( const char * haystack,  const char * needle );
 uint32_t str_to_uint32( const char * str );
 #endif
 
+#ifdef LOAD_SAVE_MENU_PATCH
+	char *Path_SlashAttack(const char *input_path);
+	char *Path_EmptyCheck(char *SaveDirPath);
+	char *Directory_GetLastSigns(const char *fullpath, char *buffer, size_t bufsize);
+	byte DirectoryRemove_Recursive(const char *path);
+	byte DirectoryCheck_isPath(const char *path);
+	byte Directory_FILE_ExistsIn_DIR(const char *dirPath);	
+#endif
+
 #endif

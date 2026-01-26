@@ -43,6 +43,10 @@
 // Because of WINVER redefine, before any include that could define WINVER
 #include "doomincl.h"
 
+#ifndef SDL2
+  #include "i_video.h" // CenterSDL1
+#endif
+
 #include <SDL.h>
 // Will use gl.h, so block SDL glext redefine.
 #define NO_SDL_GLEXT
@@ -314,6 +318,31 @@ boolean OglSdl_SetMode(int w, int h, byte req_fullscreen)
     // SDL_SetHint( SDL_HINT_RENDER_DRIVER, "opengl" );  // allow opengl
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "nearest" );  // nearest, linear, best
 
+    /*
+     * Marty: Borderless Mode
+     */
+    if (cv_borderless.EV == 1) // SDL2
+        window_reqflags |=SDL_WINDOW_BORDERLESS;
+
+    /*
+     * Marty: Neue einstellung werden nicht übernommen..
+     * Seltsam h und x richtig?
+     */
+  //if (w!=req_width && h!=req_height)
+    if ((w==req_width) && (h==req_height))
+    {
+     //GenPrintf( EMSG_ver,"  OpenGL Set to %dx%d (vs OldMode %dx%d)\n",w, h, req_width, req_height);
+       GenPrintf( EMSG_ver,"  OpenGL does need to change Resolution %dx%d\n",req_width, req_height);
+     //req_width = w;
+     //req_height= h;
+    }
+    else
+    {
+       GenPrintf( EMSG_ver,"  OpenGL Set to %dx%d (vs OldMode %dx%d)\n",w, h, req_width, req_height);
+       req_width = w;
+       req_height= h;
+    }
+
     sdl_window = SDL_CreateWindow( "Doom Legacy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                    req_width, req_height, window_reqflags );
     if( sdl_window == NULL)
@@ -333,10 +362,10 @@ boolean OglSdl_SetMode(int w, int h, byte req_fullscreen)
     SDL_GetWindowDisplayMode( sdl_window, /*OUT*/ & sdl_displaymode );
    
     // Not used in OpenGL drawmode
-    vid.bitpp = SDL_BITSPERPIXEL( sdl_displaymode.format );
+    vid.bitpp = 32; // OGL 32 Bit, Was soll der rotz mit 24Bit. SDL_BITSPERPIXEL( sdl_displaymode.format );
     vid.bytepp = (vid.bitpp + 7) >> 3;
-    vid.width = sdl_displaymode.w;
-    vid.height = sdl_displaymode.h;
+    vid.width = req_width/*sdl_displaymode.w*/;
+    vid.height = req_height/*sdl_displaymode.h*/;
     vid.ybytes = vid.width * vid.bytepp;
    
     if( verbose )
@@ -357,10 +386,17 @@ boolean OglSdl_SetMode(int w, int h, byte req_fullscreen)
 		w, h, 16, reqflags, fullscreen_str[ req_fullscreen ] );
     }
 
+    /*
+     * Marty: Borderless Mode
+     * Borderless wird direkt bei der Wahl des Modus geändert und nicht via Flags
+     * wie bei SDL2
+     */
     vidSurface = SDL_SetVideoMode(w, h, cbpp, reqflags);
     if(vidSurface == NULL)
         return false;
 
+    CenterSDL1Window();
+    
     vid.bitpp = vidSurface->format->BitsPerPixel;
     vid.bytepp = vidSurface->format->BytesPerPixel;
     vid.width = vidSurface->w;

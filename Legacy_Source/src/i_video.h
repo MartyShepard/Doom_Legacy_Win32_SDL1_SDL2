@@ -121,7 +121,12 @@ extern consvar_t cv_grgammablue;
 extern consvar_t cv_vidwait;
 
 extern consvar_t cv_fullscreen; // for fullscreen support
+extern consvar_t cv_borderless; // for Window borderless support
 
+#ifdef WIDESCREEN_WEAPONSPRITE
+extern consvar_t cv_WidescreenAspect;
+extern double WS_ScaledWidth;
+#endif
 // Return true if engine can draw using the bitpp
 boolean V_CanDraw( byte bitpp );
 
@@ -185,5 +190,9 @@ void I_LoadingScreen ( const char * msg );
 // debug in color
 // unused
 void IO_Color( unsigned char color, unsigned char r, unsigned char g, unsigned char b );
+
+#ifndef SDL2
+	void CenterSDL1Window(void);
+#endif
 
 #endif

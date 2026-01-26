@@ -36,11 +36,15 @@
 // Heretic upgrades defered to version 1.49
 // #define HERETIC_TODO_VERSION  149
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 
+#define SVN_REVISION 1766
 // Versioning
 #ifndef SVN_REV
-#define SVN_REV "1766"
+#define SVN_REV STR(SVN_REVISION)
 #endif
+
 
 // =========================================================================
 // Compile settings, configuration, tuning, and options
@@ -62,7 +66,7 @@
 // Do some extra tests, that never happens but maybe.
 //#define PARANOIA
 // write message in log.txt (win32 and Linux only for the moment)
-//#define LOGMESSAGES
+#define LOGMESSAGES
 // Default to show debug messages.
 //#define DEBUG_MESSAGES_ON
 #endif
@@ -133,7 +137,7 @@
 
 // [WDJ] 9/2/2011  BEX language controls
 // Load language BEX file
-//#define BEX_LANGUAGE
+#define BEX_LANGUAGE
 // Automatic loading of lang.bex file.
 //#define BEX_LANG_AUTO_LOAD
 
@@ -142,15 +146,15 @@
 // To save code size, can turn off some drawing bpp that you cannot use.
 #define ENABLE_DRAW15
 #define ENABLE_DRAW16
-#ifndef SMIF_PC_DOS
-# define ENABLE_DRAW24
-# define ENABLE_DRAW32
-#endif
-
+#define ENABLE_DRAW24
+#define ENABLE_DRAW32
 #define ENABLE_DRAW_ALPHA
 
 // Used for palette draw fade operations
 #define ENABLE_DRAW8_USING_12
+
+// Fixed Weapon Sprite in 16:9 Screens
+#define WIDESCREEN_WEAPONSPRITE
 
 // [WDJ] 6/5/2012 Boom global colormap
 // Boom global colormap is selectable, now a standard feature, 12/15/2015.
@@ -174,12 +178,15 @@
 // Enable alternative fit to view width and height.
 #define FIT_RATIO
 
+// Enable experimental screen modes
+#define EXP_RATIO
+
 // [WDJ] Built-in Launcher
-#define LAUNCHER
+//#define LAUNCHER
 // especially for Window 7,8
-#if defined( WIN32 ) && !defined( LAUNCHER )
-#define LAUNCHER
-#endif
+//#if defined( WIN32 ) && !defined( LAUNCHER )
+//#define LAUNCHER
+//#endif
 
 // [WDJ] Multiple config file, main and drawmode, with cvar tracking.
 // This enables editing them in the menus.
@@ -208,7 +215,7 @@
 // If music source has selected MP3 or OGG,
 // and such are not found or cannot be played, then be silent.
 // Otherwise will play the default MUS or MIDI, like in AUTO.
-#define MUSIC_SELECT_ALT_IS_SILENCE
+//#define MUSIC_SELECT_ALT_IS_SILENCE
 #endif
 #endif
 
@@ -239,7 +246,16 @@
 // Read zip wads.
 // This requires  HAVE_LIBZIP  be set in make_options to get linking.
 #define ZIPWAD
+
 #endif
+#endif
+
+#ifdef WIN32
+// For Win32/Win64 and MingW/MSyS it exits libzip.
+#define HAVE_LIBZIP 1 
+// Read zip wads.
+// This requires  HAVE_LIBZIP  be set in make_options to get linking.
+#define ZIPWAD
 #endif
 
 // DeePsea tall patches.
@@ -444,9 +460,11 @@
 #endif
 
 // How many subdirectories deep to search.
+#define SEARCH_DEPTH_USER
+#ifndef SEARCH_DEPTH_USER
 #define  GAME_SEARCH_DEPTH   4
 #define  IWAD_SEARCH_DEPTH   5
-
+#endif
 // =========================================================================
 
 // The maximum number of players, multiplayer/networking.
@@ -484,5 +502,76 @@
 // [WDJ] If (35 * 4) is exceeded then table tele_delay may break.
 #define TICRATE         (OLDTICRATE*NEWTICRATERATIO)
 
+#if defined WIN32
+  /*
+    Nun denn. Spiegeln wir die Verzeichniss wie ftp.idgames.
+  */
+  #undef DEFHOME
+  #undef DEFAULTDIR1
+  #undef DEFAULTDIR2	
+  #undef DEFWADS01
+  #undef DEFWADS02
+  #undef DEFWADS03
+  #undef DEFWADS04
+  #undef DEFWADS05
+  #undef DEFWADS06
+  #undef DEFWADS10
+
+  #define DEFHOME    ""
+  #define LEGACYWADDIR  ""
+  #define DEFAULTDIR1 ""
+  #define DEFAULTDIR2 ""
+  #define DEFWADS01  ""
+  #define DEFWADS02  ""
+  #define DEFWADS03  "DOOM1\\WADS"
+  #define DEFWADS04  "DOOM2\\WADS"
+  #define DEFWADS05  "HERETIC\\WADS"
+  #define DEFWADS06  "WADS"
+  #define DEFWADS07  "WADS\\GRAPHICS"
+  #define DEFWADS08  "WADS\\THEMES"
+  #define DEFWADS09  "WADS\\MUSIC"
+  #define DEFWADS10  "WADS\\PORTS"
+  #define DEFWADS11  "WADS\\DTHMATCH"
+  #define DEFWADS12  "WADS\\MEGAWADS"
+  #define DEFWADS13  "WADS\\0-9"
+  #define DEFWADS14  "WADS\\A-C"
+  #define DEFWADS15  "WADS\\D-F"
+  #define DEFWADS16  "WADS\\G-I"
+  #define DEFWADS17  "WADS\\J-L"
+  #define DEFWADS18  "WADS\\M-O"
+  #define DEFWADS19  "WADS\\P-R"
+  #define DEFWADS20  "WADS\\S-U"
+  #define DEFWADS21  "WADS\\V-Z"
+
+#endif
+#if defined(WIN32)
+ #define DRAGFILE
+ #define GRAB_MIDDLEMOUSE
+ #define LOAD_SAVE_MENU_PATCH
+#endif
+/* 
+ * Weiterletung and die RC datei. 
+ * Die Definierung für SDL1 oder 2 muß von hand eingestellt ... o-o
+ */
+#if defined(WIN32)
+
+  #define VALUE_COMMENT          "Do anyone read this ? Try to read the Baldur's Gate is more interesting..... Anyway If you don't know our site is www.frag.com/doomlegacy you will find our latest version and mush more"
+  #define VALUE_COMPANY          "Futur scene of Belgium" 
+#ifdef SDL2 
+  #define VALUE_FILEDESCRIPTION  "Doom Legacy (32Bit/SDL2)"
+#else
+  #define VALUE_FILEDESCRIPTION  "Doom Legacy (32Bit/SDL1)"
+#endif
+  #define VALUE_VERSION_COMMA     DL_VER_MAJ,DL_VER_MIN,DL_VER_REV,SVN_REVISION
+  #define VALUE_VERSION_STRING    STR(DL_VER_MAJ) ", " STR(DL_VER_MIN) ", " STR(DL_VER_REV)
+  #define VALUE_INTERNAL_NAME    "Doom3"
+  #define VALUE_LEGALCOPYRIGHT   "Copyright (C) 1998-2024 by DooM Legacy Team"
+  #define VALUE_LEGALTRADEMARKS  "Compiled from Marty 2026"
+  #define VALUE_ORIGINALFILENAME "DoomLegacy.exe"
+  #define VALUE_PRODUCTNAME      "Doom Legacy Underbuild v002"
+  #define VALUE_PRIVATEBUILD     ""
+  #define VALUE_SPECIALBUILD     ""
+
+#endif
 
 #endif  // DOOMDEF_H

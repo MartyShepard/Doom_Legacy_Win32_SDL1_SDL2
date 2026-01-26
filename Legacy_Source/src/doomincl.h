@@ -150,6 +150,10 @@ extern  FILE*           debugfile;
 extern  FILE* logstream;
 #endif
 
+#ifdef DRAGFILE
+extern byte  DrgFile_Requested;
+extern char *DrgFile_AutoStart;
+#endif
 
 #endif  /* DOOMINCL_H */
 

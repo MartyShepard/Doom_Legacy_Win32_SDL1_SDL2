@@ -300,7 +300,11 @@ void D_Register_ClientCommands(void)
     COM_AddCommand("saveconfig", Command_SaveConfig_f, CC_config);
     COM_AddCommand("loadconfig", Command_LoadConfig_f, CC_config);
     COM_AddCommand("changeconfig", Command_ChangeConfig_f, CC_config);
-
+#ifdef SEARCH_DEPTH_USER
+    CV_RegisterVar(&cv_game_search_depth);
+    CV_RegisterVar(&cv_iwad_search_depth);
+    CV_RegisterVar(&cv_fwad_search_depth);
+#endif
 
     //Added by Hurdler for master server connection
     MS_Register_Commands();

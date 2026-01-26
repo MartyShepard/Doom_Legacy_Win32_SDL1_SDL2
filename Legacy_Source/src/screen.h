@@ -84,8 +84,8 @@ extern int stbar_height;   // status bar, may be scaled
 // we try to re-allocate a minimum of buffers for stability of the memory,
 // so all the small-enough tables based on screen size, are allocated once
 // and for all at the maximum size.
-#define MAXVIDWIDTH    1600
-#define MAXVIDHEIGHT   1200
+#define MAXVIDWIDTH    8192/*1600*/
+#define MAXVIDHEIGHT   4320/*1200*/
 
 #define BASEVIDWIDTH    320   //NEVER CHANGE THIS! this is the original
 #define BASEVIDHEIGHT   200  // resolution of the graphics.
@@ -260,6 +260,7 @@ extern consvar_t cv_scr_width;
 extern consvar_t cv_scr_height;
 extern consvar_t cv_scr_depth;
 extern consvar_t cv_fullscreen;
+extern consvar_t cv_borderless;
 
 extern consvar_t cv_fuzzymode;
 
@@ -282,5 +283,5 @@ void SCR_SetDefaultMode (void);
 void SCR_Startup (void);
 
 void SCR_ChangeFullscreen (void);
-
+void SCR_Borderless(void);
 #endif // SCREEN_H

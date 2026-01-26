@@ -102,6 +102,8 @@
 #include "i_joy.h"
 #include "m_argv.h"
 
+#include "m_menu.h" // MiddeMouseLock
+
 
 // MOUSE2_NIX dependent upon DoomLegacy headers.
 #ifdef MOUSE2_NIX
@@ -119,6 +121,25 @@
 #ifdef SDL2
 // New SDL2 calls need the window.
 extern SDL_Window * sdl_window;
+#else
+  // Global oder static – das HWND speichern
+  #include "SDL_syswm.h"
+  static HWND sdl_hwnd = NULL;
+
+  // Einmal am Start (nach SDL_SetVideoMode) das HWND holen
+  void GetSDLWindowHandle(void)
+  {
+    SDL_SysWMinfo info;
+    SDL_VERSION(&info.version);
+    if (SDL_GetWMInfo(&info))
+    {
+      sdl_hwnd = info.window;
+      if (sdl_hwnd)
+      {
+          printf("SDL-Fenster HWND gefunden: %p\n", sdl_hwnd);
+      }
+    }
+  }
 #endif
 
 
@@ -434,6 +455,100 @@ static byte  mouse2_stim_trigger = 0;
 extern consvar_t   cv_sdl2_textchar;
 #endif
 
+byte MiddleMouselock = 0;; //Global variable
+#ifdef WIN32
+  #ifdef SDL2
+  byte isFullScreen_SDL2(void)
+  {    
+    if (sdl_window)
+    { 
+      Uint32 window_flags        = SDL_GetWindowFlags(sdl_window);    
+      byte is_fullscreen         = (window_flags & SDL_WINDOW_FULLSCREEN) != 0;
+      byte is_fullscreen_desktop = (window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0;   
+      byte is_borderless         = (window_flags & SDL_WINDOW_BORDERLESS) != 0;
+      
+      GenPrintf(EMSG_ver, "[%s][%d] Fullscreen: %s (Desktop: %s, Borderless: %s)\n",
+                __FILE__,__LINE__,
+                is_fullscreen || is_fullscreen_desktop ? "Ja" : "Nein",
+                is_fullscreen_desktop ? "Ja" : "Nein",
+                is_borderless ? "Ja" : "Nein");
+            
+      if (is_fullscreen)
+        return 1;
+    }
+    return 0;    
+  }
+  #else
+  byte isFullScreen_SDL1(void)
+  {
+    SDL_Surface *screen = SDL_GetVideoSurface();
+    if (screen)
+    {
+
+      byte is_fullscreen = (screen->flags & SDL_FULLSCREEN) != 0;
+      byte is_doublebuf  = (screen->flags & SDL_DOUBLEBUF) != 0;
+      
+      GenPrintf(EMSG_ver, "[%s][%d] Fullscreen: %s, DoubleBuf: %s\n",
+                __FILE__,__LINE__,
+                is_fullscreen ? "Ja" : "Nein",
+                is_doublebuf ? "Ja" : "Nein");
+                
+      if (is_fullscreen)
+      return 1;
+    }
+    return 0;
+  }
+  #endif
+
+
+  #ifdef GRAB_MIDDLEMOUSE
+    void DL_CaptureMouse(void)
+    {
+      if (!cv_mouse_release.value)
+        return;
+      
+    #ifdef SDL2    
+      if (isFullScreen_SDL2() == 1)
+         return;
+    #else
+      if (isFullScreen_SDL1() == 1)
+         return;
+    #endif  
+      
+      if (MiddleMouselock)
+      {
+        I_StartupMouse( 1 );
+        //SDL_SetRelativeMouseMode(SDL_TRUE);		
+        SDL_ShowCursor(SDL_DISABLE);
+    #ifdef SDL2    
+        SDL_SetWindowGrab(sdl_window, SDL_TRUE);
+    #else
+        // GetSDLWindowHandle(); /* Wird erstmal nicht benötigt */
+        // Cursor-Clip auf den ganzen Bildschirm setzen (oder gar nicht clippen)
+        ReleaseCapture();
+        // Maus-Capture freigeben
+        ClipCursor(NULL);  // NULL = gesamter Desktop
+    #endif  
+        MiddleMouselock = 0;
+      }
+      else
+      {
+        I_StartupMouse( 0 );
+        //SDL_SetRelativeMouseMode(SDL_FALSE);
+        SDL_ShowCursor(SDL_ENABLE);
+    #ifdef SDL2    
+        SDL_SetWindowGrab(sdl_window, SDL_FALSE);
+    #else
+        // Cursor-Clip auf den ganzen Bildschirm setzen (oder gar nicht clippen)  
+        ClipCursor(NULL);  // NULL = gesamter Desktop      
+    #endif
+        MiddleMouselock = 1;
+      }
+      if (verbose > 1)      
+      GenPrintf(EMSG_debug, "[%s][%d] CaptureMouse -> %s\n", __FILE__,__LINE__,MiddleMouselock==0?"Ja":"Nein");	
+    }
+    #endif
+#endif
 
 void I_GetEvent(void)
 {
@@ -459,6 +574,14 @@ void I_GetEvent(void)
 
   while (SDL_PollEvent(&inputEvent))
   {
+      /* Vielleicht kann man .... */
+      /*
+      if (inputEvent.type == SDL_DROPFILE)
+      {
+        char *dropped_file = inputEvent.drop.file;
+        printf("Drag & Drop: %s\n", dropped_file);
+      }
+      */
       switch (inputEvent.type)
       {
         case SDL_KEYDOWN:
@@ -532,7 +655,7 @@ void I_GetEvent(void)
 #endif
 
         case SDL_MOUSEMOTION:
-          if(cv_usemouse[0].EV)
+          if((cv_usemouse[0].EV) && (MiddleMouselock == 0)) /* Immer an wenn nicht GRAB_MIDDLEMOUSE*/
           {
               event.type = ev_mouse;
               event.data1 = 0;
@@ -626,7 +749,17 @@ void I_GetEvent(void)
 
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
+#ifdef GRAB_MIDDLEMOUSE
+          if ((inputEvent.button.state == SDL_PRESSED)      &&
+              (inputEvent.button.button== SDL_BUTTON_MIDDLE))
+          {
+              DL_CaptureMouse();                           
+          }
+
+          else if(cv_usemouse[0].EV)
+#else        
           if(cv_usemouse[0].EV)
+#endif
           {
               if (inputEvent.type == SDL_MOUSEBUTTONDOWN)
                 event.type = ev_keydown;
@@ -636,7 +769,7 @@ void I_GetEvent(void)
               event.data1 = KEY_MOUSE1 + inputEvent.button.button - SDL_BUTTON_LEFT;
               event.data2 = 0; // does not correspond to any character
               D_PostEvent(&event);
-          }
+          }  
           break;
 
 #ifdef JOYSTICK_SUPPORT
@@ -784,7 +917,7 @@ void I_GetEvent(void)
           break;
 #endif
 #endif
- 
+
         case SDL_QUIT:
           I_Quit();
           //M_QuitResponse('y');
@@ -951,6 +1084,25 @@ void I_SysInit(void)
 {
   CONS_Printf("Initializing SDL...\n");
 
+#if defined SDL2 && ( _WIN32_WINNT )
+  const char *SDLAUDIODRIVER = SDL_GetCurrentAudioDriver();
+  if (SDLAUDIODRIVER==NULL)
+  {
+    SDLAUDIODRIVER = "directsound"; /*Wasapi macht probleme*/
+    SDL_setenv("SDL_AUDIODRIVER", SDLAUDIODRIVER, 1);
+  }
+	
+  CONS_Printf("I_InitSound: Audio Driver: %s \n",SDLAUDIODRIVER);
+
+  /*
+   *    "0" or "default" - Use SDL's internal resampling (Default when not set - low quality, fast)
+   *    "1" or "fast"    - Use fast, slightly higher quality resampling, if available
+   *    "2" or "medium"  - Use medium quality resampling, if available
+   *    "3" or "best"    - Use high quality resampling, if available
+  */
+  SDL_SetHint(SDL_HINT_AUDIO_RESAMPLING_MODE, "3");
+
+#endif
   // Initialize Audio as well, otherwise DirectX can not use audio
   if( SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0 )
   {

@@ -916,7 +916,8 @@ void R_AddSpriteDefs (char** namelist, int wadnum)
                     if( remap_index && (verbose > 1) )
                         GenPrintf( EMSG_debug, "  Found remap sprite: %s\n", sprname );
 #endif
-                    GenPrintf(EMSG_debug, "Sprite %s: Wad %i, Loaded to %i\n", sprname, wadnum, sprindx );
+                    if( verbose > 1)
+                      GenPrintf(EMSG_debug, "Sprite %s: Wad %i, Loaded to %i\n", sprname, wadnum, sprindx );
                 }
 
                 // if a new sprite was added (not just replaced)

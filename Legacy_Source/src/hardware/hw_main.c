@@ -3902,11 +3902,28 @@ void HWR_DrawPSprite(pspdef_t * psp,  byte lightlum)
 
     tx = FIXED_TO_FLOAT( (psp->sx - ((BASEVIDWIDTH / 2) << FRACBITS)) );
     tx -= FIXED_TO_FLOAT( sprlump->leftoffset );
+    
+#ifdef WIDESCREEN_WEAPONSPRITE    
+    if (WS_ScaledWidth > 0)
+    {
+      tx -= -((int)WS_ScaledWidth/BASEVIDHEIGHT)+1; // good values -6 ~ -8
+      /* GenPrintf(EMSG_debug, "tx-    =- %d\n",( (int)WS_ScaledWidth / BASEVIDHEIGHT)); */
+    }
+#endif 
 //    x1 = gr_windowcenterx + (tx * gr_pspritescale_x);
 
     vxtx[3].x = vxtx[0].x = tx;
 
-    tx += FIXED_TO_FLOAT( sprlump->width );
+    tx += FIXED_TO_FLOAT( sprlump->width);  
+
+#ifdef WIDESCREEN_WEAPONSPRITE 
+    if (WS_ScaledWidth > 0)    
+    {
+      tx += -(((int)WS_ScaledWidth/BASEVIDHEIGHT)*2); // good values -14 ~ -16
+      /*GenPrintf(EMSG_debug, "tx+    =+ %d\n",( ((int)WS_ScaledWidth / BASEVIDHEIGHT) *2));  */
+    }
+#endif
+  
 //    x2 = gr_windowcenterx + (tx * gr_pspritescale_x) - 1;
 
     vxtx[2].x = vxtx[1].x = tx;
@@ -4324,13 +4341,18 @@ void HWR_SetViewSize( int viewsize )
     gr_pspritescale_x = gr_viewwidth / BASEVIDWIDTH;
     gr_pspritescale_y = ((vid.height * gr_pspritescale_x * BASEVIDWIDTH) / BASEVIDHEIGHT) / vid.width;
 #endif
-
+//#ifdef WIDESCREEN_WEAPONSPRITE
+//  if (WS_ScaledWidth > 0)
+//  {  
+//    GenPrintf(EMSG_debug, "Fit Widescreen\n");
+//    gr_pspritescale_x = (gr_viewwidth / BASEVIDWIDTH) / (int)WS_ScaledWidth;   // x axis scale
+//    gr_pspritescale_y = (((vid.height * gr_pspritescale_x * (int)WS_ScaledWidth) / (int)WS_ScaledWidth) / gr_viewwidth) / BASEVIDHEIGHT; 
+//  }
+//#endif
     HWR_Init_TextureMapping ();
    
     viewsv_viewnumber = 255;  // force init of render
 }
-
-
 //Hurdler: 3D water stuffs
 static int numplanes = 0;
 static int num_late_walls = 0;  // drawn late, transparent walls

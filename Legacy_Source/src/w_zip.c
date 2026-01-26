@@ -40,11 +40,10 @@
 
 // Check for libzip_ver >= 1.2 which has zip_fseek.
 // A loaded libzip may not have zip_fseek.
-#if ((LIBZIP_VERSION_MAJOR < 1) || (LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR < 2)) || defined(OPT_LIBZIP)
+//#if ((LIBZIP_VERSION_MAJOR < 1) || (LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR < 2)) || defined(OPT_LIBZIP)
 // Generate WZ_zip_fseek.
 # define GEN_ZIP_SEEK
-#endif
-
+//#endif
 
 #ifdef OPT_LIBZIP
 #include <dlfcn.h>

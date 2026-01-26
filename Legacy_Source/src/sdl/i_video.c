@@ -72,8 +72,11 @@ static int testbpp = 0;
 
 #include <stdlib.h>
 
-#include <SDL.h>
 
+#include <SDL.h>
+#ifdef SDL2
+#include <SDL_pixels.h>
+#endif
 #include "doomincl.h"
 #include "doomstat.h"
 
@@ -94,6 +97,11 @@ static int testbpp = 0;
 #include "hwsym_sdl.h" // For dynamic referencing of HW rendering functions
 #include "ogl_sdl.h"
 
+#define SDL_BITSPERPIXEL_8(X) ((X) + 6)//8+10
+#define SDL_BITSPERPIXEL_15(X) ((X) + 11)//13+15
+#define SDL_BITSPERPIXEL_16(X) ((X) + 12)//14+16
+#define SDL_BITSPERPIXEL_24(X) ((X) + 20)//22+24
+#define SDL_BITSPERPIXEL_32(X) ((X) + 28)
 
 //Hudler: 16/10/99: added for OpenGL gamma correction
 RGBA_t  gamma_correction = {0x7F7F7F7F};
@@ -106,6 +114,16 @@ SDL_Texture * sdl_texture = NULL;
 SDL_Renderer * sdl_renderer = NULL;
 uint16_t  display_index = 0;  // SDL2 can have multiple displays
 #endif
+
+
+#ifdef SDL2
+static void  add_vid_mode( int w, int h );
+static byte GetPixelFormat_Startup(uint32_t PixelFormat);
+static void Get_Screen_Modes_Pixelformat(int num_modes, byte modelist_bpp, byte request_bitpp, SDL_DisplayMode mode);
+static byte Query_Screen_Modes_PixelFormat(int num_modes, byte request_bitpp, SDL_DisplayMode mode);
+#endif
+static byte Vid_Mode_Exits(int w, int h);
+/* Marty Proto End */
 
 // Only one vidSurface, else releasing oldest faults in SDL.
 // Shared with ogl.
@@ -174,24 +192,72 @@ const static Uint32 surface_flags[2] = {
 
 
 // maximum number of windowed modes
+/*
 #ifdef FIT_RATIO
 #define MAXWINMODES (11)
 #else
 #define MAXWINMODES (8)
 #endif
+*/
+#ifdef FIT_RATIO
+#define MAXWINMODES_FIT_RATIO (11)
+#else
+#define MAXWINMODES_FIT_RATIO (0)
+#endif
+#ifdef EXP_RATIO
+#define MAXWINMODES_EXP_RATIO (24)
+#else
+#define MAXWINMODES_EXP_RATIO (0)
+#endif
+#define MAXWINMODES (8 + MAXWINMODES_FIT_RATIO + MAXWINMODES_EXP_RATIO)
 // windowed video modes from which to choose from.
 static int windowedModes[MAXWINMODES+1][2] = {
    // hidden from display
     {INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT},  // initial mode
    // public  1..
     {MAXVIDWIDTH /*1600*/, MAXVIDHEIGHT/*1200*/},
+#ifdef EXP_RATIO
+    {5793, 3055},
+    {5461, 2880},
+    {5016, 2645},
+    {4487, 2366},
+    {4096, 2160},
+    {3840, 2160},
+    {2560, 1600},
+    {2560, 1440},
+    {2048, 1536},
+    {1600, 1440},
+    {1600, 1024},
+    {1920, 1440},
+    {1920, 1200},
+    {1920, 1080},
+    {1680, 1050},
+#endif
+    {1600, 1200},
 #ifdef FIT_RATIO
     {1600, 1024},
-#endif   
+#endif 
+    {1600, 900},
+#ifdef EXP_RATIO
+    {1440, 1080},
+    {1440, 900},
+    {1366, 768},
+    {1360, 768},
+#endif
+    {1280, 1080},
     {1280, 1024},
+#ifdef EXP_RATIO
+    {1280, 960},
+#endif
 #ifdef FIT_RATIO
     {1280, 800},
-#endif   
+#endif
+#ifdef EXP_RATIO
+    {1280, 768},
+    {1280, 720},
+    {1176, 664},
+    {1152, 864},
+#endif
     {1024, 768},
 #ifdef FIT_RATIO
     {1024, 600},
@@ -203,25 +269,29 @@ static int windowedModes[MAXWINMODES+1][2] = {
     {320, 200}
 };
 
-
 // Add a video mode to the list.
 static
 void  add_vid_mode( int w, int h )
 {
     vid_mode_t * vm;
 
-    if( num_vid_mode >= num_vid_mode_allocated )
+    if ( Vid_Mode_Exits(w, h) )
     {
-       // Expand the video mode list.
-       int req_num = num_vid_mode_allocated + 16;
-       vm = realloc( vid_modelist, sizeof(vid_mode_t) * req_num );
-       if( vm == NULL )  return;
-       vid_modelist = vm;
-       num_vid_mode_allocated = req_num;
+      if( num_vid_mode >= num_vid_mode_allocated )
+      {
+         // Expand the video mode list.      
+         int req_num = num_vid_mode_allocated + 16;
+         vm = realloc( vid_modelist, sizeof(vid_mode_t) * req_num );
+         if( vm == NULL )  return;
+         vid_modelist = vm;
+         num_vid_mode_allocated = req_num;
+      }
+      vm = & vid_modelist[ num_vid_mode++ ];
+      vm->w = w;
+      vm->h = h;
+      //GenPrintf( EMSG_ver,": Added Mode: [%d] %dx%d\n",num_vid_mode,vm->w,vm->h);
     }
-    vm = & vid_modelist[ num_vid_mode++ ];
-    vm->w = w;
-    vm->h = h;
+    
 }
 
 #ifdef SDL2
@@ -510,14 +580,15 @@ boolean  VID_Query_Modelist( byte request_drawmode, byte request_fullscreen, byt
     }
 
 # ifdef DEBUG_VID
-    printf( "VID_Query_Modelist: drawmode=%i, bitpp=%i   ",
-        request_drawmode, request_bitpp, );
+ GenPrintf( EMSG_ver, "VID_Query_Modelist: drawmode=%i, bitpp=%i   ", request_drawmode, request_bitpp);
 # endif
     for(i=0; i<num_modes; i++)
     {
         // Query display=0
         if( SDL_GetDisplayMode( 0, i, & mode ) < 0 )  continue;
-        byte bpp = SDL_BITSPERPIXEL( mode.format );
+        //byte bpp = SDL_BITSPERPIXEL( mode.format );
+        byte bpp = Query_Screen_Modes_PixelFormat(num_modes, request_bitpp, mode);
+
         if( (bpp == request_bitpp)
             && (mode.w <= MAXVIDWIDTH)
             && (mode.h <= MAXVIDHEIGHT) )
@@ -570,15 +641,8 @@ void  VID_make_fullscreen_modelist( byte request_bitpp )
 #ifdef SDL2
     SDL_DisplayMode  mode;
     int num_modes = SDL_GetNumDisplayModes( display_index );
+    /*
     int i;
-
-    if( request_bitpp < 8 )
-    {
-        request_bitpp = native_bitpp;
-    }
-    modelist_bitpp = request_bitpp;
-
-    num_vid_mode = 0;
     for(i=0; i<num_modes; i++)
     {
         // Query display=0
@@ -601,6 +665,43 @@ void  VID_make_fullscreen_modelist( byte request_bitpp )
         }
     }
     return;
+    */
+    // Neuer SDL 2 Pixel Modus Abfrage
+    if( request_bitpp < 8 )
+    {
+        request_bitpp = native_bitpp;
+    }
+    modelist_bitpp = request_bitpp;
+
+    num_vid_mode = 0;
+
+    /* Marty */
+    if ( modelist_bitpp == 8 )
+    {
+      Get_Screen_Modes_Pixelformat(num_modes, modelist_bitpp, request_bitpp, mode);
+    }
+
+    if ( modelist_bitpp == 15 )
+    {
+      Get_Screen_Modes_Pixelformat(num_modes, modelist_bitpp, request_bitpp, mode);
+    }
+
+    if ( modelist_bitpp == 16 )
+    {
+      Get_Screen_Modes_Pixelformat(num_modes, modelist_bitpp, request_bitpp, mode);
+    }
+
+    if ( modelist_bitpp == 24 )
+    {
+      Get_Screen_Modes_Pixelformat(num_modes, modelist_bitpp, request_bitpp, mode);
+    }
+
+    if ( modelist_bitpp == 32 )
+    {
+      Get_Screen_Modes_Pixelformat(num_modes, modelist_bitpp, request_bitpp, mode);
+    }
+
+    return;   
 
 #else
     SDL_Rect   ** modelist;
@@ -673,6 +774,45 @@ range_t  VID_ModeRange( byte modetype )
     return mrange;
 }
 
+/*
+ * Marty: Auflösungs Markierung. Zur besseren übersicht.
+ */
+static
+modestat_t  VID_SetMode_Mark( modestat_t ms )
+{
+    if     (ms.width==1600 && ms.height==1200)
+                  ms.mark = "(*) ";
+#ifdef FIT_RATIO
+    else if (ms.width==1600 && ms.height==1024)
+                  ms.mark = "Fit ";
+#endif
+    else if (ms.width==1280 && ms.height==1024)
+                  ms.mark = "(*) ";
+#ifdef FIT_RATIO
+    else if (ms.width==1280 && ms.height==800)
+                  ms.mark = "Fit ";
+#endif
+    else if (ms.width==1024 && ms.height==768)
+                  ms.mark = "(*) ";
+#ifdef FIT_RATIO
+    else if (ms.width==1024 && ms.height==600)
+                  ms.mark = "Fit ";
+#endif
+    else if (ms.width==800 && ms.height==600)
+                  ms.mark = "(*) ";
+    else if (ms.width==640 && ms.height==480)
+                  ms.mark = "(*) ";
+    else if (ms.width==512 && ms.height==384)
+                  ms.mark = "(*) ";
+    else if (ms.width==400 && ms.height==300)
+                  ms.mark = "(*) ";
+    else if (ms.width==320 && ms.height==200)
+                  ms.mark = "(*) ";
+    else
+                  ms.mark = "(-) ";
+
+    return  ms;
+}
 
 modestat_t  VID_GetMode_Stat( modenum_t modenum )
 {
@@ -680,6 +820,7 @@ modestat_t  VID_GetMode_Stat( modenum_t modenum )
 
     if( modenum.modetype == MODE_fullscreen )
     {
+        
         // fullscreen modes  1..
         int mi = modenum.index - 1;
         if(mi >= num_vid_mode)   goto fail;
@@ -687,7 +828,8 @@ modestat_t  VID_GetMode_Stat( modenum_t modenum )
         ms.width = vid_modelist[mi].w;
         ms.height = vid_modelist[mi].h;
         ms.type = MODE_fullscreen;
-        ms.mark = "";
+        //ms.mark = "";
+        ms = VID_SetMode_Mark(ms);
     }
     else
     {
@@ -697,7 +839,9 @@ modestat_t  VID_GetMode_Stat( modenum_t modenum )
         ms.width = windowedModes[modenum.index][0];
         ms.height = windowedModes[modenum.index][1];
         ms.type = MODE_window;
-        ms.mark = "win ";
+        //ms.mark = "win ";
+        ms = VID_SetMode_Mark(ms);
+
     }
     return  ms;
 
@@ -781,7 +925,7 @@ modenum_t  VID_GetModeForSize( int rw, int rh, byte rmodetype )
             }
         }
     }
-ret_vidmode:   
+ret_vidmode:
     modenum.modetype = rmodetype;
 done:
     return modenum;
@@ -817,6 +961,7 @@ void VID_SDL_release( void )
 }
 
 
+
 // Set video mode and vidSurface, with verbose
 //   req_fullscreen :  1=fullscreen, used as index
 static
@@ -824,6 +969,7 @@ void  VID_SetMode_vid( int req_width, int req_height, int req_fullscreen )
 {
 #ifdef SDL2
     uint32_t sdl_reqflags = sdl_window_flags[req_fullscreen];
+
     // SDL2 does not have test for VideoModeOK
 #else
     // [WDJ] SDL_VideoModeOK calls SDL_ListModes which invalidates the previous modelist.
@@ -859,6 +1005,12 @@ void  VID_SetMode_vid( int req_width, int req_height, int req_fullscreen )
     sdl_window = SDL_CreateWindow( "Doom Legacy", 0, 0,
                                    req_width, req_height, sdl_reqflags );
 #else
+    /*
+     * Marty: Borderless Mode SDL2
+     */
+    if (cv_borderless.EV == 1)
+        sdl_reqflags |=SDL_WINDOW_BORDERLESS;
+
     sdl_window = SDL_CreateWindow( "Doom Legacy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                    req_width, req_height, sdl_reqflags );
 #endif
@@ -886,6 +1038,10 @@ void  VID_SetMode_vid( int req_width, int req_height, int req_fullscreen )
     // Will need an SDL_Texture.
     // Get Pixel format (Eternity Engine).
     uint32_t pixel_format = SDL_GetWindowPixelFormat( sdl_window );
+ 
+    if (verbose > 1)
+      GenPrintf( EMSG_ver,"SDL_GetWindowPixelFormat: %s \n", SDL_GetPixelFormatName(pixel_format));
+
     if( pixel_format == SDL_PIXELFORMAT_UNKNOWN )
         pixel_format = sdl_pixelformats[ vid.drawmode ];
 
@@ -915,10 +1071,16 @@ void  VID_SetMode_vid( int req_width, int req_height, int req_fullscreen )
     // SDL 1.2
     VID_SDL_release();
 
+    /*
+     * Marty: Borderless Mode
+     * Borderless wird direkt bei der Wahl des Modus geändert und nicht via Flags
+     * wie bei SDL2
+     */
+      
     vidSurface = SDL_SetVideoMode(vid.width, vid.height, modelist_bitpp, surface_flags[req_fullscreen] );
     if(vidSurface == NULL)
         goto failed;  // Modes were prechecked, SDL should not fail.
- 
+     
     if( verbose )
     {
         int32_t vflags = vidSurface->flags;
@@ -951,6 +1113,41 @@ void  VID_SetMode_vid( int req_width, int req_height, int req_fullscreen )
     vid.direct_rowbytes = vidSurface->pitch; // correct, even on Mac
     vid.direct_size = vidSurface->pitch * vid.height; // correct, even on Mac
     vid.direct = vidSurface->pixels;
+    
+    if (verbose > 1)
+    GenPrintf(EMSG_debug, "[%s][%d] SDL1 Stast:\n"
+                          "         Vid.BitPP          = %d\n"
+                          "         Vid.Bytepp         = %d\n" 
+                          "         Vid.Direct_Rowbytes= %d\n"
+                          "         Vid.direct_size    = %d\n"
+                          "         Vid.Direct         = %d\n"
+                          "         VidSurface->pitch  = %d\n"                          
+                          "         VidSurface->pixels = %d\n", 
+                          __FILE__, __LINE__,
+                          vid.bitpp,
+                          vid.bytepp,
+                          vid.direct_rowbytes,
+                          vid.direct_size,
+                          vid.direct,
+                          vidSurface->pitch,
+                          vidSurface->pixels);
+                          
+    if (vidSurface && vidSurface->format && vidSurface->format->palette)
+    {
+      SDL_Palette *pal = vidSurface->format->palette;
+      SDL_Color *colors = pal->colors;
+
+      if (verbose > 1) 
+      {
+        GenPrintf(EMSG_debug, "Palette hat %d Farben:\n", pal->ncolors);
+
+        for (int i = 0; i < pal->ncolors; i++)
+        {           
+          GenPrintf(EMSG_ver, "  [%3d]  R=%3u  G=%3u  B=%3u\n",
+                    i, colors[i].r, colors[i].g, colors[i].b);                     
+        }
+      }
+    }    
 #endif
 
 #ifdef TESTBPP
@@ -1052,7 +1249,10 @@ int VID_SetMode(modenum_t modenum)
 
         if( rendermode == render_soft )
         {
-            VID_SetMode_vid( req_width, req_height, 0 );  // window
+            VID_SetMode_vid( req_width, req_height, 0 );  // window        
+            #ifndef SDL2        
+              CenterSDL1Window();                
+            #endif            
         }
         else
         {
@@ -1177,7 +1377,9 @@ void I_StartupGraphics( void )
        
         // Decode the pixel format.
         uint32_t pformat = dispmode.format;
-        byte     bpp = SDL_BITSPERPIXEL( pformat );
+
+      //byte     bpp = SDL_BITSPERPIXEL( pformat );
+        byte     bpp = GetPixelFormat_Startup(pformat); // Marty
         byte     bytepp = SDL_BYTESPERPIXEL( pformat );
        
         if( bpp > native_bitpp )
@@ -1256,12 +1458,12 @@ abort_error:
 // Returns FAIL_select, FAIL_end, FAIL_create, of status_return_e, 1 on success;
 int I_RequestFullGraphics( byte select_fullscreen )
 {
+    vid.draw_ready = 0;  // disable print reaching console
     modenum_t initialmode;
     byte  select_bitpp, select_bytepp;
     byte  select_fullscreen_mode;
     int  ret_value = 0;
 
-    vid.draw_ready = 0;  // disable print reaching console
 
     // Get video info for screen resolutions.
 
@@ -1285,6 +1487,26 @@ int I_RequestFullGraphics( byte select_fullscreen )
        // SDL does drawing
        select_bitpp = native_bitpp;
        select_bytepp = native_bytepp;
+       goto get_modelist;
+     case DRM_8pal:
+       select_bitpp = req_bitpp = 8;
+       select_bytepp = 1;
+       goto get_modelist;
+     case DRM_15:
+       select_bitpp = req_bitpp = 15;
+       select_bytepp = 2;
+       goto get_modelist;
+     case DRM_16:
+       select_bitpp = req_bitpp = 16;
+       select_bytepp = 2;
+       goto get_modelist;
+     case DRM_24:
+       select_bitpp = req_bitpp = 24;
+       select_bytepp = 3;
+       goto get_modelist;
+     case DRM_32:
+       select_bitpp = req_bitpp = 32;
+       select_bytepp = 4;
        goto get_modelist;
      default:
        goto draw_8pal;
@@ -1393,6 +1615,17 @@ found_modes:
 
     graphics_state = VGS_fullactive;
 
+#ifndef SDL2
+
+    /*
+     * Dies zentriert das Fenster im Fenstermodus. Damit hört SDL1 auf willkürtlich
+     * irgendwo auf dem Bildschirm das Fenster zu zentrieren
+     */
+     if (vid.modenum.modetype == MODE_window)
+      //CenterSDL1Window();
+    
+#endif
+    
 #if defined(MAC_SDL) && defined( DEBUG_MAC )
     SDL_Delay( 4 * 1000 );  // [WDJ] DEBUG: to see if errors are due to startup or activity
 #endif
@@ -1425,4 +1658,264 @@ void I_ShutdownGraphics( void )
     GenPrintf( EMSG_info,"SDL_Quit()\n");  // [WDJ] DEBUG:
 #endif
     SDL_Quit();
+}
+
+
+#ifndef SDL2 // ========================================================== SDL1
+  #ifdef WIN32
+  #include <SDL/SDL_syswm.h>
+
+  #define STYLE_DO_NORMAL \
+      (WS_OVERLAPPEDWINDOW | WS_VISIBLE)  // Standard: Rahmen, Titel, Min/Max/Close
+
+  #define STYLE_NO_BORDER \
+      (WS_POPUP | WS_VISIBLE)  
+      
+  void ToggleBorderless(HWND sdl_hwnd )
+  {
+      if (!sdl_hwnd) return;
+
+      LONG current_style = GetWindowLong(sdl_hwnd, GWL_STYLE);
+      LONG new_style;
+
+      if ( (current_style & WS_CAPTION) && (cv_borderless.EV == 1) ) // Aktuell mit Rahmen ? zu borderless             
+      {           
+          new_style = STYLE_NO_BORDER;
+          // Optional: Fenstergröße auf Client-Größe setzen (sonst bleibt der Rahmen-Offset)
+          RECT client;
+          GetClientRect(sdl_hwnd, &client);
+          SetWindowPos(sdl_hwnd, NULL, 0, 0, client.right, client.bottom,
+                       SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+      }
+      
+      if ( (current_style | WS_CAPTION) && (cv_borderless.EV == 0) )// Aktuell borderless ? zurück zu normal 
+      {               
+         new_style = STYLE_DO_NORMAL;
+      }
+
+      if ( current_style != new_style )
+      {
+        // Stil ändern
+        SetWindowLong(sdl_hwnd, GWL_STYLE, new_style);
+                                
+        // Fenster neu zeichnen (wichtig!)
+        SetWindowPos(sdl_hwnd, NULL, 0, 0, 0, 0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+      }
+
+      if (verbose > 1)
+      GenPrintf(EMSG_debug, "Fensterstil geändert: %s\n",
+                            (new_style == STYLE_DO_NORMAL)?"mit Rahmen" : "borderless");
+      
+      return;
+      
+  }
+
+  void CenterSDL1Window(void)
+  {    
+      static HWND hwnd = NULL;
+    
+      SDL_SysWMinfo info;
+      SDL_VERSION(&info.version);
+      if (SDL_GetWMInfo(&info))
+      {
+        hwnd = info.window;
+        if (!hwnd) return; // Kein Fenster Gefunden! Sollte nicht passieren.
+      }
+    
+      // HWND des SDL-Fensters holen
+      if (hwnd)
+      {         
+          if (verbose > 1)          
+          GenPrintf( EMSG_debug,"[%s][%d] Surface eingefangne\n",__FILE__,__LINE__);  
+        
+          ToggleBorderless(hwnd);               
+         
+          // 1. Bildschirmgröße holen
+          int screen_w = GetSystemMetrics(SM_CXSCREEN);
+          int screen_h = GetSystemMetrics(SM_CYSCREEN);
+
+          // 2. Client-Größe (der eigentliche Inhalt) holen – NICHT GetWindowRect!
+          RECT clientRect;
+          GetClientRect(hwnd, &clientRect);
+          int client_w = clientRect.right - clientRect.left;
+          int client_h = clientRect.bottom - clientRect.top;
+
+          // 3. Äußere Fenstergröße holen (für die Positionierung)
+          RECT windowRect;
+          GetWindowRect(hwnd, &windowRect);
+          int window_w = windowRect.right - windowRect.left;
+          int window_h = windowRect.bottom - windowRect.top;
+
+          // 4. Berechne die gewünschte obere linke Ecke des **gesamten Fensters**
+          // so dass die **Client-Area** genau in der Mitte liegt
+          int x = (screen_w - client_w) / 2;
+          int y = (screen_h - client_h) / 2;
+
+          // 5. Korrigiere um den Rahmen/Titelbalken (damit Client zentriert ist)
+          int border_offset_x = (window_w - client_w) / 2;
+          int border_offset_y = (window_h - client_h) - border_offset_x;  // Titelbalken ist meist oben dicker
+
+          x -= border_offset_x;
+          y -= border_offset_y;
+
+          // Sicherheitsgrenzen (damit Fenster nicht außerhalb des Bildschirms liegt)
+          if (x < 0) x = 0;
+          if (y < 0) y = 0;
+          
+          // 6. Fenster positionieren
+          SetWindowPos(hwnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+
+          if (verbose > 1)
+          GenPrintf(EMSG_debug,"[%s][%d] Zentriert?: Client %dx%d ? Position (%d, %d)\n", __FILE__,
+                                                                                          __LINE__,
+                                                                                          client_w,
+                                                                                          client_h,
+                                                                                          x, y   );
+      }
+  }
+  #endif
+#endif
+
+
+#ifdef SDL2 // ========================================================== SDL2
+static void  add_vid_mode( int w, int h );
+
+/*
+ * Marty: Holt das Pixelformat beim ersten Start
+ * Welches vom OS/Graka unterstützt wird
+ * Sollte fixen das nur 24Bit und 16Bit auf einem
+ * 32Bit Desktop zur verfügung steht
+ * siehe I_StartupGraphics
+ */
+static
+byte GetPixelFormat_Startup(uint32_t PixelFormat )
+{
+
+  byte bpp_8 = SDL_BITSPERPIXEL_8( PixelFormat );
+  byte bpp_15 = SDL_BITSPERPIXEL_15( PixelFormat );
+  byte bpp_16 = SDL_BITSPERPIXEL_16( PixelFormat );
+  byte bpp_24 = SDL_BITSPERPIXEL_24( PixelFormat );
+  byte bpp_32 = SDL_BITSPERPIXEL_32( PixelFormat );
+  
+  if ( bpp_32 == 32 )
+    return bpp_32;
+
+  else if ( bpp_24 == 24 )
+    return bpp_24;
+
+  else if ( bpp_16 == 16 )
+    return bpp_16;
+
+  else if ( bpp_15 == 15 )
+    return bpp_15;
+
+  else if ( bpp_8 == 8 )
+    return bpp_8;
+
+  return SDL_BITSPERPIXEL(PixelFormat);
+
+}
+
+/*
+ * Marty: Holt das Pixelformat beim Aufruf
+ * von VID_make_fullscreen_modelist(bpp)
+ */
+static
+void Get_Screen_Modes_Pixelformat(int num_modes, byte modelist_bpp, byte request_bitpp, SDL_DisplayMode mode)
+{
+
+  int i;
+
+  for(i=0; i<num_modes; i++)
+  {
+    // Query display=0
+    // SDL2
+    if( SDL_GetDisplayMode( 0, i, & mode ) < 0 )  continue;
+    byte bpp = 0;
+
+    switch(modelist_bpp)
+    {
+      case 8: bpp = SDL_BITSPERPIXEL_8( mode.format );break;
+      case 15: bpp = SDL_BITSPERPIXEL_15( mode.format ); break;
+      case 16: bpp = SDL_BITSPERPIXEL_16( mode.format ); break;
+      case 24: bpp = SDL_BITSPERPIXEL_24( mode.format ); break;
+      case 32: bpp = SDL_BITSPERPIXEL_32( mode.format ); break;
+    }   
+
+    if( verbose )
+    {
+      GenPrintf( EMSG_ver, "%s %ibpp %ix%i",( ( (i&0x03)==0 ) ?(i)?"\nModes ":"Modes ":""), modelist_bpp, mode.w, mode.h );
+    }
+
+    if ( modelist_bpp == bpp )
+    {
+      if( (bpp == request_bitpp) && (mode.w <= MAXVIDWIDTH) && (mode.h <= MAXVIDHEIGHT) )      
+            add_vid_mode( mode.w, mode.h );    
+    }
+
+   }
+}
+
+/*
+ * Marty: Holt das Pixelformat beim Aufruf
+ * von VID_Query_Modelist()
+ */
+static
+byte Query_Screen_Modes_PixelFormat(int num_modes, byte request_bitpp, SDL_DisplayMode mode)
+{
+
+  int i;
+  for(i=0; i<num_modes; i++)
+  {
+    // Query display=0
+    // SDL2
+    if( SDL_GetDisplayMode( 0, i, & mode ) < 0 )  continue;
+    byte bpp = 0;
+    switch(request_bitpp)
+    {
+      case 8: bpp = SDL_BITSPERPIXEL_8( mode.format );break;
+      case 15:bpp = SDL_BITSPERPIXEL_15( mode.format ); break;
+      case 16:bpp = SDL_BITSPERPIXEL_16/*SDL_BITSPERPIXEL*/( mode.format ); break;
+      case 24:bpp = SDL_BITSPERPIXEL_24/*SDL_BITSPERPIXEL*/( mode.format ); break;
+      case 32:bpp = SDL_BITSPERPIXEL_32( mode.format ); break;
+    }   
+
+    if(bpp == request_bitpp)
+        return bpp;
+   }
+   return 0;
+}
+#endif
+
+/*
+ * Marty:
+ * Prüft ob die Auflösung schon in der Liste drin ist.
+ * Doppelte werden ausgeschlossen.
+ * Fixed den bug das im Fullscreen Modus nur knapp 6
+ * Auflösungen angezeigt werden und Reduziert den 
+ * Auflösungs table von 109 -> 32 echte aktuelle modes
+ */
+static
+byte Vid_Mode_Exits(int w, int h)
+{
+  vid_mode_t * vm;
+  /*
+   * num_vid_mode (global)
+   * vid_modelist (global)
+   */
+  if (num_vid_mode > 0)
+  {
+    int x;
+    for(x=0; x<num_vid_mode; x++)
+    {
+      vm = & vid_modelist[ x ];
+      if (vm->w == w && vm->h == h)
+      {
+        //GenPrintf( EMSG_ver,": Rejectet Mode: %dx%d\n",vm->w,vm->h);
+        return 0;
+       }
+     }
+  }
+  return 1;
 }

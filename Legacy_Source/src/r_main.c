@@ -248,6 +248,13 @@ consvar_t cv_viewsize       = {"viewsize","10",CV_SAVE|CV_CALL,viewsize_cons_t,R
 consvar_t cv_detaillevel    = {"detaillevel","0",CV_SAVE|CV_CALL,detaillevel_cons_t,R_SetViewSize}; // UNUSED
 consvar_t cv_scalestatusbar = {"scalestatusbar","0",CV_SAVE|CV_CALL,CV_YesNo,R_SetViewSize};
 
+#ifdef WIDESCREEN_WEAPONSPRITE
+  double VanillaAspect  = 1.3333333333333333;
+  double WS_ScaledWidth;
+  CV_PossibleValue_t WidescreenAspect_cons_t[]={{0,"AUTO"},{1,"On"},{2,"Off"},{0,NULL}};
+  consvar_t cv_WidescreenAspect = {"widescreen","0", CV_SAVE|CV_CALL, WidescreenAspect_cons_t, R_SetViewSize}; 
+#endif
+
 #ifdef FIT_RATIO
 CV_PossibleValue_t viewfit_cons_t[]={{0,"AUTO"},{1,"Stretch"},{2,"Fit width"},{3,"Fit height"},{0,NULL}};
 consvar_t cv_viewfit = {"viewfit","0", CV_SAVE|CV_CALL, viewfit_cons_t, R_SetViewSize};
@@ -853,7 +860,51 @@ void R_SetViewSize (void)
     setsizeneeded = true;
 }
 
+#ifdef WIDESCREEN_WEAPONSPRITE
+/*
+ * R_SetWidescreenSize
+ * thanks to Credits got to Edward850/ Doom-Legacy-Neo
+ */
+byte         SetWidescreen = false;
+void R_SetWidescreenSize (void)
+{
+    SetWidescreen = true;  
+}
 
+byte R_GetWideScreen_Aspect(void)
+{
+  double Result;
+  Result = (double)vid.width/(double)vid.height;
+  if ( Result > VanillaAspect )
+    return 1;
+  
+  return 0;
+}
+
+double R_GetWideScreen_ScaledWidth(byte auto_value)
+{        
+  double ScaledWidth;
+  ScaledWidth = VanillaAspect * (double)vid.height;
+  /* 
+  GenPrintf(EMSG_debug, "Widescreen Weapon Aspect %f: User Value = %d\n",
+           (double)vid.width/(double)vid.height,auto_value );
+  */         
+  /*Automatisch*/
+  switch(auto_value)
+  {
+    case 0: //Auto
+    {
+      if (R_GetWideScreen_Aspect()==1)
+        return ScaledWidth;
+      else
+        return 0;
+    }
+    case 1 : return ScaledWidth;
+    case 2 :
+    default: return 0;
+  }
+}
+#endif
 //
 // R_ExecuteSetViewSize
 //
@@ -945,6 +996,10 @@ void R_ExecuteSetViewSize (void)
     centerx = rdraw_viewwidth/2;
     centerxfrac = INT_TO_FIXED(centerx);
     centeryfrac = INT_TO_FIXED(centery);
+    
+#ifdef WIDESCREEN_WEAPONSPRITE
+  WS_ScaledWidth = R_GetWideScreen_ScaledWidth(cv_WidescreenAspect.EV);
+#endif
 
 #ifdef FIT_RATIO
     // For split screen, draw window is vid.width, rdraw_viewheight.
@@ -956,8 +1011,11 @@ void R_ExecuteSetViewSize (void)
     {
         // The draw for 320,200 ratio is different, as those pixels are not square.
         // For modern screens with square pixels, the ratio of 800,600 applies.
-        int r_width = 600 * vid.width / vid.height;
-
+#ifndef WIDESCREEN_WEAPONSPRITE        
+        int r_width = 600 * vid.height / vid.height;
+#else
+        int r_width = 600 * ((vid.height * (int)WS_ScaledWidth) / (int)WS_ScaledWidth) / vid.height;
+#endif       
         if( vid.width == 320 )  goto std_fit;
         if( r_width > 840  )  // wide screen
         {
@@ -975,7 +1033,7 @@ std_fit:
         }
     }
 #endif   
-
+ 
 #ifdef FIT_RATIO
 #ifdef DEBUG_FIT_RATIO
     unsigned int base_ratio = ((BASEVIDWIDTH << 16) / BASEVIDHEIGHT) + 1;  // will be rounded
@@ -1003,6 +1061,8 @@ std_fit:
     }
 #endif   
 
+
+
     //added:01-02-98:aspect ratio is now correct, added an 'projection_y'
     //      since the scale is not always the same between horiz. & vert.
 #ifdef FIT_RATIO
@@ -1018,6 +1078,9 @@ std_fit:
 #else   
     projection_x = centerxfrac; // INT_TO_FIXED(rdraw_viewwidth/2);
     projection_y = INT_TO_FIXED(((vid.height*centerx*BASEVIDWIDTH)/BASEVIDHEIGHT)/vid.width);
+#ifdef WIDESCREEN_WEAPONSPRITE    
+ //   projection_y = (((vid.height*centerx*BASEVIDWIDTH)/BASEVIDHEIGHT)/(int)WS_ScaledWidth)<<FRACBITS;
+#endif   
     //added:02-02-98:now correct aspect ratio!
     aspectf_x = INT_TO_FIXED(((vid.height*centerx*BASEVIDWIDTH)/BASEVIDHEIGHT)/vid.width);
         // used as  aspectx*FRACUNIT,  which is same as projection_y
@@ -1055,8 +1118,26 @@ std_fit:
     pspritescale  = INT_TO_FIXED(rdraw_viewwidth)/BASEVIDWIDTH;
     pspriteiscale = INT_TO_FIXED(BASEVIDWIDTH)/rdraw_viewwidth;   // x axis scale
     //added:02-02-98:now aspect ratio correct for psprites
-    pspriteyscale = INT_TO_FIXED((vid.height*rdraw_viewwidth)/vid.width)/BASEVIDHEIGHT;
+    pspriteyscale = INT_TO_FIXED((vid.height*rdraw_viewwidth)/vid.width)/BASEVIDHEIGHT;    
 #endif
+
+#ifdef WIDESCREEN_WEAPONSPRITE
+  if (WS_ScaledWidth > 0)
+  {  
+    pspritescale = ((int)WS_ScaledWidth << FRACBITS) / BASEVIDWIDTH;
+    pspriteiscale = (BASEVIDWIDTH << FRACBITS) / (int)WS_ScaledWidth;   // x axis scale
+    pspriteyscale = (((vid.height * (int)WS_ScaledWidth) / (int)WS_ScaledWidth) << FRACBITS) / BASEVIDHEIGHT;    
+  }
+  /*
+      GenPrintf(EMSG_debug, "WS_ScaledWidth    = %f\n"
+                            "  PsSprite Scale  = %i\n"
+                            "  PsSprite-i Scale= %i\n"
+                            "  PsSprite-y Scale= %i\n"
+                            "  FRACBITS        = %d\n"
+                            "  BASEVIDWIDTH    = %d\n"
+                            "  BASEVIDHEIGHT    = %d\n", WS_ScaledWidth, pspritescale,pspriteiscale, pspriteyscale, FRACBITS, BASEVIDWIDTH, BASEVIDHEIGHT);      
+  */
+#endif    
 
     // thing clipping
     for (i=0 ; i<rdraw_viewwidth ; i++)
@@ -1693,6 +1774,9 @@ consvar_t * engine_ded_cvar_list[] =
    &cv_viewsize,
 #ifdef FIT_RATIO
    &cv_viewfit,
+#endif
+#ifdef WIDESCREEN_WEAPONSPRITE
+   &cv_WidescreenAspect,
 #endif
    &cv_psprites,
    &cv_splitscreen,

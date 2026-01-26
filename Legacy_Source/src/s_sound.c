@@ -1578,7 +1578,7 @@ void S_ChangeMusicName( const char * name, byte looping )
 
 // Detect the music type.
 //   can_play_adm:  ADM_ of music types that can be played
-byte detect_music_type( lumpnum_t music_ln, byte can_play_adm )
+byte detect_music_type_1( lumpnum_t music_ln, byte can_play_adm )
 {
     byte  head[10];
     W_ReadLumpHeader( music_ln, &head, 8 );
@@ -1668,7 +1668,7 @@ void S_ChangeMusic(int music_num, byte looping)
             music_ln = S_FindExtMusic( music->name, "o_" );  // Doom MP3
             if( VALID_LUMP(music_ln) )
             {
-                music_type = detect_music_type( music_ln, EN_port_music );
+                music_type = detect_music_type_1( music_ln, EN_port_music );
                 byte music_adm = music_type_to_ADM[ music_type ];
                 if( ! (adv_music & music_adm) )  // check on select and required decoder
                     music_ln = NO_LUMP;
@@ -1681,7 +1681,7 @@ void S_ChangeMusic(int music_num, byte looping)
             music_ln = S_FindExtMusic( music->name, NULL );  // Doom MP3
             if( VALID_LUMP(music_ln) )
             {
-                music_type = detect_music_type( music_ln, EN_port_music );
+                music_type = detect_music_type_1( music_ln, EN_port_music );
             }
         }
 
@@ -1699,7 +1699,7 @@ void S_ChangeMusic(int music_num, byte looping)
 # ifndef MUSSERV
     else
     {
-        music_type = detect_music_type( music->lumpnum, EN_port_music );
+        music_type = detect_music_type_1( music->lumpnum, EN_port_music );
     }
 # endif
 #else
@@ -1712,7 +1712,7 @@ void S_ChangeMusic(int music_num, byte looping)
 # ifndef MUSSERV
     if( VALID_LUMP(music->lumpnum) )
     {
-        music_type = detect_music_type( music->lumpnum, EN_port_music );
+        music_type = detect_music_type_1( music->lumpnum, EN_port_music );
     }
 # endif
 #endif

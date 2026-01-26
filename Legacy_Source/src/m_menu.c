@@ -264,6 +264,13 @@ boolean                 menuactive;
 #ifdef SAVEGAMEDIR
 char  savegamedir[SAVESTRINGSIZE] = "";  // default is main legacy dir
 #endif
+#ifdef LOAD_SAVE_MENU_PATCH
+  int MaxDirsEntrys=999999;
+  byte Savegame_Delete_ForceFiles=0;
+  byte Savegame_Delete_FilesFound=0; 
+  byte SaveGame_IsDirectory=0;
+  static void    (*remove_callback)(int ch) = NULL; // call to delete  
+#endif
 
 typedef struct
 {
@@ -2224,9 +2231,13 @@ void M_DrawSlider (int x, int y, int range)
 menuitem_t MenuOptionsMenu[]=
 {
     {IT_STRING | IT_CVAR,0, "Menu Sounds"     , &cv_menusound     , 0},
-    {IT_STRING | IT_CVAR,0, "Screens Link"    , &cv_screenslink   , 0},
+    {IT_STRING | IT_CVAR,0, "Screens Link"     , &cv_screenslink   , 0},
+#ifdef SEARCH_DEPTH_USER
+    {IT_STRING | IT_CVAR,0, "Search Depth Game (Auto)" , &cv_game_search_depth, 0},
+    {IT_STRING | IT_CVAR,0, "Search Depth iWad (User)" , &cv_iwad_search_depth, 0},
+    {IT_STRING | IT_CVAR,0, "Search Depth Level Wads" , &cv_fwad_search_depth, 0},
+#endif
 };
-
 menu_t  MenuOptionsDef =
 {
     "M_OPTTTL",
@@ -2312,6 +2323,7 @@ menuitem_t VideoOptionsMenu[]=
     {IT_STRING | IT_WHITESTRING | IT_SUBMENU,0, "Video Modes >>"   , &VideoModeDef       , 0},
 #ifndef __DJGPP__
     {IT_STRING | IT_CVAR,0,    "Fullscreen"       , &cv_fullscreen    , 0},
+    {IT_STRING | IT_CVAR,0,    "Borderless"       , &cv_borderless    , 0},
 #endif
 // if these are moved then fix MenuGammaFunc_dependencies
     {IT_STRING | IT_CVAR,0,    "Gamma Function"   , &cv_gammafunc     , 0},
@@ -2326,6 +2338,9 @@ menuitem_t VideoOptionsMenu[]=
      | IT_CV_SLIDER     ,0,    "Screen Size"      , &cv_viewsize      , 0},
 #ifdef FIT_RATIO
     {IT_STRING | IT_CVAR,0,    "View fit"         , &cv_viewfit       , 0},
+#endif
+#ifdef WIDESCREEN_WEAPONSPRITE
+    {IT_STRING | IT_CVAR,0,    "Widescreen"       , &cv_WidescreenAspect, 0},
 #endif
     {IT_STRING | IT_CVAR,0,    "Scale Status Bar" , &cv_scalestatusbar, 0},
     {IT_STRING | IT_CVAR,0,    "Dark Back"        , &cv_darkback      , 0},
@@ -2346,7 +2361,7 @@ menu_t  VideoOptionsDef =
     M_DrawGenericMenu,
     NULL,
     sizeof(VideoOptionsMenu)/sizeof(menuitem_t),
-    60,40,
+    60,30/*40*/,
     0
 };
 
@@ -2389,6 +2404,9 @@ menuitem_t MouseOptionsMenu[]=
     {IT_STRING | IT_CVAR,0,"Mouse motion",  &cv_mouse_motion    ,0},
 #endif
     {IT_STRING | IT_CVAR,0,"Grab input", &cv_grabinput ,0},
+#ifdef GRAB_MIDDLEMOUSE
+    {IT_STRING | IT_CVAR,0,"Middle Mouse Release", &cv_mouse_release ,0},
+#endif
 #if 0
 //[WDJ] disabled in 143beta_macosx
 //[segabor]
@@ -3303,20 +3321,23 @@ void M_ChangeControl(int choice)
 //===========================================================================
 // Video mode and drawmode test and draw support.
 
-//max modes displayed in one column
+//max modes displayed in one column (Marty: Geaenderte Werte)
 //#define MAXCOLUMNMODES   10
-#define MAXCOLUMNMODES   8
-#define MAXMODEDESCS     (MAXCOLUMNMODES*3)
-#define MODES_X          16
-#define MODES_Y          44
+#define MAXCOLUMNMODES   10
+#define MAXMODEDESCS     (MAXCOLUMNMODES*4)
+#define MODES_X          14
+#define MODES_Y          30
 #define MODES_X_INC      (8*13)
 #define MODES_Y_INC      8
-#define MODETXT_Y        (MODES_Y + 60 + 24)
+#define MODETXT_Y        (MODES_Y + 60 + 24 + 24)
 
 static int vidm_testing_cnt=0;  // test videomode failsafe
 static int vidm_current=0;  // modedesc index
 static int vidm_nummodes;
 static int vidm_column_size;
+/* Marty: Selectet_ModeName */
+const char * Selectet_ModeName = "";
+//static byte SubSelect = 0;
 
 
 // Draw the instructions for the video mode setting
@@ -3327,6 +3348,7 @@ static
 void  draw_set_mode_instructions( byte vm_mode, const char * current_mode_name, const char * sel_mode_name )
 {
     char  temp[80];
+    char  curr[80];
     byte  test_mkcfg = 0;
 
     if (vidm_testing_cnt>0)
@@ -3355,7 +3377,7 @@ void  draw_set_mode_instructions( byte vm_mode, const char * current_mode_name, 
 
         if( current_mode_name )
         {
-            sprintf(temp, "D to set default to  %s", current_mode_name );
+            sprintf(curr, "D to set default to  %s", current_mode_name );
             M_CentreText(MODETXT_Y + 20,temp);
         }
 
@@ -3391,15 +3413,38 @@ void  draw_set_mode_instructions( byte vm_mode, const char * current_mode_name, 
 #endif
     }
 
+   /*
+    * Marty: i + j aus der SjkullAnim Counter Klammer geholt
+    * um ein scheinbaren select modus anzeigen zu lassen.
+    */
+    int i = MODES_X - 10 + ((vidm_current / vidm_column_size) * MODES_X_INC);
+    int j = MODES_Y + ((vidm_current % vidm_column_size) * MODES_Y_INC);
     // Draw the cursor for the VidMode menu
     if (skullAnimCounter<4)    //use the Skull anim counter to blink the cursor
-//    if( (itemOn > 0) && skullAnimCounter<4 )    //use the Skull anim counter to blink the cursor
+// if( (itemOn > 0) && skullAnimCounter<4 )    //use the Skull anim counter to blink the cursor
     {
-        int i = MODES_X - 10 + ((vidm_current / vidm_column_size) * MODES_X_INC);
-        int j = MODES_Y + ((vidm_current % vidm_column_size) * MODES_Y_INC);
         V_DrawCharacter( i, j, '*' | 0x80);  // white
     }
+    /*
+    * Marty: Selectet_ModeName. Zeichnet ein weißen string auch beim selektieren an
+    */   
+    if (Selectet_ModeName)
+    V_DrawString( i+10, j, V_WHITEMAP, Selectet_ModeName);
+
 }
+
+/*
+ * Marty: modedesc_t und modedescs verschoben um zugang
+ * zu den variablem zu haben select modus anzeigen zu lassen.
+ */
+typedef struct
+{
+    modenum_t  modenum; // video mode number in format of setmodeneeded
+    char    *  desc;    // XXXxYYY
+} modedesc_t;
+
+static modedesc_t   modedescs[MAXMODEDESCS];
+static byte  vidm_drawmode[MAXCOLUMNMODES+2];  // drawmode for a menu row
 
 // Stay in the column.
 // Alternative is to jump from column to column.
@@ -3408,7 +3453,7 @@ void  draw_set_mode_instructions( byte vm_mode, const char * current_mode_name, 
 //added:30-01-98: special menuitem key handler for video mode list
 void M_VideoMode_key_handler (int key)
 {
-#ifdef VIDMODE_COLUMNAR_MOVEMENT       
+#ifdef VIDMODE_COLUMNAR_MOVEMENT
     byte old_col, new_col;
 #endif
 
@@ -3418,7 +3463,6 @@ void M_VideoMode_key_handler (int key)
 #ifdef VIDMODE_COLUMNAR_MOVEMENT       
     old_col = vidm_current / vidm_column_size;
 #endif
-
     switch( key )
     {
       case KEY_DOWNARROW:
@@ -3475,6 +3519,7 @@ void M_VideoMode_key_handler (int key)
 
       case KEY_ESCAPE:      //this one same as M_Responder
         key_handler2 = NULL;
+        Selectet_ModeName = "";
         S_StartSound(menu_sfx_esc);
         Pop_Menu();
         break;
@@ -3483,10 +3528,21 @@ void M_VideoMode_key_handler (int key)
         break;
     }
 
+    /*
+    * Marty: Selectet_ModeName. Zeichnet ein weißen string auch beim selektieren an
+    */ 
+      if (currentMenu == &VideoModeDef)
+      Selectet_ModeName = modedescs[vidm_current].desc;
+
+      if (currentMenu == &DrawmodeDef)
+      Selectet_ModeName = CV_get_possiblevalue_string( drawmode_sel_t, vidm_drawmode[vidm_current]);
+
+
     if( vidm_current >= vidm_nummodes )
         vidm_current = vidm_nummodes-1;
     if( vidm_current < 0 )
         vidm_current = 0;
+
     return;
 }
 
@@ -3517,8 +3573,8 @@ menu_t  VideoModeDef =
     0                   // lastOn
 };
 
-
-
+/*
+ * Wurde nach obene verschoben  
 typedef struct
 {
     modenum_t  modenum; // video mode number in format of setmodeneeded
@@ -3526,6 +3582,7 @@ typedef struct
 } modedesc_t;
 
 static modedesc_t   modedescs[MAXMODEDESCS];
+*/
 static modenum_t    vidm_previousmode;  // modenum in format of setmodeneeded
 
 
@@ -3596,7 +3653,7 @@ void M_DrawVideoMode(void)
     for (i=moderange.first ; i<=moderange.last ; i++)
     {
         dmode.index = i;
-        desc = VID_GetModeName (dmode);
+        desc = VID_GetModeName (dmode);        
         if (desc)
         {
             int j;
@@ -3652,6 +3709,7 @@ void M_DrawVideoMode(void)
     for(i=0; i<vidm_nummodes; i++)
     {
         mdp = & modedescs[i];
+
 
         V_DrawString (col, row, (mdp == current_modedesc) ? V_WHITEMAP : 0, mdp->desc);
 
@@ -3798,8 +3856,12 @@ menu_t  DrawmodeDef =
 static
 byte  drawmode_test_key_handler( int key )
 {
-    set_drawmode = DRM_none;
-    req_drawmode = DRM_none;  // cancel any command line setup
+//  set_drawmode = DRM_none;
+//  req_drawmode = DRM_none;  // cancel any command line setup
+    set_drawmode = vidm_drawmode[vidm_current];
+    req_drawmode = vidm_drawmode[vidm_current];   
+
+    static byte setmode = 0;
 
     if (vidm_testing_cnt>0)
     {
@@ -3830,8 +3892,8 @@ byte  drawmode_test_key_handler( int key )
       case 'D':
       case 'd':
         // current active mode becomes the default mode.
-        S_StartSound(menu_sfx_action);
-        CV_SetValue( &cv_drawmode, cv_drawmode.EV );
+        S_StartSound(menu_sfx_action);                 
+        CV_SetValue( &cv_drawmode, vidm_drawmode[vidm_current] );   
         goto used_key;
 
       case 'c' :
@@ -3852,6 +3914,16 @@ change_drawmode:
         // Safer to change the graphics and video mode setups in between
         // frame drawing cycles.
         set_drawmode = vidm_drawmode[vidm_current];  // drawmode for menu row
+
+        if (setmode)
+        {   
+            if (verbose > 1)
+            {
+              GenPrintf( EMSG_debug,"DrawMode [%s = %d], vidm_current %d\n",__FILE__,__LINE__,vidm_drawmode[vidm_current]);
+              GenPrintf( EMSG_debug,"DrawMode [%s = %d], req_drawmode %d\n",__FILE__,__LINE__,req_drawmode);
+              GenPrintf( EMSG_debug,"DrawMode [%s = %d], cv_drawmode.value %d\n",__FILE__,__LINE__,cv_drawmode.value);
+            }
+        }
         drawmode_recalc = true;
     }
     goto used_key;
@@ -3906,6 +3978,44 @@ void M_Draw_drawmode(void)
     const char * cur_drawmode_str = CV_get_possiblevalue_string( drawmode_sel_t, cv_drawmode.EV );
     draw_set_mode_instructions( 0, cur_drawmode_str, sel_drawmode_str );
 
+   /*
+    * Marty: Selektiert aber nicht final den Modus um einen
+    * scheinbaren select modus anzeigen zu lassen.
+    */
+    if (key_handler2)
+    {
+      switch(sel_dm)
+      {
+      case 1:
+        //cv_drawmode.EV = 1;
+        set_drawmode = 1;
+        break;
+      case 2:
+        //cv_drawmode.EV = 2;
+        set_drawmode = 2;
+        break;
+      case 3:
+        //cv_drawmode.EV = 3;
+        set_drawmode = 3;
+        break;
+      case 4:
+        //cv_drawmode.EV = 4;
+        set_drawmode = 4;
+        break;
+      case 5:
+        //cv_drawmode.EV = 5;
+        set_drawmode = 5;
+        break;
+      case 7:
+        //cv_drawmode.EV = 7;
+        set_drawmode = 7;
+        break;
+      case 8:
+        //cv_drawmode.EV = 8;
+        set_drawmode = 8;
+        break;
+      }
+    }
     // setup key handler for video modes
     key_handler2 = drawmode_test_key_handler;  // key handler
 }
@@ -3952,9 +4062,27 @@ menu_t  DirDef =
 static
 void draw_dir_line( int line_y )
 {
+#ifdef LOAD_SAVE_MENU_PATCH
+    /*
+     * Damit wird auch das aktuelle verzeichnis
+     * angezeigt wo auch die unterverzeichnisse
+     * angelegt werden.
+     */  
+     char SGDC[512];
+     strncpy(SGDC,savegamedir,sizeof(savegamedir));
+     Path_EmptyCheck(SGDC);          
+     //GenPrintf(EMSG_debug, "[%s][%d] Draw Dir Line: SaveGameDir Orig= %s\n",__FILE__,__LINE__,savegamedir);     
+     //GenPrintf(EMSG_debug, "[%s][%d] Draw_Dir_Line: SaveGameDir Copy= %s\n",__FILE__,__LINE__,SGDC);
+     
+#endif    
     V_DrawString( DirDef.x, line_y, 0, "DIR");
     M_Draw_SaveLoadBorder( DirDef.x+32, line_y, 0);
-    V_DrawString( DirDef.x+32, line_y, 0, savegamedir);
+#ifdef LOAD_SAVE_MENU_PATCH    
+    V_DrawString( DirDef.x+32, line_y, 0,SGDC);
+#else
+     V_DrawString( DirDef.x+32, line_y, 0,savegamedir); 
+#endif
+
 }
 
 // Draw the dir list and DIR line
@@ -3990,7 +4118,11 @@ void M_DrawDir(void)
     // The actual dir name remains blank.
     if( scroll_index == 0 )
     {
+#ifdef LOAD_SAVE_MENU_PATCH      
+        V_DrawString( DirDef.x, DirDef.y+LINEHEIGHT, 0, ">> Current Directory");
+#else
         V_DrawString( DirDef.x, DirDef.y+LINEHEIGHT, 0, "..");
+#endif 
     }
 }
 
@@ -4028,9 +4160,13 @@ void M_NewDir( void )
     // normal savegame select, set savegamedir
     M_DirSelect( 1 ); // LoadDirMenu: slot=0 is menu 1
     if( savegamedir[0] )
-    {
+    {      
         // make new directory
-        snprintf( dirname, 255, "%s%s", legacyhome, savegamedir );
+        #ifdef LOAD_SAVE_MENU_PATCH      
+          snprintf( dirname, 255, "%s\\%s\\", legacyhome, savegamedir );
+        #else        
+          snprintf( dirname, 255, "%s%s", legacyhome, savegamedir );
+        #endif
         dirname[255] = '\0';
         I_mkdir( dirname, 0700 ); // octal permissions
     }
@@ -4053,6 +4189,9 @@ void M_DirEnter(int choice)
 static void M_Dir_scroll (int amount);
 
 // Called from DIR game menu to delete a directory
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
 static
 void M_Dir_delete (int ch)
 {
@@ -4065,10 +4204,25 @@ void M_Dir_delete (int ch)
             savegamedir[0] = '\0';
         }
         // remove directory
-        snprintf( dirname, 255, "%s%s", legacyhome, savegamedisp[slotindex].desc );
+        #ifdef LOAD_SAVE_MENU_PATCH 
+          snprintf( dirname, 255, "%s\\%s\\", legacyhome, savegamedisp[slotindex].desc );        
+        #else
+          snprintf( dirname, 255, "%s%s", legacyhome, savegamedisp[slotindex].desc );
+        #endif
         dirname[255] = '\0';
+        #ifdef WIN32 // remove(dirname) funktioniert nicht unter Windows. Weder leer oder mit Dateien
+        rmdir( dirname ); 
+        #else
         remove( dirname );
-        savegamedisp[slotindex].desc[0] = '\0';
+        #endif
+                
+        if (DirectoryCheck_isPath(dirname) == 0) // Prüft ob das Verzeichnis tatsächlich weg ist
+            savegamedisp[slotindex].desc[0] = '\0';
+        else
+        {   // Lass einfach mal die Fehler Nummer in den String schreiben
+            snprintf( savegamedisp[slotindex].desc, 255, "%s (errno=%d)",strerror(errno), errno);
+            GenPrintf(EMSG_warn,"[%s][%d] Directory '%s' could not be deleted [%s (errno=%d)]\n",__FILE__,__LINE__,dirname,strerror(errno), errno);
+        } 
     }
     // fixup after the message undo, which does not record callbacks
     M_StopMessage(0);
@@ -4076,6 +4230,73 @@ void M_Dir_delete (int ch)
     delete_callback = M_Dir_delete;
 }
 
+
+// Called from DIR game menu to delete a directory
+#ifdef LOAD_SAVE_MENU_PATCH 
+static
+void M_Dir_delete_force(int ch)
+{
+
+    if( ch=='y' && savegamedisp[slotindex].desc[0] )
+    {       
+        char dirname[256];  
+        // if is current directory
+        if( strcmp( savegamedir, savegamedisp[slotindex].desc ) == 0 )
+        {
+            savegamedir[0] = '\0';
+        }
+        // remove directory
+        snprintf( dirname, 255, "%s\\%s", legacyhome, savegamedisp[slotindex].desc );        
+        dirname[255] = '\0';  
+        
+        DirectoryRemove_Recursive(dirname);       
+        if (DirectoryCheck_isPath(dirname) == 0) // Prüft ob das Verzeichnis tatsächlich weg ist
+            savegamedisp[slotindex].desc[0] = '\0';
+        else
+        {   // Lass einfach mal die Fehler Nummer in den String schreiben
+            snprintf( savegamedisp[slotindex].desc, 255, "%s (errno=%d)",strerror(errno), errno);
+            GenPrintf(EMSG_warn,"[%s][%d] Directory '%s' could not be deleted [%s (errno=%d)]\n",__FILE__,__LINE__,dirname,strerror(errno), errno);
+        }
+    }
+    // fixup after the message undo, which does not record callbacks   
+    M_StopMessage(0);
+    scroll_callback = M_Dir_scroll;
+    remove_callback = M_Dir_delete_force;
+
+}
+#endif  
+
+#ifdef LOAD_SAVE_MENU_PATCH 
+void M_Dir_delete_Check(void)
+{                              
+
+  SaveGame_IsDirectory       = 0;
+  Savegame_Delete_FilesFound = 0;
+    
+  if( savegamedisp[slotindex].desc[0] )
+  {
+
+    char dirname[256];
+    Savegame_Delete_FilesFound=0;
+        
+    // if is current directory
+    GenPrintf(EMSG_debug, "[%s][%d] %s\n",__FILE__,__LINE__,savegamedisp[slotindex].desc);    
+    
+    if( strcmp( savegamedir, savegamedisp[slotindex].desc ) == 0 )
+    {
+      savegamedir[0] = '\0';
+  
+    }
+    // check for files in the directory        
+    snprintf( dirname, 255, "%s\\%s", legacyhome, savegamedisp[slotindex].desc );        
+     
+    dirname[255] = '\0';
+    
+    SaveGame_IsDirectory       = DirectoryCheck_isPath(dirname);    
+    Savegame_Delete_FilesFound = Directory_FILE_ExistsIn_DIR(dirname);
+  }
+}
+#endif
 
 // [smite] MinGW compatibility
 #ifndef WIN32
@@ -4116,7 +4337,7 @@ int  ftw_directory_entry( const char *file, const struct stat * sb, int flag )
 // Get directories into savegamedisp, starting at skip_count.
 static
 void  get_directory_entries( int skip_count )
-{
+{    
 #ifdef USE_FTW
     // Use ftw
     slotindex = -skip_count;
@@ -4162,7 +4383,15 @@ void  get_directory_entries( int skip_count )
                 savegamedisp[slotindex].desc[0] = 0;
         }
         slotindex++;
-        if( slotindex >= NUM_DIRLINE )  break;  // full
+#ifdef LOAD_SAVE_MENU_PATCH  
+        MaxDirsEntrys=slotindex;       
+//      GenPrintf(EMSG_debug, "[%s][%d] Max Directory Entrys: %d\n",__FILE__,__LINE__,MaxDirsEntrys);        
+#endif        
+        if (((savegamedisp[slotindex].desc) == NULL) && (slotindex < 5))
+          break;
+        
+        if( slotindex >= NUM_DIRLINE )
+           break;  // full
     }
     closedir( legdir );
 #endif
@@ -4178,7 +4407,11 @@ void M_Dir_scroll (int amount)
 
     clear_remaining_savegamedisp( 0 );
     // countdown reading dir entries
+#ifdef LOAD_SAVE_MENU_PATCH 
+    scroll_index = amount;
+#else
     scroll_index += amount;
+#endif
     if( scroll_index < 0 )   scroll_index = 0;
     get_directory_entries( scroll_index );
 }
@@ -4192,6 +4425,9 @@ void M_Get_SaveDir (int choice)
     Push_Setup_Menu(&DirDef);
     scroll_callback = M_Dir_scroll;
     delete_callback = M_Dir_delete;
+#ifdef LOAD_SAVE_MENU_PATCH    
+    remove_callback = M_Dir_delete_force;
+#endif
 
     clear_remaining_savegamedisp( 0 );
     scroll_index = 0;  // start at top of dir list
@@ -4267,7 +4503,7 @@ void M_Draw_Loadgame(void)
         M_Draw_SaveLoadBorder( LoadDef.x, line_y, 1);
 #ifdef SAVEGAME_MTLEFT
         V_DrawString( LoadDef.x, line_y, 0, savegamedisp[i].levtime);
-        V_DrawString( LoadDef.x+SAVE_DESC_XPOS, line_y, 0, savegamedisp[i].desc);
+        V_DrawString( LoadDef.x+SAVE_DESC_XPOS, line_y, 0, savegamedisp[i].desc);          
 #else
         V_DrawString( LoadDef.x, line_y, 0, savegamedisp[i].desc);
         V_DrawString( LoadDef.x+(SAVE_MT_POS*8), line_y, 0, savegamedisp[i].levtime);
@@ -4328,7 +4564,9 @@ void M_ReadSaveStrings( int scroll_direction )
     savegame_disp_t* sgdp;
     savegame_info_t  sginfo;
     char    name[256];
-
+#ifdef LOAD_SAVE_MENU_PATCH    
+    MaxDirsEntrys=999999;   
+#endif    
     P_Alloc_savebuffer( 0 );  // header only
     // savegamedisp is statically alloc
 
@@ -5893,10 +6131,58 @@ boolean M_Responder (event_t* ev)
       case KEY_DELETE:	// delete directory or savegame
 #ifdef SAVEGAMEDIR
         // The Dir, Loadgame, Savegame menus all have dir at MSLOT_0
-        if( delete_callback && itemOn >= SAVEGAME_MSLOT_0 )
+  #ifdef LOAD_SAVE_MENU_PATCH
+  
+        if (MaxDirsEntrys != 999999)
         {
+          /*
+           * Das geht aber auch nur wenn MaxDirsEntrys nicht 999999 ist ...
+           */
+          if (delete_callback == NULL)
+          {
+            delete_callback = M_Dir_delete;
+            GenPrintf(EMSG_debug, "[%s][%d] Delete Callback zurückgesetzt\n",__FILE__,__LINE__);              
+          }
+          
+          if (remove_callback == NULL)
+          {              
+            remove_callback = M_Dir_delete_force;
+            GenPrintf(EMSG_debug, "[%s][%d] Remove Callback zurückgesetzt\n",__FILE__,__LINE__);               
+          }                    
+        }    
+        if(( delete_callback && itemOn >= SAVEGAME_MSLOT_0 ) || ( remove_callback && itemOn >= SAVEGAME_MSLOT_0 ))
+  #else
+        if( delete_callback && itemOn >= SAVEGAME_MSLOT_0 )
+  #endif
+        {           
+            
             slotindex = itemOn - SAVEGAME_MSLOT_0;
-            M_StartMessage("Delete Y/N?", delete_callback, MM_YESNO);
+  #ifdef LOAD_SAVE_MENU_PATCH
+
+            if (slotindex == 0 && MaxDirsEntrys != 999999)
+            {
+               M_StartMessage( "You cannot delete\nthe program directory.", NULL, MM_NOTHING );
+               goto ret_action;
+            }
+
+            M_Dir_delete_Check();
+            if ( SaveGame_IsDirectory == 1)
+            {
+              if (Savegame_Delete_FilesFound > 0)
+              {
+                snprintf( msgtmp, MSGTMP_LEN, "%d Savefile%s Found?\n\nReally Delete the Directory  Y/N?",
+                                              Savegame_Delete_FilesFound,
+                                              (Savegame_Delete_FilesFound==1)?"":"s");
+                 M_StartMessage(msgtmp,remove_callback, MM_YESNO);     
+              }
+              else           
+               M_StartMessage("Delete the Directory  Y/N?", delete_callback, MM_YESNO);                             
+            }
+            else
+              M_StartMessage("Delete Savegame  Y/N?", delete_callback, MM_YESNO);
+  #else              
+              M_StartMessage("Delete Y/N?", delete_callback, MM_YESNO);    
+  #endif 
             goto ret_action;
         }
 #else
@@ -5930,37 +6216,81 @@ boolean M_Responder (event_t* ev)
 
       case KEY_DOWNARROW:
 #if defined SAVEGAMEDIR || defined SAVEGAME99
-        if( scroll_callback && (scroll_index < 99) && (itemOn >= SAVEGAME_MSLOT_LAST))
+  #ifdef LOAD_SAVE_MENU_PATCH 
+        if( scroll_callback && (MaxDirsEntrys == itemOn) && (MaxDirsEntrys != 999999)  && (MaxDirsEntrys <= 5))
         {
-            // scrolling menu scrolls preferentially
+           /* Marty ... sollte
+            * Dies fixed, das wenn man im "Verzeichnis" Modus ist, der Skull'er nur
+            * "vorhandene" verzeichnisse wählt. Damit wird das scrollen durch Leere
+            * Strings verhindert und das entfernen des ersten Root verzeichnis verhindert
+            */ 
+            scroll_callback( 1 );
+            goto ret_updown;          
+        }
+        else if( scroll_callback && (scroll_index < 99) && (itemOn >= SAVEGAME_MSLOT_LAST))
+  #else
+        if( scroll_callback && (scroll_index < 99) && (itemOn >= SAVEGAME_MSLOT_LAST))
+  #endif
+        {
+
+            // scrolling menu scrolls preferentially           
             scroll_index ++;
+          
             scroll_callback( 1 );
             goto ret_updown;
         }
+        
 #endif
         do
         {
             if (itemOn+1 > currentMenu->numitems-1)
             {
+                
                 if( scroll_callback )  // only wrap when not scrolling
                     goto ret_updown;
                 itemOn = 0;
             }
-            else itemOn++;
+            else itemOn++;          
         } while((currentMenu->menuitems[itemOn].status & IT_TYPE)==IT_SPACE);
         goto ret_updown;
 
-      case KEY_UPARROW:
+      case KEY_UPARROW: 
 #if defined SAVEGAMEDIR || defined SAVEGAME99
-        if( scroll_callback && (scroll_index > 0) && (itemOn < (SAVEGAME_MSLOT_0+1)))
+  #ifdef LOAD_SAVE_MENU_PATCH 
+        if( scroll_callback && (scroll_index < MaxDirsEntrys) && (itemOn < MaxDirsEntrys) && (MaxDirsEntrys != 999999) )
         {
+           /* Marty ... sollte
+            * Dies fixed, das wenn man im "Verzeichnis" Modus ist, der Skull'er nur
+            * "vorhandene" verzeichnisse wählt. Damit wird das scrollen durch Leere
+            * Strings verhindert und das entfernen des ersten Root verzeichnis verhindert
+            */          
+             scroll_index --;
+             
+            if( scroll_index < MaxDirsEntrys )
+            {
+              scroll_index = MaxDirsEntrys;
+              if (itemOn > 0)
+              itemOn--;
+            }
+                    
+            scroll_callback( -1 );  // some functions need to correct
+            goto ret_updown;         
+        }
+        else if( scroll_callback && (scroll_index > 0) && (itemOn < (SAVEGAME_MSLOT_0+1)))
+  #else
+        if( scroll_callback && (scroll_index > 0) && (itemOn < (SAVEGAME_MSLOT_0+1)))    
+  #endif
+        {           
             // scrolling menu scrolls preferentially
             scroll_index --;
-            if( scroll_index < 0 )   scroll_index = 0;
+            
+            if( scroll_index < 0 )
+              scroll_index = 0;
+            
             scroll_callback( -1 );  // some functions need to correct
             goto ret_updown;
         }
-#endif       
+#endif   
         do
         {
             if (!itemOn)
@@ -6286,6 +6616,9 @@ void M_SetupMenu(menu_t* menudef)
 
     delete_callback = NULL;
     scroll_callback = NULL;
+#ifdef LOAD_SAVE_MENU_PATCH    
+    remove_callback =NULL;
+#endif
 }
 
 
@@ -7051,6 +7384,9 @@ consvar_t * menu_command_cvar_list[] =
   &cv_grabinput,
     // WARNING : the order is important when init mouse
     // Call of mouse1 init occurs with Register cv_usemouse[1].
+#ifdef GRAB_MIDDLEMOUSE
+  &cv_mouse_release,
+#endif
 #ifdef SMIF_SDL
   &cv_mouse_motion,
 #endif

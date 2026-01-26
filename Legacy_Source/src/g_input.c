@@ -123,6 +123,10 @@ consvar_t  cv_mouse_motion = {"mousemotion","0", CV_SAVE|CV_CALL|CV_NOINIT, mous
 
 consvar_t  cv_grabinput = {"grabinput","1", CV_SAVE|CV_CALL, CV_OnOff, CV_mouse_OnChange };
 
+#ifdef GRAB_MIDDLEMOUSE
+consvar_t  cv_mouse_release = {"middle_mouse_button_release","1", CV_SAVE|CV_CALL, CV_OnOff, CV_mouse_OnChange };
+#endif
+
 // A normal double click is approx. 6 tics from previous click.
 CV_PossibleValue_t double_cons_t[]={{1,"MIN"},{40,"MAX"},{0,NULL}};  // double click threshold
 consvar_t  cv_mouse_double   = {"mousedouble","8",CV_SAVE, double_cons_t};
@@ -929,3 +933,12 @@ void Command_BindJoyaxis_f()
   }
 #endif
 }
+#ifdef GRAB_MIDDLEMOUSE
+void Middle_MB_Release (void)
+{
+   if (cv_mouse_release.value)
+        cv_mouse_release.EV = 1;
+   else
+        cv_mouse_release.EV = 0;
+}
+#endif

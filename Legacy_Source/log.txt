@@ -1,0 +1,57 @@
+ Jan  8 2026             Doom Legacy 1.48.18 (rev 1749)                11:48:47 
+Z_Init: Init zone memory allocation daemon. 
+System memory 32666 MiB, free 17843 MiB
+8 MiB requested for Z_Init.
+Initializing SDL...
+ 1 joystick(s) found.
+StartupGraphics...
+VID_SetMode(window,0)
+V_Setup_VideoDraw:
+ screens[0] = 8790020
+ screens[1] = 8964c20
+ screens[2] = 8b39820
+ screens[3] = 8d0e420
+ screens[4] = 0
+blood lasts for 20 seconds
+gravity set to 1
+IWAD recognized: Doom shareware
+DOOM Shareware
+Added file D:\System-Coding\MSYS2_Dosbox\src\Legacy\svn1749/bin/DOOM1.WAD (1264 lumps)
+Added file D:\System-Coding\MSYS2_Dosbox\src\Legacy\svn1749\bin/legacy.wad (85 lumps)
+===========================================================================
+                     This program is Free Software!
+===========================================================================
+RequestFullGraphics...
+VID_SetMode(window,11)
+Debug Graphics Window...
+VID_SetMode(window,7)
+V_Setup_VideoDraw:
+ screens[0] = 9380020
+ screens[1] = 9554c20
+ screens[2] = 9729820
+ screens[3] = 98fe420
+ screens[4] = 0
+HU_Init: Setting up heads up display.
+Init after ...
+W_Init: Init WADfiles.
+M_Init: Init miscellaneous info.
+R_Init: Init DOOM refresh daemon - 
+Load Textures...
+Load Flats...
+InitSprites...
+61 sprites added from file D:\System-Coding\MSYS2_Dosbox\src\Legacy\svn1749/bin/DOOM1.WAD
+4 sprites added from file D:\System-Coding\MSYS2_Dosbox\src\Legacy\svn1749\bin/legacy.wad
+
+Load Colormaps...
+S_Init: Setting up sound.
+I_InitSound: 
+ Music initialized.
+I_InitSound: sound module ready.
+ST_Init: Init status bar.
+D_Startup_NetGame: Checking network game status.
+I_ShutdownSound: shut down
+Could not save game config file D:\System-Coding\MSYS2_Dosbox\home\Traxx Amiga EP/C:\DOOM\config.cfg
+Shutting down joysticks.
+Closing joystick Gamepad F310 (Controller).
+Joystick subsystem closed cleanly.
+I_Quit(): end of logstream

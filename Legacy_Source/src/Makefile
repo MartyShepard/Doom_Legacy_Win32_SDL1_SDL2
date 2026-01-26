@@ -120,7 +120,7 @@
 # Win7/Win8 have caused problems, and any solutions found will be enabled
 # by this OS selection.
 # This does  NOT YET  make a version customized to Win7/8.
-#   OS=WIN7
+OS=WIN7
 # Some older Windows, for completeness.
 #   OS=WIN98
 # An OS2 port is present, but has not been tried in ages.
@@ -135,12 +135,12 @@
 # SMIF - System Media Interface
 # Select one of the following.
 # The SDL library. SDL is the default.
-#   SMIF=SDL
+SMIF=SDL
 # The X11 window system native calls.  See some X11 options later.
 #   SMIF=LINUX_X11
 #   SMIF=FREEBSD_X11
 # Windows Direct Draw native calls.  See some Direct Draw options later.
-#   SMIF=WIN32_NATIVE
+# SMIF=WIN32_NATIVE
 #   SMIF=OS2_NATIVE
 #   SMIF=DJGPPDOS_NATIVE
 
@@ -149,7 +149,7 @@
 #   CC_SELECT=GCC
 # The Makefile will use some alternative compiling switches known to be needed
 # for these compilers.
-#   CC_SELECT=MINGW
+CC_SELECT=MINGW
 #   CC_SELECT=WATCOM
 #   CC_SELECT=CLANG
 # Enable CC_ENVIRONMENT to allow an environment CC to specify the compiler.
@@ -160,7 +160,7 @@
 #   CC_EXPLICIT_CMD=clang
 
 # SDL Mixer, to get music.
-#   HAVE_MIXER=1
+HAVE_MIXER=1
 
 # Music options
 # CD-Music enable/disable, if you don't have the special libraries, etc.
@@ -259,18 +259,19 @@ ifdef MAIN_BUILD_DIR
   BUILD_DIR:=$(MAIN_BUILD_DIR)
 else
 ifndef BUILD
-  BUILD:=build
-  BUILD_DIR:=../build/
-  MAKE_OPTIONS=../make_options
+  BUILD_DIR:=../
 else
 ifeq ("$(BUILD)",".")
   # BUILD== "." is the main directory.
-  BUILD:=../build
-  BUILD_DIR:=../build/
-  MAKE_OPTIONS=../make_options
+  BUILD_DIR:=../
+else
+ifeq ("$(BUILD)","")
+  # BUILD== "" is the main directory.
+  BUILD_DIR:=../
 else
   # BUILD in a sub-directory of the parent directory.
   BUILD_DIR:=../$(BUILD)/
+endif
 endif
 endif
 endif
@@ -291,13 +292,13 @@ O  = $(BUILD_DIR)objs
 DD = $(BUILD_DIR)dep
 
 # Invoke make with MAKE_OPTIONS= to specify another file or location.
-ifndef MAKE_OPTIONS
-  MAKE_OPTIONS = $(BUILD_DIR)make_options
-endif
+#ifndef MAKE_OPTIONS
+#  MAKE_OPTIONS = $(BUILD_DIR)make_options
+#endif
 
 # Put user settings in this file, and they will be included with every
 # invocation of make.
--include $(MAKE_OPTIONS)
+# -include $(MAKE_OPTIONS)
 
 # $(warning OS=$(OS) )
 # $(warning SMIF=$(SMIF) )
@@ -655,6 +656,10 @@ ifdef ENV_CFLAGS
   CFLAGS+=$(ENV_CFLAGS)
 endif
 
+  CFLAGS+=-mmmx -msse -msse2 -msse3 -mssse3 -msse4 -msse4a -msse4.1 -msse4.2 -mavx \
+-fexpensive-optimizations -funroll-loops -finline-functions -ftree-vectorize -mrecip \
+-mfma -mxop -mf16c -mpopcnt -mlzcnt -mbmi -maes -mpclmul \
+-Wno-deprecated
 SND_DEVS:=
 SND_CFLAGS:=
 SND_LIBS:=
@@ -773,7 +778,7 @@ ifeq ($(SMIF), SDL)
 # The system and SDL interface files are in sdl directory (all i_*.c).
   INTERFACE=sdl
 
-  MAINOBJ:=i_main.o
+  MAINOBJ:=i_main.o wLegacy.rc.o
   CDMUSOBJ:=i_cdmus.o
   SMIFOBJS:=i_system.o i_video.o i_sound.o i_net.o \
     hw_bsp.o hw_draw.o hw_light.o hw_main.o hw_md2.o hw_cache.o hw_trick.o \
@@ -787,11 +792,13 @@ ifeq ($(SMIF), SDL)
   ifdef WIN32
     # Windows (MinGW)
     EXENAME:=doomlegacy.exe
-    LIBS:=-lopengl32 -lglu32 -lwsock32 -lm
+    LIBS:=-static -s -lopengl32 -lglu32 -lwsock32 -lm -lws2_32 -static-libgcc -lpthread
+
+    WINDRES=windres
   endif
   ifdef MAC
     EXENAME:=doomlegacy
-    LDFLAGS+=-framework OpenGL
+    LDFLAGS+=-framework OpenGL -static -s
   endif
   ifndef EXENAME
     # default is Linux, for all unix SDL
@@ -803,10 +810,29 @@ ifeq ($(SMIF), SDL)
     # -lm is needed for pow, powf, and other MATH1 functions.
   endif
 
+  ifdef HAVE_MIXER
+    # Allow HAVE_MIXER=0 to turn it off.
+    ifeq ("$(HAVE_MIXER)", "1")
+      # SDL has separate SDL_Mixer library.
+      OPTS+=-DHAVE_MIXER
+      ifdef SDL2
+        LIBS+=-lSDL2_mixer
+        LIBS+=-lmad
+     else
+        LIBS+=-lSDL_mixer
+        LIBS+=-lmad
+      endif
+    endif
+  endif
+
   # Try to access sdl-config, for all platforms.
   ifdef SDL2
     # SDL 2.x
     OPTS+=-DSDL2
+    ifdef WIN32
+     USESDL2=1
+     OPTS+=-DUSESDL2
+    endif
     # SDL2 does not support CD-MUSIC.
     undefine CDMUS
     SDLCONFIG_LIBS:=$(shell sdl2-config --libs)
@@ -825,7 +851,7 @@ ifeq ($(SMIF), SDL)
         OPTS+=-Dmain=SDL_main
         OPTINC+=-I$(SDL_DIR)/include/SDL2
         LIBS+=-L$(SDL_DIR)/lib
-        LIBS+=-lmingw32 -mwindows
+        LIBS+=-lmingw32
         LIBS+=-lSDLmain -lSDL2
       endif
       ifeq ($(CC_SELECT), WATCOM)
@@ -837,7 +863,7 @@ ifeq ($(SMIF), SDL)
         OPTINC+=-I$(SDL_DIR)/include/SDL2
 #       OPTINC+=-I/watcom/h/SDL2
         LIBS+=-L$(SDL_DIR)/lib
-        LIBS+=-lwatcom -mwindows
+        LIBS+=-lwatcom
         LIBS+=-lSDLmain -lSDL2
       endif
       ifndef SDL_DIR
@@ -860,6 +886,10 @@ ifeq ($(SMIF), SDL)
     endif
   else
     # SDL 1.2
+      ifdef WIN32
+      USESDL1=1
+      OPTS+=-DUSESDL1
+    endif
     SDLCONFIG_LIBS:=$(shell sdl-config --libs)
     ifeq "$(findstring -lSDL, $(SDLCONFIG_LIBS) )" "-lSDL"
       # Got valid output from sdl-config
@@ -878,7 +908,7 @@ ifeq ($(SMIF), SDL)
         LIBS+=-L$(SDL_DIR)/lib
 #        LIBS+=-L/mingw/lib
 #        LIBS+=-L/windows/system32
-        LIBS+=-lmingw32 -mwindows
+        LIBS+=-lmingw32 -Wl,--subsystem,console
         LIBS+=-lSDLmain -lSDL
       endif
       ifeq ($(CC_SELECT), WATCOM)
@@ -891,7 +921,7 @@ ifeq ($(SMIF), SDL)
 #       OPTINC+=-I/watcom/h/SDL
         LIBS+=-L$(SDL_DIR)/lib
 #       LIBS+=-L/windows/system32
-        LIBS+=-lwatcom -mwindows
+        LIBS+=-lwatcom
         LIBS+=-lSDLmain -lSDL
       endif
       ifndef SDL_DIR
@@ -916,21 +946,35 @@ ifeq ($(SMIF), SDL)
     endif
   endif
 
+
+  LIBS+=-Wl,--subsystem,console
+  LIBS+=-lwinmm
+  LIBS+=-limm32
+  LIBS+=-lole32
+  LIBS+=-loleaut32
+  LIBS+=-lversion
+  LIBS+=-lsetupapi
+  LIBS+=-lshlwapi
+  LIBS+=-lssp
+  # Zip Support
+   LIBS+=-lzip
+   LIBS+=-lbz2
+   LIBS+=-llzma
+   LIBS+=-lzstd
+   LIBS+=-lbcrypt
+   LIBS+=-lz
+   LIBS+=-lssp
+
+  ifdef USESDL1
+  EXENAME=LegacySDL1
+  endif
+  ifdef USESDL2
+  EXENAME=LegacySDL2
+  endif
+
   OPTS+=-DHWRENDER -DSMIF_SDL
   OPTINC+=$(SRCINC)
 
-  ifdef HAVE_MIXER
-    # Allow HAVE_MIXER=0 to turn it off.
-    ifeq ("$(HAVE_MIXER)", "1")
-      # SDL has separate SDL_Mixer library.
-      OPTS+=-DHAVE_MIXER
-      ifdef SDL2
-        LIBS+=-lSDL2_mixer
-      else
-        LIBS+=-lSDL_mixer
-      endif
-    endif
-  endif
 
   ifdef MAC
     # Objective-C main program is required for SDL 1.2.x
@@ -1420,9 +1464,9 @@ MAINOBJ:=$(addprefix $(O)/, $(MAINOBJ))
 .PHONY : all clean distclean dirs asm dll install
 
 # prevent compile without make_options file
-ifndef MAKE_OPTIONS_PRESENT
-  $(error Create make_options file first, using parent Makefile.)
-endif
+#ifndef MAKE_OPTIONS_PRESENT
+#  $(error Create make_options file first, using parent Makefile.)
+#endif
 
 # ALL, compile and link
 all:	 $(BIN)/$(EXENAME)  $(SUPPORT_EXE)
@@ -1632,6 +1676,9 @@ hardware/*/*.h :
 
 hardware/*/*/*.h :
 	@:
+
+$(O)/%.rc.o:	$(SD)win32/winres.rc $(SD)win32/wLegacy.ico
+	$(WINDRES) -o $@ $<
 
 # Do not remake makefile
 

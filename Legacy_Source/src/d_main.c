@@ -276,6 +276,19 @@
 #include "d_french.h"
 #endif
 
+  void Commandline_GetCompileFeatures(void);
+  void ListSupportetWads(void);
+  void ListSupportetWads_Command(void);  
+
+  char *Posix_Deform_Path(char *path)
+  {
+    char *p = path;
+    for (*p = path[0]; p && *p; p++)
+         if (*p == '/') *p = '\\';
+    
+  return path;
+  }
+
 
 // DoomLegacy version defines are in doomdef.h
 // DOOMLEGACY_COMPONENT_VERSION, is in doomincl.h
@@ -473,6 +486,9 @@ byte    demo_ctrl;
 byte    init_sequence = 0;
 byte    fatal_error = 0;
 
+byte  DrgFile_Requested = 0;
+char *DrgFile_AutoStart = NULL;
+
 // name buffer sizes including directory and everything
 #define FILENAME_SIZE  256
 
@@ -570,7 +586,17 @@ consvar_t cv_home = {"home", "", CV_HIDEN, NULL};
 consvar_t cv_doomwaddir = {"doomwaddir", "", CV_HIDEN, NULL};
 consvar_t cv_iwad = {"iwad", "", CV_HIDEN, NULL};
 #endif
-
+#ifdef SEARCH_DEPTH_USER
+/*
+ * cv_game_search_depth: Such tiefe für Hauptwads (iwad) (Programm Start)
+ * cv_iwad_search_depth: Such Tiefe für Hauptwads (iwad) (über den Schalter -iwad)
+ * cv_fwad_search_depth: Such tiefe für Level wads mit -file <xxxx.wad>
+ */
+CV_PossibleValue_t search_depth_cons_t[]={{1,"MIN"},{50,"MAX"},{0,NULL}};
+consvar_t cv_game_search_depth = {"Search_Depth_Game"  , "2", CV_VALUE|CV_SAVE, search_depth_cons_t};
+consvar_t cv_iwad_search_depth = {"Search_Depth_iWad"  , "2", CV_VALUE|CV_SAVE, search_depth_cons_t};
+consvar_t cv_fwad_search_depth = {"Search_Depth_Levels", "4", CV_VALUE|CV_SAVE, search_depth_cons_t};
+#endif
 
 #if defined(__APPLE__) && defined(__MACH__)
 // [WDJ] This is for a setup using an .app folder
@@ -600,7 +626,9 @@ void  owner_wad_search_order( void )
         }
         else
         if( defdir
+#ifdef LAUNCHER
             &&( !(strcmp( defdir, cv_home.string ) == 0) ) // not home directory
+#endif
             &&( !(progdir && (strcmp( defdir, progdir ) == 0)) ) // not program directory
             &&( !(progdir_wads && (strcmp( defdir, progdir_wads ) == 0)) ) // not wads directory
           )
@@ -1506,7 +1534,7 @@ const char * common_lump_names[ COMMON_LUMP_LIST_SIZE ] =
 // can be used in file names on all systems.
 // This table is the game search order.
 // The first entry matching all characteristics will be used !
-#define  NUM_GDESC   (GDESC_other+1)	// number of entries in game_desc_table
+#define  NUM_GDESC   (GDESC_other+2)	// number of entries in game_desc_table(Marty: Compiler Warning Excess)
 game_desc_t  game_desc_table[ NUM_GDESC ] =
 {
 // Free wads should get their own gamemode identity
@@ -1605,6 +1633,13 @@ game_desc_t  game_desc_table[ NUM_GDESC ] =
         {"chex1.wad","chex.wad",NULL}, NULL,
         {"W94_1", "POSSH0M0"}, LN_E1M1, LN_TITLE,
         GD_iwad_pref, GDESC_chex1, GM_chexquest1 },
+#if defined (__DJGPP__) || defined (__WIN32__)
+// GDESC_doom2: HacX
+   { "HacX", "HacX: Twitch 'n' Kill", "HACX",
+        {"HACX.wad",NULL,NULL}, NULL,
+        {NULL, NULL}, LN_MAP01, LN_TITLE,
+        GD_idwad, GDESC_doom2, GM_doom2_commercial },
+#endif
 // GDESC_ultimate_mode: Ultimate Doom replacement
    { "Ultimate mode", NULL, "ultimode",
         {"doomu.wad","doom.wad",NULL}, NULL,
@@ -1803,8 +1838,11 @@ boolean  Check_wad_filenames( int gmi, /*OUT*/ char * pathbuf_p )
     {
         if( gmtp->iwad_filename[w] == NULL )
             break;
-
+#ifndef SEARCH_DEPTH_USER
         fse = Search_doomwaddir( gmtp->iwad_filename[w], GAME_SEARCH_DEPTH,
+#else
+        fse = Search_doomwaddir( gmtp->iwad_filename[w], cv_game_search_depth.EV,
+#endif
                                /*OUT*/ pathbuf_p );
       
 #ifdef ZIPWAD
@@ -1871,6 +1909,18 @@ void IdentifyVersion()
     // pathiwad must be MAX_WADPATH to be used by cat_filename.
     // Look in program directory first, because executable may have
     // its own version of legacy.wad.
+
+    #if defined( __WIN32__ )
+
+
+        char dosroot[MAX_WADPATH]; 		
+        getcwd(dosroot, MAX_WADPATH-1);
+        Posix_Deform_Path(dosroot);
+        progdir = dosroot;
+        //sprintf(dirbuf, "%s\\", dosroot);       
+        progdir = strdup( ProgrammPath() );
+    #endif
+
     if( progdir && ( access( progdir, R_OK) == 0 ) )
     {
         // [WDJ] look for legacy.wad with doomlegacy
@@ -2020,7 +2070,11 @@ void IdentifyVersion()
         {
             // Simple filename.
             // Find the IWAD in the doomwaddir.
+#ifndef SEARCH_DEPTH_USER
             fse = Search_doomwaddir( s, IWAD_SEARCH_DEPTH, /*OUT*/ pathiwad );
+#else
+            fse = Search_doomwaddir( s, cv_iwad_search_depth.EV, /*OUT*/ pathiwad );
+#endif
 #ifdef ZIPWAD
             if( fse == FS_ZIP )
             {
@@ -2144,13 +2198,17 @@ void IdentifyVersion()
             goto got_gmi_iwad;
     }
 
-    I_SoftError("Main WAD file not found\n"
+    I_SoftError(
+            "==================================================================\n"
+            "Main WAD file not found\n"
             "You need doom.wad, doom2.wad, heretic.wad or some other IWAD file\n"
             "from any shareware, commercial or free version of Doom or Heretic!\n"
-#if !defined(__WIN32__) && !(defined __DJGPP__)
             "If you have one of those files, be sure its name is lowercase\n"
             "or use the -iwad command line switch.\n"
+#ifdef SEARCH_DEPTH_USER
+            "Otherwise, check the game's search depth.\n"
 #endif
+            "==================================================================\n"
             );
     goto fatal_err;
 
@@ -2334,7 +2392,9 @@ void D_DoomMain()
 #ifdef FRENCH_INLINE
     french_early_text();
 #endif
-
+//#if defined( __DJGPP__ )
+    char dosroot[MAX_WADPATH]; 
+//#endif
     // print version banner just once here, use it anywhere
 //    sprintf(VERSION_BANNER, "Doom Legacy %d.%d.%d %s", VERSION/100, VERSION%100, REVISION, VERSIONSTRING);
     demoversion = VERSION;
@@ -2380,12 +2440,19 @@ void D_DoomMain()
       exit(0);
     }
 
+#if defined( __WIN32__ )
+    if (M_CheckParm("-listwads") || M_CheckParm("-lw")) ListSupportetWads_Command();
+    if (M_CheckParm("-features"))  Commandline_GetCompileFeatures();
+#endif  
     GenPrintf( EMSG_info|EMSG_all, "%s\n", legacytitle);
 
     // Find or make a default dir that is not root dir
     // get the current directory (possible problem on NT with "." as current dir)
     if (getcwd(dirbuf, _MAX_PATH) != NULL)
     {
+        //#if defined (__DJGPP__)
+         Posix_Deform_Path(dirbuf);
+        //#endif	
         // Need a working default dir, to prevent "" leading to root files.
         if( (strlen(dirbuf) > 4)
             || (strcmp( dirbuf, "." ) == 0) )   // systems that pass "."
@@ -2405,6 +2472,9 @@ void D_DoomMain()
     {
         // At worst, dirbuf may be an empty string.  OS dependent.
         progdir = strdup( dirbuf );
+        //#if defined (__DJGPP__)
+         Posix_Deform_Path(progdir);
+        //#endif
         if( verbose )
           GenPrintf(EMSG_ver, "Program directory: %s\n", progdir);
 
@@ -2543,7 +2613,6 @@ void D_DoomMain()
     CV_Set( &cv_doomwaddir, doomwaddir[0] ? doomwaddir[0] : "" );
     cv_doomwaddir.state &= ~CS_MODIFIED;
 #endif
-
     //Fab:29-04-98: do some dirty chatmacros strings initialisation
     HU_Init_Chatmacros();
 
@@ -2633,16 +2702,16 @@ restart_command:
             if( userhome && strstr( userhome, "MSYS" ) )
             {
                 // Ignore MSYS HOME, it is not the one wanted.
-                if( verbose > 1 )
+                if( verbose )
                     CONS_Printf("Ignore MYS HOME = %s\n", userhome);
                 userhome = NULL;
             }
             // Windows XP,
             if( !userhome )
             {
-                 userhome = getenv("UserProfile");
-                 if( userhome && verbose > 1 )
-                     CONS_Printf("UserProfile = %s\n", userhome);
+            //     userhome = getenv("UserProfile");
+            //     if( userhome && verbose > 1 )
+            //         CONS_Printf("UserProfile = %s\n", userhome);
             }
 #endif
         }
@@ -2657,6 +2726,7 @@ restart_command:
        
         if( !userhome )
         {
+#if !defined( __WIN32__ )	
             if(verbose)
                 GenPrintf(EMSG_ver, "Please set $HOME to your home directory, or use -home switch\n");
 
@@ -2679,6 +2749,7 @@ restart_command:
             {
                 GenPrintf(EMSG_warn, " No home dir, and no defdir.\n" );
             }
+#endif
 #endif
         }
 
@@ -2746,8 +2817,18 @@ restart_command:
         {
             // Make a default legacy home in the program directory.
             // default absolute path, do not set to ""
+        #if defined( __WIN32__ )		
+             getcwd(dosroot, MAX_WADPATH-1);
+             Posix_Deform_Path(dosroot);
+             progdir = dosroot;
+             userhome = dosroot;
+             sprintf(dirbuf, "%s\\", dosroot);
+             legacyhome = strdup( dirbuf );
+             userhome = progdir = legacyhome = ProgrammPath();
+        #else						
             cat_filename( dirbuf, progdir, DEFHOME );
             legacyhome = strdup( dirbuf );  // malloc, will be free.
+        #endif
             if( verbose )
                 GenPrintf(EMSG_ver, "Default legacyhome= %s\n", legacyhome );
         }
@@ -2782,13 +2863,20 @@ restart_command:
         }
 
 #ifdef SAVEGAMEDIR
-        // default savegame file name, example: "/home/user/.legacy/%s/doomsav%i.dsg"
-//        sprintf(savegamename, "%s%%s" SLASH "%s", legacyhome, text[NORM_SAVEI_NUM]);
+  #ifdef LOAD_SAVE_MENU_PATCH
+        /*
+         * Ach. Kacke. Da fehlt noch ein backslash...
+         */
+        snprintf(savegamename, MAX_WADPATH-1, "%s\\%%s" SLASH "%s%s", legacyhome, SAVEGAMENAME, "%d.dsg");
+  #else
+        /* default savegame file name, example: "/home/user/.legacy/%s/doomsav%i.dsg" */
+        // sprintf(savegamename, "%s%%s" SLASH "%s", legacyhome, text[NORM_SAVEI_NUM]);
         snprintf(savegamename, MAX_WADPATH-1, "%s%%s" SLASH "%s%s", legacyhome, SAVEGAMENAME, "%d.dsg");
         // so can extract legacyhome from savegamename later
-#else    
-        // default savegame file name, example: "/home/user/.legacy/doomsav%i.dsg"
-//        sprintf(savegamename, "%s%s", legacyhome, text[NORM_SAVEI_NUM]);
+  #endif
+#else
+        /* default savegame file name, example: "/home/user/.legacy/doomsav%i.dsg" */
+        // sprintf(savegamename, "%s%s", legacyhome, text[NORM_SAVEI_NUM]);
         snprintf(savegamename, MAX_WADPATH-1, "%s%s%s", legacyhome, SAVEGAMENAME, "%d.dsg");
 #endif
         savegamename[MAX_WADPATH-1] = '\0';
@@ -2815,8 +2903,9 @@ restart_command:
         }
     }
 
-#if 0
-    Print_search_directories( EMSG_debug, 0x0F );
+#if 0 || defined( __WIN32__ )
+    if (M_CheckParm("-listdirs") || M_CheckParm("-ld"))    
+    Print_search_directories( EMSG_debug, 0x0F );  
 #endif
 
     if( verbose )
@@ -2824,7 +2913,13 @@ restart_command:
         GenPrintf(EMSG_ver, "Config: %s\n", configfile_main );
         GenPrintf(EMSG_ver, "Savegames: %s\n", savegamename );
     }
-
+#ifdef SEARCH_DEPTH_USER
+    if (!M_CheckParm("-config") )
+    {
+      M_ClearConfig( CFG_main );
+      M_LoadConfig( CFG_main, configfile_main );
+    }
+#endif
     // identify the main IWAD file to use
     IdentifyVersion();  // game, iwad
     modifiedgame = false;
@@ -2893,6 +2988,19 @@ restart_command:
 
     // Add any files specified on the command line with -file <wadfile>
     // to the wad list
+#ifdef DRAGFILE
+    if (DrgFile_Requested)
+    {
+      /*
+       * Wad/Zip/Bex/Deh wurde via Drag'n'Drop gestartet
+       */
+      if( verbose )
+        GenPrintf(EMSG_debug, "Dragged File: %s\n",DrgFile_AutoStart);
+
+       modifiedgame = true;    // homebrew levels
+       D_AddFile( DrgFile_AutoStart);
+    }
+#endif
     if (M_CheckParm("-file"))
     {
         // the parms after p are wadfile/lump names,
@@ -3528,14 +3636,15 @@ fatal_error_action:
         }
         FIL_DefaultExtension(demo_name, ".lmp");
 
-        CONS_Printf("Playing demo %s.\n", demo_name);
 
         if( p == 2500 )
         {  // timedemo
+            CONS_Printf("Timing Benchmark Demo %s.\n", demo_name);					
             G_TimeDemo(demo_name);
         }
         else
         {  // playdemo
+            CONS_Printf("Playing demo %s.\n", demo_name);				
             singledemo = true;  // quit after one demo
             G_DeferedPlayDemo(demo_name);
         }
@@ -3817,6 +3926,10 @@ static void Help( void )
      printf
        (
         "-v   -v2        Verbose\n"
+#if defined (__WIN32__)
+        "-console        Use console output"
+        "-features       Show Compiled Features that support this version\n"
+#endif
         "-home name      Config and savegame directory\n"
         "-config file    Config file\n"
         "-opengl         OpenGL hardware renderer\n"
@@ -3838,6 +3951,8 @@ static void Help( void )
 #ifdef BEX_LANGUAGE
         "-lang name      Load BEX language file name.bex\n"
 #endif
+        "-listdirs/-ld   Lists supportet search directorys\n"
+        "-listwads/-lw   Lists supportet iWads\n"
         );
      break;
    case 's': // server
@@ -3886,3 +4001,606 @@ static void Help( void )
      break;
   }
 }
+
+void ListSupportetWads(void)
+{
+  
+ int iWad_index = NUM_GDESC; // nothing
+ int gmi;
+ int wad;
+ game_desc_t     iWadSupport;	 // active desc 
+
+ printf("DoomLegacy Supportet: %d Games\n",iWad_index);
+
+ for( gmi=0; gmi<iWad_index-1; gmi++ )
+ {
+   iWadSupport = game_desc_table[gmi];
+
+#if defined( __DJGPP__ )
+   if ((gmi + 1) % 4 == 0)
+   {
+    printf("\n--- Press Space, Enter to continue or ESC to abort ---");
+    fflush(stdout);
+
+    int c;
+    do {
+       c = getch();            // wartet auf Tastendruck (kein Enter nötig)
+       } while (c != ' ' && c != 13 && c != 27);  // Space, Enter oder ESC
+
+       if (c == 27) {              // ESC = Abbruch
+         printf("\nAbgebrochen.\n");
+         break;
+       }
+       printf("\r                                      \r"); // Zeile löschen
+   }
+   else
+#endif
+     printf("\n");
+
+
+    if (iWadSupport.startup_title == NULL)
+    {
+        if (iWadSupport.gameflags & GD_unsupported)
+            printf("Supportet: %-15s [Not Supportet]\n",iWadSupport.gname);
+        else
+            printf("Supportet: %-15s\n",iWadSupport.gname);
+    }
+    else
+    {
+       if (iWadSupport.gameflags & GD_unsupported)
+           printf("Supportet: %-15s [Not Supportet]\n",iWadSupport.startup_title);
+       else
+           printf("Supportet: %-15s\n",iWadSupport.startup_title);
+    }
+
+    printf("Directory: C:\\%s\\\n",iWadSupport.idstr);
+
+    for( wad=0; wad<3-1; wad++ )
+    {
+      if (iWadSupport.iwad_filename[wad] == NULL)
+          continue;			
+      
+      printf("     iWad: %s\n",iWadSupport.iwad_filename[wad]);
+    }
+
+    if (iWadSupport.support_wad != NULL)
+        printf("Support : %s\n",iWadSupport.support_wad);			
+    }
+}
+
+void ListSupportetWads_Command(void)
+{
+    printf("%s\n", legacytitle);
+    ListSupportetWads();
+    exit(0);    
+}
+ 
+void Commandline_GetCompileFeatures(void)
+{
+
+  printf("%s\n", legacytitle);
+  printf("Support Compiled Features and Hardy Hardcoded #Defines\n");
+
+#ifdef DOOMLEGACY_COMPONENT_VERSION
+        printf("Doomlegacy Component Version %d\n",DOOMLEGACY_COMPONENT_VERSION);
+        printf("\n");
+#endif
+
+#ifdef LAUNCHER
+        printf("ENGINE [X] Built-in Launcher\n");
+#else
+        printf("ENGINE [ ] Built-in Launcher\n");
+#endif
+
+#ifdef SMIF_PC_DOS
+        printf("ENGINE [X] Personal Computer DOS\n");
+#else
+        printf("ENGINE [ ] Personal Computer DOS\n");
+#endif
+
+#ifdef SMIF_WIN32
+        printf("ENGINE [X] M$ Windows (32Bit)\n");
+#else
+        printf("ENGINE [ ] M$ Windows (32Bit)\n");
+#endif
+
+#ifdef SMIF_LINUX
+        printf("ENGINE [X] Linux\n");
+#else
+        printf("ENGINE [ ] No Linux ...good\n");
+#endif
+
+#ifdef SMIF_MAC
+        printf("ENGINE [X] Macintosh\n");
+#else
+        printf("ENGINE [ ] No Mac   ...very good \n");
+#endif
+
+#ifdef SMIF_SDL
+        printf("ENGINE [X] Using SDL1 Backend\n");
+#else
+        printf("ENGINE [ ] Using SDL1 Backend\n");
+#endif
+
+#ifdef __GNUG__
+        printf("ENGINE [X] Compile: GNUG\n");
+#else
+        printf("ENGINE [ ] Compile: GNUG\n");
+#endif
+
+#ifdef HAVE_LIMITS_H
+        printf("ENGINE [X] Compile: Have_Limits_H\n");
+#else
+        printf("ENGINE [ ] Compile: Have_Limits_H\n");
+#endif
+
+#ifdef __STDC__
+        printf("ENGINE [X] Compile: STDC\n");
+#else
+        printf("ENGINE [ ] Compile: STDC\n");
+#endif
+
+#ifdef __BIG_ENDIAN__
+        printf("ENGINE [X] Compile: Big Endian\n");
+#else
+        printf("ENGINE [ ] Compile: Big Endian\n");
+#endif
+
+#ifdef USEASM
+        printf("ENGINE [X] Compile: Use Assembler\n");
+#else
+        printf("ENGINE [ ] Compile: Use Assembler\n");
+#endif
+
+#ifdef ENABLE_DRAW15
+        printf("ENGINE [X] Video  : 15Bit Rendermode\n");
+#else
+        printf("ENGINE [ ] Video  : 15Bit Rendermode\n");
+#endif
+
+#ifdef ENABLE_DRAW16
+        printf("ENGINE [X] Video  : 16Bit Rendermode\n");
+#else
+        printf("ENGINE [ ] Video  : 16Bit Rendermode\n");
+#endif
+
+#ifdef ENABLE_DRAW24
+        printf("ENGINE [X] Video  : 24Bit Rendermode\n");
+#else
+        printf("ENGINE [ ] Video  : 24Bit Rendermode\n");
+#endif
+
+#ifdef ENABLE_DRAW32
+        printf("ENGINE [X] Video  : 32Bit Rendermode\n");
+#else
+        printf("ENGINE [ ] Video  : 32Bit Rendermode\n");
+#endif
+
+#ifdef HWRENDER
+        printf("ENGINE [X] Video  : Hardware Rendermode\n");
+#else
+        printf("ENGINE [ ] Video  : Hardware Rendermode\n");
+#endif
+
+#ifdef CDMUS
+        printf("ENGINE [X] Music  : Support CD-ROM Music\n");
+#else
+        printf("ENGINE [ ] Music  : Support CD-ROM Music\n");
+#endif
+
+#ifdef XBOX_CONTROLLER
+        printf("ENGINE [X] Input  : XBOX controller Support\n");
+#else
+        printf("ENGINE [ ] Input  : XBOX controller Support\n");
+#endif
+
+#ifdef MOUSE2
+        printf("ENGINE [X] Input  : Second Mouse Support\n");
+#else
+        printf("ENGINE [ ] Input  : Second Mouse Support\n");
+#endif
+
+#ifdef MOUSE2_NIX
+        printf("ENGINE [X] Input  : Second Mouse Support (Linux)\n");
+#else
+        printf("ENGINE [ ] Input  : Second Mouse Support (Linux)\n");
+#endif
+
+#ifdef MOUSE2_WIN
+        printf("ENGINE [X] Input  : Second Mouse Support (Windows)\n");
+#else
+        printf("ENGINE [ ] Input  : Second Mouse Support (Windows)\n");
+#endif
+
+#ifdef CV_DEFAULT_PORT
+        printf("ENGINE [X] Input  : Second Mouse Default Port '%s'\n",CV_DEFAULT_PORT);
+#else
+        printf("ENGINE [ ] Input  : Second Mouse Default Port\n");
+#endif
+
+#ifdef DOSNET_SUPPORT
+        printf("ENGINE [X] Network: Dosnet Support\n");
+#else
+        printf("ENGINE [ ] Network: Dosnet Support\n");
+#endif
+
+#ifdef USE_IPX
+        printf("ENGINE [X] Network: IPX Support\n");
+#else
+        printf("ENGINE [ ] Network: IPX Support\n");
+#endif
+
+#ifdef SAVEGAMEDIR
+        printf("ENGINE [X] Savegame: Directory Support\n");
+#else
+        printf("ENGINE [ ] Savegame: Directory Support\n");
+#endif
+
+#ifdef SAVE_VERSION_144
+        printf("ENGINE [X] Savegame: Version 1.44\n");
+#else
+        printf("ENGINE [ ] Savegame: Version 1.44\n");
+#endif
+
+#ifdef SAVEGAME99
+        printf("ENGINE [X] Savegame: Slot Support 0 to 99\n");
+#else
+        printf("ENGINE [ ] Savegame: Slot Support\n");
+#endif
+
+#ifdef DOGS
+        printf("ENGINE [X] Marine's Best Friend DOGS\n");
+#else
+        printf("ENGINE [ ] Marine's Best Friend DOGS\n");
+#endif
+
+#ifdef BEX_LANGUAGE
+        printf("ENGINE [X] BEX: language Support\n");
+#else
+        printf("ENGINE [ ] BEX: language Support\n");
+#endif
+
+#ifdef BEX_LANG_AUTO_LOAD
+        printf("ENGINE [X] BEX: Automatic loading of lang.bex file\n");
+#else
+        printf("ENGINE [ ] BEX: Automatic loading of lang.bex file\n");
+#endif
+
+#ifdef BEX_SAVEGAMENAME
+        printf("ENGINE [X] BEX: Allow to change Savegamename\n");
+#else
+        printf("ENGINE [ ] BEX: Allow to change Savegamename\n");
+#endif
+
+#ifdef FRICTIONTHINKER
+        printf("ENGINE [X] Boom: Demo Compatibility Friction Thinkers\n");
+#else
+        printf("ENGINE [ ] Boom: Demo Compatibility Friction Thinkers\n");
+#endif
+
+#ifdef CLIENTPREDICTION2
+        printf("ENGINE [X] Client Prediction 2\n");
+#else
+        printf("ENGINE [ ] Client Prediction 2\n");
+#endif
+
+#ifdef CLIP2_LIMIT
+        printf("ENGINE [X] Clip2 Limit\n");
+#else
+        printf("ENGINE [ ] Clip2 Limit\n");
+#endif
+
+#ifdef DYLT_CORONAS
+        printf("ENGINE [X] Coronas in DynamicLights\n");
+#else
+        printf("ENGINE [ ] Coronas in DynamicLights\n");
+#endif
+
+#ifdef SPDR_CORONAS
+        printf("ENGINE [X] Coronas drawn with Sprite draw\n");
+#else
+        printf("ENGINE [ ] Coronas drawn with Sprite draw\n");
+#endif
+
+#ifdef DEVPARM_LOADING
+       printf("ENGINE [X] DevParm: Special handling for devparm\n");
+#else
+       printf("ENGINE [ ] DevParm: Special handling for devparm\n");
+#endif
+
+#ifdef DEEPSEA_TALL_PATCH
+        printf("ENGINE [X] DeePsea tall Patch Support\n");
+#else
+        printf("ENGINE [ ] DeePsea tall Patch\n");
+#endif
+
+#ifdef DOORDELAY_CONTROL
+        printf("ENGINE [X] Doordelay Control\n");
+#else
+        printf("ENGINE [ ] Doordelay Control\n");
+#endif
+
+#ifdef FRENCH_INLINE
+        printf("ENGINE [X] French language controls\n");
+#else
+        printf("ENGINE [ ] French language controls\n");
+#endif
+
+#ifdef FRAGGLESCRIPT
+        printf("ENGINE [X] Fragglescript\n");
+#else
+        printf("ENGINE [ ] Fragglescript\n");
+#endif
+
+#ifdef GAME_SEARCH_DEPTH
+        printf("ENGINE [X] Game Subdirectories Deeps = %d\n",GAME_SEARCH_DEPTH);
+#else
+        printf("ENGINE [ ] Game Subdirectories Deeps\n");
+#endif
+
+#ifdef IWAD_SEARCH_DEPTH
+        printf("ENGINE [X] Game IWad Subdirectories Deeps = %d\n",IWAD_SEARCH_DEPTH);
+#else
+        printf("ENGINE [ ] Game IWad Subdirectories Deeps\n");
+#endif
+
+#ifdef SEARCH_DEPTH_USER
+        printf("ENGINE [X] Game IWad/Levels Subdirectories Deep Search by User\n");
+#else
+        printf("ENGINE [ ] Game IWad/Levels Subdirectories Deep Search by User\n");
+#endif
+
+#ifdef LOADING_DISK_ICON
+        printf("ENGINE [X] Loading disk icon\n");
+#else
+        printf("ENGINE [ ] Loading disk icon\n");
+#endif
+
+#ifdef MACHINE_MHZ
+        printf("ENGINE [X] Machine speed limitations = %d\n",MACHINE_MHZ);
+#else
+        printf("ENGINE [ ] Machine speed limitations\n");
+#endif
+
+#ifdef MAXVISSPRITES
+        printf("ENGINE [X] Max Sprites = %d\n",MAXVISSPRITES);
+#endif
+
+#ifdef MAX_WADPATH
+        printf("ENGINE [X] Max File Path Lenght = %d\n",MAX_WADPATH);
+#endif
+
+#ifdef NEWLIGHT
+        printf("ENGINE [X] Newlight, Compute Lighting with BSP\n");
+#else
+        printf("ENGINE [ ] Newlight, Compute Lighting with BSP\n");
+#endif
+
+#ifdef NUM_RGBA_LEVELS
+        printf("ENGINE [X] RGBA - Num Levels %d\n",NUM_RGBA_LEVELS);
+#endif
+
+#ifdef LIGHT_TO_RGBA_SHIFT
+        printf("ENGINE [X] RGBA - Light to RGBA Shift %d\n",LIGHT_TO_RGBA_SHIFT);
+#endif
+
+#ifdef ROT16
+        printf("ENGINE [X] 16 Rotation Sprites\n");
+#else
+        printf("ENGINE [ ] 16 Rotation Sprites\n");
+#endif
+
+#ifdef SKY_FLAT_HEIGHT
+        printf("ENGINE [X] Sky Flat Height %d\n",SKY_FLAT_HEIGHT);
+#endif
+
+#ifdef SKY_FLAT_WIDTH
+        printf("ENGINE [X] Sky Flat Width %d\n",SKY_FLAT_WIDTH);
+#endif
+
+#ifdef SPLITSCREEN
+        printf("ENGINE [X] Splitscreen\n");
+#else
+        printf("ENGINE [ ] Splitscreen\n");
+#endif
+
+#ifdef OLDTICRATE
+        printf("ENGINE [X] TIC: Old Timer Rate (OLDTICRATE)= %d\n",OLDTICRATE);
+#endif
+
+#ifdef NEWTICRATERATIO
+        printf("ENGINE [X] TIC: New Timer Ratio (TICRATIO) = %d\n",NEWTICRATERATIO);
+#endif
+
+#ifdef TICRATE
+        printf("ENGINE [X] TIC: New Timer Rate (TICRATE)   = %d\n",TICRATE);
+#endif
+
+#ifdef WADFILE_RELOAD
+        printf("ENGINE [X] Wadfile Reload at level start when filename starts with '~'\n");
+#else
+        printf("ENGINE [ ] Wadfile Reload at level start when filename starts with '~'\n");
+#endif
+
+#ifdef ZIPWAD
+        printf("ENGINE [X] Zip Support\n");
+#else
+        printf("ENGINE [ ] Zip Support\n");
+#endif
+
+#ifdef ZIPWAD_OPTIONAL
+        printf("ENGINE [X] Zip Support (Optional)\n");
+#else
+        printf("ENGINE [ ] Zip Support (Optional)\n");
+#endif
+
+// User Info
+#ifdef LOGMESSAGES
+        printf("INFO : [X] Log Messages with Log Line Length %d\n",LOGLINELEN);
+#else
+        printf("INFO : [ ] Log Messages\n");
+#endif
+
+#ifdef TURBO_MSG_LEN
+        printf("INFO : [X] Turbo MSG LEN %d\n",TURBO_MSG_LEN);
+#endif
+
+// Debug Features
+#ifdef DEBUG
+        printf("DEBUG  [X] Debug Modus\n");
+#else
+        printf("DEBUG  [ ] Debug Modus\n");
+#endif
+
+#ifdef DEBUG_WINDOWED
+        printf("DEBUG  [X] Debug Windowed\n");
+#else
+        printf("DEBUG  [ ] Debug Windowed\n");
+#endif
+
+#ifdef DEBUG_MESSAGES_ON
+        printf("DEBUG  [X] Debug Messages Default On\n");
+#else
+        printf("DEBUG  [ ] Debug Messages Default\n");
+#endif
+
+#ifdef DEBUG_LOG
+        printf("DEBUG  [X] Debug Log\n");
+#else
+        printf("DEBUG  [ ] Debug Log\n");
+#endif
+
+#ifdef DEBUGFILE
+        printf("DEBUG  [X] Debug File\n");
+#else
+        printf("DEBUG  [ ] Debug File\n");
+#endif
+
+#ifdef DEBUG_COPYRECT
+        printf("DEBUG  [X] Debug CopyRect\n");
+#else
+        printf("DEBUG  [ ] Debug CopyRect\n");
+#endif
+
+#ifdef DEBUG_MD5_TIME
+        printf("DEBUG  [X] Debug MD5 Time\n");
+#else
+        printf("DEBUG  [ ] Debug MD5 Time\n");
+#endif
+
+#ifdef DEBUG_MD5_TIME
+        printf("DEBUG  [X] Debug MD5 Time\n");
+#else
+        printf("DEBUG  [ ] Debug MD5 Time\n");
+#endif
+
+#ifdef DEBUG_ZONE
+        printf("DEBUG  [X] Debug Zone\n");
+#else
+        printf("DEBUG  [ ] Debug Zone\n");
+#endif
+
+#ifdef DEBUG_ZONE
+        printf("DEBUG  [X] Detect Tiles\n");
+#else
+        printf("DEBUG  [ ] Detect Tiles\n");
+#endif
+
+#ifdef RANGECHECK
+        printf("DEBUG  [X] RangeCheck\n");
+#else
+        printf("DEBUG  [ ] RangeCheck\n");
+#endif
+
+#ifdef RANGECHECK_DRAW_LIMITS
+        printf("DEBUG  [X] Rangecheck Draw Limits\n");
+#else
+        printf("DEBUG  [ ] Rangecheck Draw Limits\n");
+#endif
+
+#ifdef PARANOIA
+        printf("DEBUG  [X] Paranoia Mode\n");
+#else
+        printf("DEBUG  [ ] Paranoia Mode\n");
+#endif
+
+#ifdef TRACE_BLOCKMAPHEAD
+        printf("DEBUG  [X] Trace Blockmaphead\n");
+#else
+        printf("DEBUG  [ ] Trace Blockmaphead\n");
+#endif
+
+#ifdef DUMP_BLOCKMAP
+        printf("DEBUG  [X] Dump Blockmap\n");
+#else
+        printf("DEBUG  [ ] Dump Blockmap\n");
+#endif
+
+    printf("if the list too long. add '>Features.txt' to the exe as output\n");
+    exit(0); 
+}
+
+#ifdef _WIN32
+/*
+ * Versuche nicht erst den Programm Pfad zu verlassen. Sondern bleibe da
+ * wo auch die DoomLegacy.exe ist.
+ */
+char *ProgrammPath(void)
+{
+  static char dosroot[MAX_PATH] = {0}; 	
+  static char exepath[MAX_PATH] = {0};  // static = nur einmal initialisiert
+
+  if (exepath[0] == '\0')  // Nur einmal berechnen
+  {
+       GetModuleFileNameA(NULL, exepath, MAX_PATH);
+       char *last = strrchr(exepath, '\\');
+       if (last) *(last /*+ 1*/) = '\0';  // Nur Ordner und entferne '\' den auch.
+  }
+
+  if (dosroot[0] == '\0')  // Nur einmal berechnen  
+       getcwd(dosroot, MAX_PATH);
+
+  if (strcmp(exepath, dosroot ) == 0)
+  {
+    if( verbose )
+      GenPrintf(EMSG_ver, "ProgrammPath [exedir]:[getcwd] sind identisch\n");
+
+  }
+  else
+  {
+    if( verbose )
+    {
+      GenPrintf(EMSG_ver, "ProgrammPath [exedir]: %s\n", exepath);
+      GenPrintf(EMSG_ver, "ProgrammPath [getcwd]: %s\n", dosroot);
+      GenPrintf(EMSG_ver, "Main->Argv hat eine anderes Arbeitsverzeichnis bekommen...\n");
+    }
+  }
+
+  return exepath; 
+}
+
+byte CheckMainWad(const char *MainWadFile)
+{
+  
+ int iWad_index = NUM_GDESC; // nothing
+ int gmi;
+ int wad;
+ game_desc_t     iWadSupport;	 // active desc 
+
+ for( gmi=0; gmi<iWad_index-1; gmi++ )
+ {
+   iWadSupport = game_desc_table[gmi];
+
+    for( wad=0; wad<3-1; wad++ )
+    {
+      if (iWadSupport.iwad_filename[wad] == NULL)
+          continue;			
+    }
+
+    if (iWadSupport.support_wad != NULL)
+      GenPrintf(EMSG_debug, "Support : %s\n",iWadSupport.support_wad);	
+
+  }
+  return 0;
+}
+#endif

@@ -62,7 +62,9 @@
 #endif
 
 #ifdef WIN32
+#ifndef WINVER // Kollidiert mit sdkdkver.h
 #define WINVER 0x0500  // require windows 2k or later
+#endif
 #include <windows.h>
 #else
 // WIN32 standard headers already define these!

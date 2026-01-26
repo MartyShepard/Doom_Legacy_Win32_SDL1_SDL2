@@ -1334,8 +1334,14 @@ filestatus_e  findfile( const char * filename, const byte * wantedmd5sum,
     }
 
     // Search doomwaddir for simple filename.
+#ifndef SEARCH_DEPTH_USER
     ret_val = FullSearch_doomwaddir( filename, GAME_SEARCH_DEPTH, wantedmd5sum,
                     /* OUT */  completepath );
+#else
+    ret_val = FullSearch_doomwaddir( filename, cv_fwad_search_depth.EV, wantedmd5sum,
+                    /* OUT */  completepath );
+#endif
+
 
 #if 1
     return ret_val;

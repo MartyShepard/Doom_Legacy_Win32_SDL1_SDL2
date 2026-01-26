@@ -112,7 +112,9 @@ typedef enum
 
 
 extern consvar_t   cv_grabinput;
-
+#ifdef GRAB_MIDDLEMOUSE
+		extern consvar_t	cv_mouse_release;
+#endif
 // Player control
 // [0]=main player [1]=splitscreen player
 extern consvar_t   cv_autorun[2];
@@ -202,5 +204,7 @@ void  G_CheckDoubleUsage(int keynum);
 
 // Called for cv_usemouse, cv_grabinput, cv_mouse_motion
 void  CV_mouse_OnChange( void );
-
+	#ifdef GRAB_MIDDLEMOUSE
+		void Middle_MB_Release (void);
+	#endif
 #endif

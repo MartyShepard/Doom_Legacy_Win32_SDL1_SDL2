@@ -650,16 +650,45 @@ byte  M_Make_Screenshot_Filename( char * lbmname, const char * ext )
 	// Because we support other compilers, which behave better, this cannot just be thrown in the compile flags.
 //# pragma GCC diagnostic push
 # pragma GCC diagnostic ignored	  "-Wformat-truncation"
+  #if defined( SMIF_PC_DOS) || defined( WIN32 ) || defined( SMIF_OS2_NATIVE )
+        snprintf(lbmname, MAX_WADPATH-1, "%s\\%s0000.%s", cv_screenshot_dir.string, wn, ext );
+  #else
         snprintf(lbmname, MAX_WADPATH-1, "%s/%s0000.%s", cv_screenshot_dir.string, wn, ext );
+  #endif
 //# pragma GCC diagnostic pop
 #else
+  #if defined( SMIF_PC_DOS) || defined( WIN32 ) || defined( SMIF_OS2_NATIVE )  
+        snprintf(lbmname, MAX_WADPATH-1, "%s\\%s0000.%s", cv_screenshot_dir.string, wn, ext );
+  #else
         snprintf(lbmname, MAX_WADPATH-1, "%s/%s0000.%s", cv_screenshot_dir.string, wn, ext );
+  #endif      
 #endif
         lbmname[MAX_WADPATH-1] = 0;
     }
     else
-    {
+    {   
+     #ifdef LOAD_SAVE_MENU_PATCH
+        /*
+         * Bleibt im Programm Pfad... was sollen die screenshots am Arsch der Welt
+         */
+        char MyHomy[MAX_WADPATH];
+        strncpy(MyHomy, ProgrammPath(), sizeof(MyHomy));
+        
+        // Sicherheit: Falls kein Backslash da ist, anhängen
+        size_t len = strlen(MyHomy);
+        if (len > 0 && MyHomy[len-1] != '\\')        
+          strcat(MyHomy, "\\");          
+        
+        strcat(MyHomy, "ScreenShots\\");    
+  
+        if (DirectoryCheck_isPath(MyHomy) == 0)        
+            mkdir(MyHomy);        
+                              
+        snprintf(lbmname, MAX_WADPATH-1, "%s%s0000.%s", MyHomy, wn, ext );
+     #else
+         
         sprintf(lbmname, "%s0000.%s", wn, ext );
+     #endif
     }
 
     vernum = strrchr( lbmname, '.') - 4;
@@ -1121,7 +1150,12 @@ void cat_filename( char * dest, const char * dn, const char * fn )
     {
         // if directory does not have '/' then include one in format
         char ch = dn[ dnlen-1 ]; // last char
-        if( ! ( ch == '/' || ch == '\\' ))   format = "%s/%s";
+        if( ! ( ch == '/' || ch == '\\' ))
+        #if defined (__DJGPP__) || defined (__WIN32__)
+          format = "%s\\%s";
+        #else
+          format = "%s/%s";
+        #endif 
     }
     snprintf(dest, MAX_WADPATH-1, format, dn, fn);
     dest[MAX_WADPATH-1] = '\0';
@@ -1202,4 +1236,231 @@ uint32_t str_to_uint32( const char * str )
     }
     return val;
 }
+#endif
+
+#ifdef LOAD_SAVE_MENU_PATCH
+/*
+ * Zeigt die Letzten Infos des Aktuellen verzeichnis an
+ */  
+  void ShortenPathFromLeft(char *path, size_t max_len)
+  {
+      size_t len = strlen(path);
+      if (len <= max_len) return;  // schon kurz genug
+
+      // Wie viele Zeichen müssen weg?
+      size_t to_remove = len - max_len + 3;  // +3 für die drei Punkte "..."
+
+      // "..." am Anfang einfügen
+      memmove(path + 3, path + to_remove, len - to_remove + 1);
+
+      // Die ersten drei Zeichen auf "..."
+      path[0] = '.';
+      path[1] = '.';
+      path[2] = '.';
+
+      // Null-Terminator bleibt erhalten (durch +1 in memmove)
+  }
+
+/*
+ * Im Save/Load Menu von Doom Legacy wird nicht das aktuelle verzeichnis
+ * angezeigt. (siehe menu.c, hier weter unten)
+ */
+  char *Directory_GetLastSigns(const char *fullpath, char *buffer, size_t bufsize)
+  {
+
+    const char *last_slash = strrchr(fullpath, '\\');
+    if (!last_slash)
+    {
+      // Kein Slash -> ganzer Pfad ist Dateiname
+      strncpy(buffer, fullpath, bufsize - 1);
+      buffer[bufsize - 1] = '\0';
+      return buffer;
+    }
+
+    // Vorletzten Slash finden (um letzten Ordner zu bekommen)
+    const char *second_last = last_slash;
+    while (second_last > fullpath && *--second_last != '\\');
+
+    if (*second_last == '\\')
+    {
+      // Vorletzter Slash gefunden -> ab hier kopieren
+      const char *start = second_last;
+      strncpy(buffer, start, bufsize - 1);
+      buffer[bufsize - 1] = '\0';
+    }
+    else
+    {
+      // Nur ein Slash -> z. B. D:\datei -> \datei
+      strncpy(buffer, last_slash, bufsize - 1);
+      buffer[bufsize - 1] = '\0';
+    }
+
+    // Prüfen ob der Path noch passt
+    if (strlen(buffer) > 22)
+       ShortenPathFromLeft(buffer, 22);
+     
+    return buffer;
+  }
+
+/*
+ * Prüft ob der Dateiname leer und bei der umsetzung von von der Variable "legacyhome"
+ * zu einem "\\\\" führt wegen ... einfach kacke
+ */
+  char *Path_EmptyCheck(char *SaveDirPath)
+  {
+    static char Buffer[512];
+    if (strlen(SaveDirPath) == 0)
+      strncpy(SaveDirPath, Directory_GetLastSigns( legacyhome, Buffer, sizeof(Buffer) ), sizeof(Buffer));
+         
+    return Buffer;
+  }
+
+/*
+ * Hier ist das mit der Kacke. Dadurch wird er PFad wieder normalisiert
+ */
+  char *Path_SlashAttack(const char *input_path)
+  {
+    static char cleaned[1024];  // groß genug für DOS/Windows
+    strcpy(cleaned, input_path);
+
+    if (verbose > 1)
+      GenPrintf(EMSG_debug, "[%s][%d] Kommt rein <-: %s\n",__FILE__,__LINE__,cleaned);
+
+    // Entferne führendes .\ oder ./
+    if (strncmp(cleaned, "\\\\", 4) == 0)
+    {
+      memmove(cleaned, cleaned + 1, strlen(cleaned + 1) + 1);
+    }
+
+    // Entferne alle \.\ oder /./ im Pfad (wiederholt, falls nötig)
+    char *p;
+    while ((p = strstr(cleaned, "\\\\")) != NULL)
+    {
+      memmove(p, p + 1, strlen(p + 1) + 1);
+    }
+        
+    if (verbose > 1)
+      GenPrintf(EMSG_debug, "[%s][%d] Geht  raus ->: %s\n",__FILE__,__LINE__,cleaned);
+        
+    return cleaned;
+  }
+  
+/*
+ * Entfernt das Verzeichnis mit Savegames. Einfach nur Remove( dirname ) läuft nicht
+ * wenn sich dateien in diesem verzeichniss befinden.
+ */
+  #include <dirent.h>
+  #include <sys/stat.h>
+  #include <stdio.h>
+  #include <stdlib.h>  
+  byte DirectoryCheck_isPath(const char *path)
+  {
+      byte Result = 1;
+      
+      DIR *dir = opendir(path);
+      if (!dir) // Kein Verzeichnis? Dann normale Datei?     
+          Result = 0;
+      
+      closedir(dir);
+
+      GenPrintf(EMSG_debug, "[%s][%d] Directory Check: is Path = %s\n"
+                            "        : %s\n",__FILE__,__LINE__,
+                                      (Result==1)?"True":"False",path);
+                                      
+      return Result;
+  }
+  
+  byte DirectoryRemove_Recursive(const char *path)
+  {
+      GenPrintf(EMSG_debug, "[%s][%d] Remove fullpath %s\n",__FILE__,__LINE__,path); 
+      DIR *dir = opendir(path);
+      if (!dir) {
+          // Kein Verzeichnis? Dann normale Datei löschen
+          return remove(path) == 0 ? 0 : -1;
+      }
+
+      struct dirent *entry;
+      char fullpath[1024];
+
+      while ((entry = readdir(dir)) != NULL) {
+          if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+              continue;
+
+          snprintf(fullpath, sizeof(fullpath), "%s\\%s", path, entry->d_name);         
+
+          struct stat st;
+          if (stat(fullpath, &st) == 0)
+          {
+              if (S_ISDIR(st.st_mode))
+              {
+                  if (DirectoryRemove_Recursive(fullpath) != 0)
+                  {
+                      closedir(dir);
+                      return -1;
+                  }
+              }
+              else
+              {
+                  if (remove(fullpath) != 0)
+                  {
+                      closedir(dir);
+                      return -1;
+                  }
+              }
+          }
+      }
+
+      closedir(dir);
+
+      // Jetzt das leere Verzeichnis selbst löschen
+      return rmdir(path) == 0 ? 0 : -1;
+  }  
+
+/*
+ * Überprpft "vorher" ob sich dateien in dem zu löschenden verzeichniss 
+ * befinden und user informaieren.
+ */  
+  byte Directory_FILE_ExistsIn_DIR(const char *dirPath)
+  {
+      DIR *dir = opendir(dirPath);
+      if (!dir) return 0;
+
+      struct dirent *entry;
+      struct stat st;
+      char fullpath[1024];
+      int hasSaves = 0;
+
+         GenPrintf(EMSG_debug, "[%s][%d] legacyhome = %s\n"
+                               "                      %s\n",__FILE__,__LINE__,legacyhome,dirPath);
+                               
+      /* Prüfung auf das eigene Verzeichnis, "legacyhome" ist global */
+      if (strcmp(legacyhome, dirPath) == 0)
+         GenPrintf(EMSG_debug, "[%s][%d] legacyhome = %s\n"
+                               "                      %s\n",__FILE__,__LINE__,legacyhome, dirPath);
+         
+      
+      while ((entry = readdir(dir)) != NULL)
+      {
+          if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+          snprintf(fullpath, sizeof(fullpath), "%s\\%s", dirPath, entry->d_name);
+
+          
+
+          if (stat(fullpath, &st) == 0 && S_ISREG(st.st_mode))// Nur echte Dateien
+          {               
+             // Endungs-Check
+              if (strstr(entry->d_name, ".dsg"))
+             {
+                 hasSaves += 1; // Gint die Anzhal der Dateien wieder
+             //break;
+             }
+          }
+      }
+
+      closedir(dir);
+      GenPrintf(EMSG_debug, "[%s][%d] fullpath %s\n",__FILE__,__LINE__,fullpath);
+      return hasSaves;
+  }  
 #endif

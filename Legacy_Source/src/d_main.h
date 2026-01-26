@@ -60,6 +60,12 @@ void  owner_wad_search_order( void );
 extern consvar_t cv_home, cv_doomwaddir, cv_iwad;
 extern consvar_t cv_screenshot_type, cv_screenshot_dir;
 
+#ifdef SEARCH_DEPTH_USER
+extern consvar_t cv_game_search_depth;
+extern consvar_t cv_iwad_search_depth;
+extern consvar_t cv_fwad_search_depth;
+#endif
+
 extern byte  init_sequence;  // = 0 on first init
 
 // the infinite loop of D_DoomLoop() called from win_main for windows version
@@ -95,5 +101,7 @@ extern byte demo_ctrl;
 
 void D_StartTitle (void);
 void D_End_commandline(void);
-
+// Marty
+char *ProgrammPath(void);
+byte CheckMainWad(const char *MainWadFile);
 #endif //__D_MAIN__

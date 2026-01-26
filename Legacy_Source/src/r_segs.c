@@ -192,6 +192,17 @@ lighttable_t**  walllights;  // array[] of colormap selected by lightlevel
 
 int16_t  *  maskedtexturecol;
 
+#if defined( __DJGPP__ ) || defined( __WIN32__ )
+void* portable_realloc(void* mem, size_t siz)
+{
+    if (!mem) {
+        return malloc(siz);
+    } else if (!siz) {
+        return mem;
+    }
+    return realloc(mem, siz);
+}
+#endif
 
 // Define  colfunc_2s_t
 typedef  void (* colfunc_2s_t) (byte *);
@@ -594,10 +605,18 @@ void expand_drawsegs( void )
 //    drawseg_t * old_drawsegs = drawsegs;
     ptrdiff_t  drawsegs_diff = (void*)ds_p - (void*)drawsegs;  // avoid using drawsegs after realloc
     unsigned newmax = max_drawsegs ? max_drawsegs*2 : 128;
+#if !defined( __DJGPP__ ) || !defined( __WIN32__ )
     drawseg_t * new_drawsegs = realloc(drawsegs, newmax*sizeof(*drawsegs));
-    if( new_drawsegs == NULL )
+#else
+    drawseg_t * new_drawsegs = portable_realloc(drawsegs, newmax*sizeof(*drawsegs));
+#endif
+    if( new_drawsegs == 0 )
     {
+#if !defined( __DJGPP__ ) || !defined( __WIN32__ )
         I_Error( "Failed realloc for drawsegs\n" );
+#else
+        I_Error( "Failed realloc for (new_)drawsegs (Need %dkb)\n",newmax* sizeof(drawseg_t)/1024);
+#endif
     }
     drawsegs = new_drawsegs;
     max_drawsegs = newmax;

@@ -1,0 +1,16 @@
+VIDGL_Set_GL_Model_View(): 1024x600
+VIDGL_Set_GL_States()
+Vendor     : NVIDIA Corporation
+Renderer   : NVIDIA GeForce RTX 2060/PCIe/SSE2
+Version    : 4.6.0 NVIDIA 472.75
+Extensions : 
+  GL_AMD_multi_draw_indirect GL_AMD_seamless_cubemap_per_texture GL_AMD_vertex_sha
+oglflags   : 0x0
+VIDGL_Set_GL_Model_View(): 1280x1080
+VIDGL_Set_GL_States()
+VIDGL_Set_GL_Model_View(): 1920x1080
+VIDGL_Set_GL_States()
+VIDGL_Set_GL_Model_View(): 1280x1080
+VIDGL_Set_GL_States()
+VIDGL_Set_GL_Model_View(): 1920x1080
+VIDGL_Set_GL_States()

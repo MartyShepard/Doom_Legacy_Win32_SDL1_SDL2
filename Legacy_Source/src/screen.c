@@ -129,10 +129,11 @@ consvar_t   cv_fuzzymode = {"fuzzymode", "Off", CV_SAVE | CV_CALL, CV_OnOff, CV_
 CV_PossibleValue_t scr_depth_cons_t[]={{8,"8 bits"}, {15,"15 bits"}, {16,"16 bits"}, {24,"24 bits"}, {32,"32 bits"}, {0,NULL}};
 
 //added:03-02-98: default screen mode, as loaded/saved in config
-consvar_t   cv_scr_width  = {"scr_width",  "320", CV_VALUE|CV_SAVE, CV_uint16};
-consvar_t   cv_scr_height = {"scr_height", "200", CV_VALUE|CV_SAVE, CV_uint16};
+consvar_t   cv_scr_width  = {"scr_width",  "800", CV_VALUE|CV_SAVE, CV_uint16};
+consvar_t   cv_scr_height = {"scr_height", "600", CV_VALUE|CV_SAVE, CV_uint16};
 consvar_t   cv_scr_depth =  {"scr_depth",  "8 bits",   CV_SAVE, scr_depth_cons_t};
-consvar_t   cv_fullscreen = {"fullscreen",  "Yes",CV_SAVE | CV_CALL, CV_YesNo, SCR_ChangeFullscreen};
+consvar_t   cv_fullscreen = {"fullscreen",  "no",CV_SAVE | CV_CALL, CV_YesNo, SCR_ChangeFullscreen};
+consvar_t   cv_borderless = {"borderless",  "yes",CV_SAVE | CV_CALL, CV_YesNo, SCR_Borderless};
 
 // =========================================================================
 //                           SCREEN VARIABLES
@@ -605,7 +606,8 @@ void SCR_apply_video_settings( byte calc_setmodeneeded )
     if( ! (req_command_video_settings & 0x3F) ) // bitpp
     {
         // From config file, or menu.
-        req_bitpp = cv_scr_depth.value;
+        if ((req_bitpp == cv_scr_depth.value) ||  (req_bitpp == 0))
+          req_bitpp = cv_scr_depth.value;
     }
     if( req_command_video_settings & 0xC0 ) // width, height
     {
@@ -665,4 +667,19 @@ void SCR_ChangeFullscreen (void)
     {
         cv_fullscreen.EV = 0;
     }
+}
+
+void SCR_Borderless (void)
+{
+   if (cv_borderless.value)
+        cv_borderless.EV = 1;
+   else
+        cv_borderless.EV = 0;
+
+  if( ( graphics_state >= VGS_fullactive ) && !cv_fullscreen.EV)
+  { // Mach das im bei der Borderless Wahl
+    SCR_SetDefaultMode ();
+    SCR_apply_video_settings( 1 );
+  }
+
 }
