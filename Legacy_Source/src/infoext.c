@@ -391,7 +391,14 @@ byte EN_state_zero = 2;  // auto
 // [WDJ] Sprite remapping
 #ifdef ENABLE_DEH_REMAP
 
-// Free sprites, Doom
+// Predef and Free sprites, Doom
+static
+     range_t  sprite_predef_table_doom[2] =
+{
+  { SPR_DOOM_START, SPR_DOOM_MAX },
+  { SPR_DOGS, SPR_LEGACY_MAX }
+};
+#define NUM_sprite_predef_table_doom (sizeof(sprite_predef_table_doom)/sizeof(range_t))
 static
 const range_t  sprite_free_table_doom[2] =
 {
@@ -400,7 +407,16 @@ const range_t  sprite_free_table_doom[2] =
 };
 #define NUM_sprite_free_table_doom (sizeof(sprite_free_table_doom)/sizeof(range_t))
 
-// Free sprites, Heretic
+// Predef and Free sprites, Heretic
+static
+     range_t  sprite_predef_table_heretic[4] =
+{
+  { SPR_HERETIC_START, SPR_HERETIC_MAX },
+  { SPR_PLAY, SPR_PLAY },
+  { SPR_BLUD, SPR_BLUD },
+  { SPR_DOGS, SPR_LEGACY_MAX }
+};
+#define NUM_sprite_predef_table_heretic (sizeof(sprite_predef_table_heretic)/sizeof(range_t))
 static
 const range_t  sprite_free_table_heretic[4] =
 {
@@ -412,14 +428,16 @@ const range_t  sprite_free_table_heretic[4] =
 #define NUM_sprite_free_table_heretic (sizeof(sprite_free_table_heretic)/sizeof(range_t))
 
 
+
 static
 const range_t *  sprite_free_table = NULL;
 static byte  num_sprite_free_table = 0;
 static byte  sprite_free_table_index = 0;
-
 static range_t  free_sprite = {10, 0};  // invalid to trigger setup
-static range_t  predef_sprite = {0, SPR_TNT1};
-static range_t  predef_sprite_ext = {0, SPR_TNT1};
+
+static range_t * sprite_predef_table = NULL;
+static byte  num_sprite_predef_table = 0;
+
 static range_t  nomap_sprite = {0, 0};
 
 // last predef, for EN_sprite_remap settings
@@ -495,10 +513,15 @@ void  sprite_remap_allocate( void )
 
 byte  is_predef_sprite( uint16_t sprite_id )
 {
-    if( (sprite_id == 0)
-        || ((sprite_id >= predef_sprite.first) && (sprite_id <= predef_sprite.last))
-        || ((sprite_id >= predef_sprite_ext.first) && (sprite_id <= predef_sprite_ext.last)) )
-         return 1;
+    if( sprite_id == 0 )
+        return 1;
+
+    int k;
+    for( k=0; k<num_sprite_predef_table; k++ )
+    {
+        if((sprite_id >= sprite_predef_table[k].first) && (sprite_id <= sprite_predef_table[k].last))
+          return 1;
+    }
 
     return 0;
 }
@@ -517,20 +540,38 @@ uint16_t  get_free_sprite( uint16_t sprite_id )
 
         // Next free section of sprites.
         free_sprite = sprite_free_table[sprite_free_table_index++];
+        // The sprite_predef_table[0].last is dependent upon adapt.
         // this might remove entire free space, so must loop
-        if( free_sprite.first < predef_sprite.first )
+        int k;
+        for( k=0; k<num_sprite_predef_table; k++ )
         {
-            // Free sprite block is before predef.
-            if( free_sprite.last >= predef_sprite.first )
-                free_sprite.last = predef_sprite.first - 1;
+            range_t * sprg = & sprite_predef_table[k];
+            if( free_sprite.first < sprg->first )
+            {
+                // Free sprite block is before predef.
+                if( free_sprite.last >= sprg->first )
+                  free_sprite.last = sprg->first - 1;
+            }
+            else
+            {
+                // Free state block is after predef.
+                if( free_sprite.first <= sprg->last )
+                  free_sprite.first = sprg->last + 1;
+            }
         }
-        else
+
+        if( nomap_sprite.last )
         {
-            // Free state block is after predef.
-            if( free_sprite.first <= predef_sprite.last )
-                free_sprite.first = predef_sprite.last + 1;
-            if( nomap_sprite.last && (free_sprite.first <= nomap_sprite.last) )
-                free_sprite.first = nomap_sprite.last + 1;
+            if( free_sprite.first < nomap_sprite.first )
+            {
+                if( free_sprite.last >= nomap_sprite.first )
+                  free_sprite.last = nomap_sprite.first - 1;
+            }
+            else
+            {
+                if( free_sprite.first <= nomap_sprite.last )
+                  free_sprite.first = nomap_sprite.last + 1;
+            }
         }
     }
 
@@ -1003,10 +1044,9 @@ void init_tables_deh( void )
     {
         sprite_free_table = & sprite_free_table_heretic[0];
         num_sprite_free_table = NUM_sprite_free_table_heretic;
-        predef_sprite.first = SPR_HERETIC_START;
-        predef_sprite.last = predef_sprite_heretic_adapt[EN_sprite_remap];
-        predef_sprite_ext.first = SPR_DOGS;
-        predef_sprite_ext.last = SPR_LEGACY_MAX;
+        sprite_predef_table_heretic[0].last = predef_sprite_heretic_adapt[EN_sprite_remap]; 
+        sprite_predef_table = & sprite_predef_table_heretic[0];
+        num_sprite_predef_table = NUM_sprite_predef_table_heretic;
         nomap_sprite = nomap_sprite_heretic_adapt[EN_state_remap];
 
         state_free_table = & state_free_table_heretic[0];
@@ -1021,10 +1061,9 @@ void init_tables_deh( void )
     {
         sprite_free_table = & sprite_free_table_doom[0];
         num_sprite_free_table = NUM_sprite_free_table_doom;
-        predef_sprite.first = SPR_DOOM_START;
-        predef_sprite.last = predef_sprite_doom_adapt[EN_sprite_remap];
-        predef_sprite_ext.first = SPR_DOGS;
-        predef_sprite_ext.last = SPR_LEGACY_MAX;
+        sprite_predef_table_doom[0].last = predef_sprite_doom_adapt[EN_sprite_remap];
+        sprite_predef_table = & sprite_predef_table_doom[0];
+        num_sprite_predef_table = NUM_sprite_predef_table_doom;
         nomap_sprite = nomap_sprite_doom_adapt[EN_state_remap];
 
         state_free_table = & state_free_table_doom[0];

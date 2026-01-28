@@ -252,8 +252,9 @@ static int DIB_AddMode(_THIS, int bpp, int w, int h)
 		return(0);
 	}
 	index = ((bpp+7)/8)-1;
-	for ( i=0; i<SDL_nummodes[index]; ++i ) {
-		mode = SDL_modelist[index][i];
+	for ( i=0; i<SDL_nummodes[index]; ++i )
+  {
+		mode = SDL_modelist[index][i];      
 		if ( (mode->w == w) && (mode->h == h) ) {
 			return(0);
 		}
@@ -315,7 +316,7 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	int i;
 	DEVMODE settings;
 #endif
-
+  int BitMode;
 	/* Create the window */
 	if ( DIB_CreateWindow(this) < 0 ) {
 		return(-1);
@@ -326,30 +327,49 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 #endif
 
 	/* Determine the screen depth */
-	vformat->BitsPerPixel = DIB_SussScreenDepth();
+	//vformat->BitsPerPixel = DIB_SussScreenDepth();
 	switch (vformat->BitsPerPixel) {
 		case 15:
 			vformat->Rmask = 0x00007c00;
 			vformat->Gmask = 0x000003e0;
 			vformat->Bmask = 0x0000001f;
-			vformat->BitsPerPixel = 16;
+			vformat->Amask = 0x00000000;      
+			vformat->BitsPerPixel = 15;
+      BitMode = 15;
 			break;
 		case 16:
 			vformat->Rmask = 0x0000f800;
 			vformat->Gmask = 0x000007e0;
 			vformat->Bmask = 0x0000001f;
+			vformat->Amask = 0x00000000;      
+			vformat->BitsPerPixel = 16;
+      BitMode = 16;
 			break;
 		case 24:
+			vformat->Rmask = 0x00ff0000;
+			vformat->Gmask = 0x0000ff00;
+			vformat->Bmask = 0x000000ff;
+			vformat->Amask = 0x00000000;      
+			vformat->BitsPerPixel = 24;
+      BitMode = 24;
 		case 32:
 			/* GDI defined as 8-8-8 */
 			vformat->Rmask = 0x00ff0000;
 			vformat->Gmask = 0x0000ff00;
 			vformat->Bmask = 0x000000ff;
+			vformat->BitsPerPixel = 32;
+      BitMode = 32;
 			break;
 		default:
+      BitMode = 32;
 			break;
 	}
 
+  int BitMode08Found = 0;
+  int BitMode15Found = 0;
+  int BitMode16Found = 0;
+  int BitMode24Found = 0;
+  int BitMode32Found = 0;
 	/* See if gamma is supported on this screen */
 	DIB_CheckGamma(this);
 
@@ -370,15 +390,41 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	this->info.current_h = SDL_desktop_mode.dmPelsHeight;
 
 	/* Query for the list of available video modes */
-	for ( i=0; EnumDisplaySettings(NULL, i, &settings); ++i ) {
-		DIB_AddMode(this, settings.dmBitsPerPel,
-			settings.dmPelsWidth, settings.dmPelsHeight);
+	for ( i=0; EnumDisplaySettings(NULL, i, &settings); ++i )
+  {   
+    switch(settings.dmBitsPerPel)
+    {
+      case 8:
+        BitMode08Found++;
+        break;
+      case 15:
+        BitMode15Found++;
+        break;      
+      case 16:
+        BitMode16Found++;
+        break;        
+      case 24:
+        BitMode24Found++;
+        break;         
+      case 32:
+        BitMode32Found++;       
+    }
+    DIB_AddMode(this, settings.dmBitsPerPel, settings.dmPelsWidth, settings.dmPelsHeight);     
+
 #ifdef _WIN32_WCE		
 		if( this->hidden->supportRotation )
 			DIB_AddMode(this, settings.dmBitsPerPel,
 				settings.dmPelsHeight, settings.dmPelsWidth);
 #endif
 	}
+ 
+  printf("[SDL_BitsPerPixel Found (EnumDisplaySettings)][ 8Bit = %d]\n"
+         "!These are the bit modes retrieved from the  ![15Bit = %d]\n"
+         "!WinAPI EnumDisplaySettings. These are the   ![16Bit = %d]\n"
+         "!bit modes supported by your system/graphics ![24Bit = %d]\n"
+         "!card/driver.                                ![32Bit = %d]\n"                                                       
+                                                       ,BitMode08Found,BitMode15Found,BitMode16Found,BitMode24Found,BitMode32Found);   
+  
 	/* Sort the mode lists */
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( SDL_nummodes[i] > 0 ) {
@@ -396,6 +442,7 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			GetDeviceCaps(GetDC(NULL), HORZRES), 
 			GetDeviceCaps(GetDC(NULL), VERTRES));
 
+  
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
 
 	/* Grab an identity palette if we are in a palettized mode */
@@ -404,6 +451,13 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		moved palette creation to "DIB_CreatePalette" */
 		DIB_CreatePalette(this, vformat->BitsPerPixel);
 	}
+  
+  if (BitMode == 24)
+  {
+    vformat->BitsPerPixel = 24;
+    DIB_CreatePalette(this, vformat->BitsPerPixel);    
+  }
+    
 
 	/* Fill in some window manager capabilities */
 	this->info.wm_available = 1;
@@ -429,6 +483,7 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 }
 
 /* We support any format at any dimension */
+/*
 SDL_Rect **DIB_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
@@ -436,6 +491,15 @@ SDL_Rect **DIB_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 	} else {
 		return((SDL_Rect **)-1);
 	}
+}*/
+/* We support any format at any dimension */
+SDL_Rect **DIB_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
+{
+	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN )  
+    return(SDL_modelist[((format->BitsPerPixel+7)/8)-1]);   
+	
+  else       
+		return((SDL_Rect **)-1); 
 }
 
 
@@ -603,7 +667,6 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	prev_w = current->w;
 	prev_h = current->h;
 	prev_flags = current->flags;
-
 	/*
 	 * Special case for OpenGL windows...since the app needs to call
 	 *  SDL_SetVideoMode() in response to resize events to continue to
@@ -633,12 +696,9 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	SDL_resizing = 1;
 
 	/* Recalculate the bitmasks if necessary */
-  if (bpp == 15) //Marty. Dies fixed den 15Bit ausgang. Komisch.. ist aber so
-      bpp = 16;
-    
-  if (bpp == 24) 
-      bpp = 32;    
-    
+  if (bpp == 15) //Marty. Ja .. .nein .. 
+      bpp =  16;    
+       
 	if ( bpp == current->format->BitsPerPixel ) {
 		video = current;
 	} else {
@@ -659,21 +719,21 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
           Amask = 0x00000000;
 				}
 				break;
-			case 24:
+			case 24:       
 			case 32:
-				if ( DIB_SussScreenDepth() == 24 ) {      
-					/* 5-5-5 */
-          Rmask = 0x00ff0000;
-          Gmask = 0x0000ff00;
-          Bmask = 0x000000ff;
-          Amask = 0x00000000;
-				} else {      
+				if ( DIB_SussScreenDepth() == 24 ) {
+					/* 5-5-5 */          
+           Rmask = 0x00ff0000;
+           Gmask = 0x0000ff00;
+           Bmask = 0x000000ff;
+           Amask = 0x00000000;
+				} else {              
           /* GDI defined as 8-8-8 */
           Rmask = 0x00ff0000;
           Gmask = 0x0000ff00;
           Bmask = 0x000000ff;
           Amask = 0xFF000000;
-        }
+				}
           break;
 			default:
 				Rmask = 0x00000000;
@@ -774,11 +834,12 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 #endif
 
-#ifndef _WIN32_WCE
+#ifndef _WIN32_WCE    
 		settings.dmBitsPerPel = video->format->BitsPerPixel;
 		settings.dmPelsWidth = width;
 		settings.dmPelsHeight = height;
 		settings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
+ 
 		if ( refresh_rate > 0 ) {
 			settings.dmDisplayFrequency = refresh_rate;
 			settings.dmFields |= DM_DISPLAYFREQUENCY;
@@ -802,6 +863,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 
 	}
+
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
 
 	/* Reset the palette and create a new one if necessary */
@@ -819,7 +881,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		SDL_free(screen_logpal);
 		screen_logpal = NULL;
 	}
-
+   
 	if ( bpp <= 8 )
 	{
 	/*	RJR: March 28, 2000
@@ -854,7 +916,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		if (IsZoomed(SDL_Window)) style |= WS_MAXIMIZE;
 #endif
 	}
-
+	
 	/* DJM: Don't piss of anyone who has setup his own window */
 	if ( !SDL_windowid )
 		SetWindowLong(SDL_Window, GWL_STYLE, style);
@@ -884,7 +946,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			return(NULL);
 		}
 
-		binfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	binfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 		binfo->bmiHeader.biWidth = video->w;
 		binfo->bmiHeader.biHeight = -video->h;	/* -ve for topdown bitmap */
 		binfo->bmiHeader.biPlanes = 1;
@@ -892,18 +954,38 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		binfo->bmiHeader.biXPelsPerMeter = 0;
 		binfo->bmiHeader.biYPelsPerMeter = 0;
 		binfo->bmiHeader.biClrUsed = 0;
-		binfo->bmiHeader.biClrImportant = 0;
-		binfo->bmiHeader.biBitCount = video->format->BitsPerPixel;
-
-		if ( is16bitmode ) {
+    if ( bpp == 24 )
+    {
+        binfo->bmiHeader.biClrImportant = 24;
+        binfo->bmiHeader.biBitCount = 24;
+    }
+    else
+    {
+        binfo->bmiHeader.biClrImportant = 0;
+        binfo->bmiHeader.biBitCount = video->format->BitsPerPixel;
+    }
+		if ( is16bitmode )
+    {
 			/* BI_BITFIELDS tells CreateDIBSection about the rgb masks in the palette */
 			binfo->bmiHeader.biCompression = BI_BITFIELDS;
 			((Uint32*)binfo->bmiColors)[0] = video->format->Rmask;
 			((Uint32*)binfo->bmiColors)[1] = video->format->Gmask;
 			((Uint32*)binfo->bmiColors)[2] = video->format->Bmask;
-		} else {
+    }
+    else if ( bpp == 24 )
+    {
+      binfo->bmiHeader.biBitCount = 24;
+			binfo->bmiHeader.biCompression = BI_BITFIELDS;
+			((Uint32*)binfo->bmiColors)[0] = video->format->Rmask;
+			((Uint32*)binfo->bmiColors)[1] = video->format->Gmask;
+			((Uint32*)binfo->bmiColors)[2] = video->format->Bmask;      
+			((Uint32*)binfo->bmiColors)[3] = video->format->Amask;         
+		}
+    else
+    {
 			binfo->bmiHeader.biCompression = BI_RGB;	/* BI_BITFIELDS for 565 vs 555 */
-			if ( video->format->palette ) {
+			if ( video->format->palette )
+      {
 				SDL_memset(binfo->bmiColors, 0,
 					video->format->palette->ncolors*sizeof(RGBQUAD));
 			}

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: doomdef.h 1770 2026-01-13 16:00:35Z wesleyjohnson $
+// $Id: doomdef.h 1771 2026-01-13 16:01:42Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2024 by DooM Legacy Team.
@@ -40,7 +40,7 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define SVN_REVISION 1770
+#define SVN_REVISION 1771
 // Versioning
 #ifndef SVN_REV
 #define SVN_REV STR(SVN_REVISION)
