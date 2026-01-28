@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: am_map.h 1112 2014-06-03 21:54:41Z smite-meister $
+// $Id: am_map.h 1772 2026-01-13 16:02:20Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -49,9 +49,9 @@ typedef struct
 #define AM_MSGENTERED (AM_MSGHEADER | ('e'<<8))
 #define AM_MSGEXITED (AM_MSGHEADER | ('x'<<8))
 
-extern boolean am_recalc;       //added:05-02-98:true if screen size changes
-extern  boolean automapactive;  // In AutoMap mode?
-extern int     am_cheating;
+extern byte  am_cheating;
+extern boolbyte  am_recalc;      //added:05-02-98:true if screen size changes
+extern boolbyte  automapactive;  // In AutoMap mode?
 
 // Called by main loop.
 boolean AM_Responder (event_t* ev);

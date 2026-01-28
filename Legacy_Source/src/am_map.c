@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: am_map.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: am_map.c 1772 2026-01-13 16:02:20Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -74,8 +74,59 @@
 #include "hardware/hw_main.h"
 #endif
 
+// [WDJ] The map lightlevel has been disabled since vanilla Doom.
+// It creates a bad map light strobing effect (ramp light down, repeat).
+// Distracting, no play value, bad.  I do not recommend it.
+// I made it conditional so I could remove the code from normal compile.
+// #define AM_MAP_VARIABLE_LIGHT
 
-// For use if I do walls with outsides/insides
+// ----- Map Colors
+
+
+
+// [WDJ] Structure to allow colormap to be switched easily,
+// and with less wasted program size.
+typedef struct
+{
+  byte black, white;
+  byte reds, redrange;
+  byte blues, bluerange;
+  byte greens, greenrange;
+  byte greys,  greyrange;
+  byte browns, brownrange;
+  byte yellows, yellowrange;
+  byte player, playerinvis;
+  byte playerskin;
+  byte bluekey, yellowkey, redkey;
+  byte teleport, exitdoor;
+} mapcolor_t;
+
+static mapcolor_t  mapcolor;  // The current map colors
+
+// Doom map colors
+static mapcolor_t  mapcolor_doom = {
+ // Doom colormap
+ 0,  (256-47), // black, white
+ (256-5*16),  16, // 176 reds, redrange
+ (256-4*16+8), 8, // 200 blues, bluerange
+ (7*16),      16, // 112 greens, greenrange
+ (6*16),      16, //  96 greys,  greyrange
+ (4*16),      16, //  64 browns, brownrange
+ (256-32+7),   1, // 231 yellows, yellowrange
+ 112, 246, // normal player green, *close* to background
+ 120, // skin green
+ 200, // bluekey
+ 231, // yellowkey
+ 176, // redkey
+ 184, // teleport  =(reds + redrange/2)
+      // WALLCOLORS+WALLRANGE/2;
+ 176, // exitdoor
+};
+
+
+#if 0
+// Old Doom colormap
+// Old color non-structure, not easy to switch in.
 static byte REDS        =    (256-5*16);
 static byte REDRANGE    =    16;
 static byte BLUES       =    (256-4*16+8);
@@ -90,6 +141,104 @@ static byte YELLOWS     =    (256-32+7);
 static byte YELLOWRANGE =    1;
 static byte DBLACK      =    0;
 static byte DWHITE      =    (256-47);
+
+        BLUEKEYCOLOR = 200;
+        YELLOWKEYCOLOR = 231;
+        REDKEYCOLOR = 176;
+#endif
+
+// Heretic map colors
+static mapcolor_t  mapcolor_heretic = {
+ // Heretic colormap
+ 0,  4*8, // black, white,
+ 12*8,         1, //  96 reds, redrange
+ (256-4*16+8), 1, // 200 blues, bluerange
+ 224,          1, // 224 greens, greenrange
+ (5*8),        1, //  40 greys,  greyrange
+ (14*8),       1, // 112 browns, brownrange
+ 10*8,         1, //  80 yellows, yellowrange
+ 241, 46, // normal player, *close* to background
+    // 222 green
+    // 241 yellow
+    //  28 near white
+ 230, // skin (cloak color)
+ 197, // bluekey
+ 144, // yellowkey
+ 220, // redkey (green)
+ 197, // teleport
+ 150, // exitdoor
+};
+
+#if 0
+// Old Heretic color map
+// To switch in, required this tedious set of individual copies.
+        REDS       = 12*8;
+        REDRANGE   = 1;
+        BLUES      = (256-4*16+8);
+        BLUERANGE  = 1;
+        GREENS     = 224; 
+        GREENRANGE = 1;
+        GRAYS      = (5*8);
+        GRAYSRANGE = 1;
+        BROWNS     = (14*8);
+        BROWNRANGE = 1;
+        YELLOWS    = 10*8;
+        YELLOWRANGE= 1;
+        DBLACK      = 0;
+        DWHITE      = 4*8;
+
+        BLUEKEYCOLOR = 197;
+        YELLOWKEYCOLOR = 144;
+        REDKEYCOLOR = 220; // green 
+#endif
+
+#ifdef HEXEN
+// Differences from Heretic colormap.
+static byte  mapcolor_hexen_obj = {
+ 157, // bluekey
+ 137, // yellowkey
+ 198, // redkey (green)
+ 157, // teleport
+ 177, // exitdoor
+};
+#endif
+
+
+// For use if I do walls with outsides/insides
+// Automap colors
+#define BACKGROUND      mapcolor.black
+#define YOURCOLORS      mapcolor.white
+#define YOURRANGE       0
+#define WALLCOLORS      mapcolor.reds
+#define WALLRANGE       mapcolor.redrange
+#define TSWALLCOLORS    mapcolor.greys
+#define TSWALLRANGE     mapcolor.greyrange
+#define FDWALLCOLORS    mapcolor.browns
+#define FDWALLRANGE     mapcolor.brownrange
+#define CDWALLCOLORS    mapcolor.yellows
+#define CDWALLRANGE     mapcolor.yellowrange
+#define THINGCOLORS     mapcolor.greens
+#define THINGRANGE      mapcolor.greenrange
+#define GRIDCOLORS      (mapcolor.greys + mapcolor.greyrange/2)
+#define GRIDRANGE       0
+#define XHAIRCOLORS     mapcolor.greys
+
+// From vanilla Doom, it was a deliberate choice to hide secrets this way.
+#define SECRETWALLCOLORS WALLCOLORS
+#define SECRETWALLRANGE WALLRANGE
+
+#ifdef  AM_MAP_VARIABLE_LIGHT
+# define  MAPLIGHT( x )     ((x) + am_lightlev)
+#else
+# define  MAPLIGHT( x )     (x)
+#endif
+
+
+#if 0
+// Old color definitions, for reference.
+static byte BLUEKEYCOLOR;
+static byte YELLOWKEYCOLOR;
+static byte REDKEYCOLOR;
 
 // Automap colors
 #define BACKGROUND      DBLACK
@@ -110,6 +259,9 @@ static byte DWHITE      =    (256-47);
 #define GRIDCOLORS      (GRAYS + GRAYSRANGE/2)
 #define GRIDRANGE       0
 #define XHAIRCOLORS     GRAYS
+
+#endif
+
 
 // drawing stuff
 #define FB              0
@@ -213,38 +365,42 @@ mline_t cheat_player_arrow[] = {
 #undef R
 #define NUMCHEATPLYRLINES (sizeof(cheat_player_arrow)/sizeof(mline_t))
 
-#define R (FRACUNIT)
+#define F(x)  FIXFL(x)
 mline_t triangle_guy[] = {
-    { { (fixed_t)-.867*R, (fixed_t)-.5*R }, { (fixed_t) .867*R, (fixed_t)-.5*R } },
-    { { (fixed_t) .867*R, (fixed_t)-.5*R }, { (fixed_t)      0, (fixed_t)    R } },
-    { { (fixed_t)      0, (fixed_t)    R }, { (fixed_t)-.867*R, (fixed_t)-.5*R } }
+    { { F(-.867), F(-.5) }, { F( .867), F(-.5) } },
+    { { F( .867), F(-.5) }, { F(    0), F(  1) } },
+    { { F(    0), F(  1) }, { F(-.867), F(-.5) } }
 };
-#undef R
+#undef F
 #define NUMTRIANGLEGUYLINES (sizeof(triangle_guy)/sizeof(mline_t))
 
-#define R (FRACUNIT)
+#define F(x)  FIXFL(x)
 mline_t thintriangle_guy[] = {
-    { { -.5*R, -.7*R }, { R, 0 } },
-    { { R, 0 }, { -.5*R, .7*R } },
-    { { -.5*R, .7*R }, { -.5*R, -.7*R } }
+    { { F(-.5), F(-.7) }, { F(  1), F(  0) } },
+    { { F(  1), F(  0) }, { F(-.5), F( .7) } },
+    { { F(-.5), F( .7) }, { F(-.5), F(-.7) } }
 };
-#undef R
+#undef F
 #define NUMTHINTRIANGLEGUYLINES (sizeof(thintriangle_guy)/sizeof(mline_t))
 
 
+// Global controls
+byte      am_cheating = 0;
+boolbyte  automapactive = false;
+boolbyte  am_recalc = false;     //added:05-02-98:true when screen size changes
 
 
-static int      bigstate;       //added:24-01-98:moved here, toggle between
-                               // user view and large view (full map view)
 
-int      am_cheating = 0;
-static int      grid = 0;
+// Local
+static boolbyte  am_active = false;  // map is active
+static boolbyte  bigstate;   //added:24-01-98:moved here, toggle between
+                             // user view and large view (full map view)
 
-static int      leveljuststarted = 1;   // kluge until AM_LevelInit() is called
+static boolbyte  grid = 0;
 
-boolean         automapactive = false;
-boolean         am_recalc = false;     //added:05-02-98:true when screen size
-                                       //               changes
+static boolbyte  leveljuststarted = 1;   // kluge until AM_LevelInit() is called
+static boolbyte  followplayer = 1; // specifies whether to follow the player around
+
 
 // location of window on screen
 static int      f_x;
@@ -254,9 +410,11 @@ static int      f_y;
 static int      f_w;
 static int      f_h;
 
-static int      lightlev;               // used for funky strobing effect
+#ifdef AM_MAP_VARIABLE_LIGHT
+static byte     am_lightlev;            // used for funky strobing effect
+static int      am_clock;
+#endif
 static byte*    fb;                     // pseudo-frame buffer
-static int      amclock;
 
 static mpoint_t m_paninc; // how far the window pans each tic (map coords)
 static fixed_t  mtof_zoommul; // how far the window zooms in each tic (map coords)
@@ -298,13 +456,7 @@ static patch_t * marknums[10];                   // numbers used for marking by 
 static mpoint_t markpoints[AM_NUMMARKPOINTS];   // where the points are
 static int markpointnum = 0;                    // next point to be assigned
 
-static int followplayer = 1; // specifies whether to follow the player around
 
-static boolean stopped = true;
-
-static byte BLUEKEYCOLOR;
-static byte YELLOWKEYCOLOR;
-static byte REDKEYCOLOR;
 
 // function for drawing lines, depends on rendermode
 typedef void (*AMDRAWFLINEFUNC) (fline_t* fl, int color);
@@ -376,7 +528,7 @@ void AM_newscale( fixed_t newscale )
 {
     // new size
     scale_mtof = newscale;
-    scale_ftom = FixedDiv(FRACUNIT, scale_mtof);
+    scale_ftom = FixedDiv( FIXINT(1), scale_mtof );
     // floating point scale because fixed_t overflows
     //   div by 1<<32 to convert (fixed_t * fixed_t) to int
     f_scale_mtof = (double)scale_mtof / ((double)((uint64_t)1<<32));
@@ -417,7 +569,7 @@ void AM_restoreScaleAndLoc(void)
     AM_calc_mapbox();  // from m_curpos
 
     // Change the scaling multipliers
-    AM_newscale( FixedDiv(f_w<<FRACBITS, m_w) );
+    AM_newscale( FixedDiv( INT_TO_FIXED(f_w), m_w ) );
 }
 
 //
@@ -465,15 +617,15 @@ void AM_findMinMaxBoundaries(void)
     // Calculate using 1/2 max because Europe.wad causes overflow to negative.
     fixed_t halfmax_w = max_x/2 - min_x/2;
     fixed_t halfmax_h = max_y/2 - min_y/2;
-    fixed_t a = FixedDiv(f_w<<(FRACBITS-1), halfmax_w);
-    fixed_t b = FixedDiv(f_h<<(FRACBITS-1), halfmax_h);
+    fixed_t a = FixedDiv( INT_TO_FIXED(f_w) >> 1, halfmax_w);
+    fixed_t b = FixedDiv( INT_TO_FIXED(f_h) >> 1, halfmax_h);
     min_scale_mtof = a < b ? a : b;
     // overflow during FixedMul limits max scale_ftom, and thus min scale_mtof
     fixed_t max_ftom = (fixed_t)FIXED_MAX / f_w; // limit of overflow
-    fixed_t min_mtof = FixedDiv(FRACUNIT, max_ftom);
+    fixed_t min_mtof = FixedDiv( FIXINT(1), max_ftom);
     if( min_scale_mtof < min_mtof )
        min_scale_mtof = min_mtof;
-    max_scale_mtof = FixedDiv(f_h<<FRACBITS, 2*PLAYERRADIUS);
+    max_scale_mtof = FixedDiv( INT_TO_FIXED(f_h), 2*PLAYERRADIUS);
 }
 
 
@@ -492,6 +644,14 @@ void AM_changeWindowLoc(void)
     m_curpos.x += m_paninc.x;
     m_curpos.y += m_paninc.y;
     AM_calc_mapbox(); // from m_curpos
+
+#ifdef HEXEN
+    // From chocolate-doom
+    // The following code was commented out in the Hexen source code, AM_clearFB.
+    // It is here to stop the background moving when the pan reaches the
+    // map boundaries.
+    // [WDJ] the code is in AM_clearFB.
+#endif
 }
 
 
@@ -508,8 +668,10 @@ void AM_initVariables(void)
     fb = screens[0];
 
     f_oldloc.x = FIXED_MAX;
-    amclock = 0;
-    lightlev = 0;
+#ifdef AM_MAP_VARIABLE_LIGHT
+    am_clock = 0;
+    am_lightlev = 0;
+#endif
 
     m_paninc.x = m_paninc.y = 0;
     ftom_zoommul = FRACUNIT;
@@ -538,33 +700,20 @@ void AM_initVariables(void)
     old_m_w = m_w;
     old_m_h = m_h;
 
-    if( EN_heretic )
+    if( EN_heretic_hexen )
     {
-        REDS       = 12*8;
-        REDRANGE   = 1;
-        BLUES      = (256-4*16+8);
-        BLUERANGE  = 1;
-        GREENS     = 224; 
-        GREENRANGE = 1;
-        GRAYS      = (5*8);
-        GRAYSRANGE = 1;
-        BROWNS     = (14*8);
-        BROWNRANGE = 1;
-        YELLOWS    = 10*8;
-        YELLOWRANGE= 1;
-        DBLACK      = 0;
-        DWHITE      = 4*8;
-
-        BLUEKEYCOLOR = 197;
-        YELLOWKEYCOLOR = 144;
-        REDKEYCOLOR = 220; // green 
+        mapcolor = mapcolor_heretic;
+#ifdef HEXEN
+        if( EN_hexen )
+          memcpy( &mapcolor.bluekey, &mapcolor_hexen_obj, sizeof(mapcolor_hexen_obj) );
+#endif
     }
     else
     {
-        BLUEKEYCOLOR = 200;
-        YELLOWKEYCOLOR = 231;
-        REDKEYCOLOR = 176;
+        // Doom map colors
+        mapcolor = mapcolor_doom;
     }
+
     // inform the status bar of the change
     ST_Responder(&st_notify);
 }
@@ -668,7 +817,7 @@ void AM_Stop(void)
     AM_Release_Pics();
     automapactive = false;
     ST_Responder(&st_notify);
-    stopped = true;
+    am_active = false;
 }
 
 //
@@ -679,9 +828,10 @@ void AM_Start (void)
     static int am_lastlevel = -1, am_lastepisode = -1;
     // am_recalc, which is set in SCR_Recalc upon screen size change
 
-    if (!stopped)
+    if (am_active)
         AM_Stop();
-    stopped = false;
+    am_active = true;
+
     if (am_lastlevel != gamemap || am_lastepisode != gameepisode
         || am_recalc)      //added:05-02-98:screen size changed
     {
@@ -867,7 +1017,7 @@ void AM_doFollowPlayer(void)
     }
 }
 
-#if 0
+#ifdef AM_MAP_VARIABLE_LIGHT
 // Currently disabled
 //
 //
@@ -880,11 +1030,11 @@ void AM_updateLightLev(void)
     static int litelevelscnt = 0;
 
     // Change light level
-    if (amclock>nexttic)
+    if (am_clock > nexttic)
     {
-        lightlev = litelevels[litelevelscnt++];
+        am_lightlev = litelevels[litelevelscnt++];
         if (litelevelscnt == sizeof(litelevels)/sizeof(int)) litelevelscnt = 0;
-        nexttic = amclock + 6 - (amclock % 6);
+        nexttic = am_clock + 6 - (am_clock % 6);
     }
 
 }
@@ -902,7 +1052,9 @@ void AM_Ticker (void)
     if (!automapactive)
         return;
 
-    amclock++;
+#ifdef AM_MAP_VARIABLE_LIGHT
+    am_clock++;
+#endif
 
     if (followplayer)
         AM_doFollowPlayer();
@@ -915,8 +1067,10 @@ void AM_Ticker (void)
     if (m_paninc.x || m_paninc.y)
         AM_changeWindowLoc();
 
+#ifdef AM_MAP_VARIABLE_LIGHT
     // Update light level
-    // AM_updateLightLev();
+    AM_updateLightLev();
+#endif    
 
 }
 
@@ -969,6 +1123,13 @@ void AM_clear_FB(int color)
         }
         else
         {
+#ifdef HEXEN
+            // From chocolate-doom
+            // Hexen source does this here, but that allows the map
+            // to move when pan reaches the map boundary.
+            // In chocolate-doom this is moved to AM_changeWindowLoc
+            // [WDJ] the code is in AM_clearFB.
+#endif
             mapxstart += (MTOF(m_paninc.x)>>1);
             mapystart -= (MTOF(m_paninc.y)>>1);
             if( mapxstart >= 320 )
@@ -980,7 +1141,7 @@ void AM_clear_FB(int color)
             if( mapystart < 0 )
                 mapystart += MAPLUMPHEIGHT;
         }
-        
+
         //blit the automap background to the screen.
         // [WDJ] Draw map for all bpp, bytepp, and padded lines.
         for (y=0 ; y<f_h ; y++)
@@ -988,7 +1149,7 @@ void AM_clear_FB(int color)
             src = &maplump[mapxstart + (y+mapystart)*320];
             for (i=0 ; i<320*vid.dupx ; i++)
             {
-                while( src>maplump+320*MAPLUMPHEIGHT ) src-=320*MAPLUMPHEIGHT;
+                while( src > maplump+(320*MAPLUMPHEIGHT) ) src -= (320*MAPLUMPHEIGHT);
                 V_DrawPixel(dest, i, *src++);
             }
             dest += vid.ybytes;
@@ -1224,25 +1385,25 @@ void AM_drawMline ( mline_t*  ml,
 // Draws flat (floor/ceiling tile) aligned grid lines.
 //
 static
-void AM_drawGrid(int color)
+void AM_drawGrid( byte color )
 {
     fixed_t x, y;
-    fixed_t start, end;
+    fixed_t start, end, start_frac;
     mline_t ml;
 
     // Figure out start of vertical gridlines
     start = m_x;
-    if ((start-bmaporgx)%(MAPBLOCKUNITS<<FRACBITS))
+    start_frac = (start - bmaporgy) % FIXINT(MAPBLOCKUNITS);
+    if( start_frac )
     {
-        start += (MAPBLOCKUNITS<<FRACBITS)
-            - ((start-bmaporgx)%(MAPBLOCKUNITS<<FRACBITS));
+        start += FIXINT(MAPBLOCKUNITS) - start_frac;
     }
     end = m_x2;
 
     // draw vertical gridlines
     ml.a.y = m_y;
     ml.b.y = m_y2;
-    for (x=start; x<end; x+=(MAPBLOCKUNITS<<FRACBITS))
+    for (x=start; x<end; x+=FIXINT(MAPBLOCKUNITS))
     {
         ml.a.x = x;
         ml.b.x = x;
@@ -1251,15 +1412,15 @@ void AM_drawGrid(int color)
 
     // Figure out start of horizontal gridlines
     start = m_y;
-    if ((start-bmaporgy)%(MAPBLOCKUNITS<<FRACBITS))
-        start += (MAPBLOCKUNITS<<FRACBITS)
-            - ((start-bmaporgy)%(MAPBLOCKUNITS<<FRACBITS));
+    start_frac = (start - bmaporgy) % FIXINT(MAPBLOCKUNITS);
+    if( start_frac )
+        start += FIXINT(MAPBLOCKUNITS) - start_frac;
     end = m_y2;
 
     // draw horizontal gridlines
     ml.a.x = m_x;
     ml.b.x = m_x2;
-    for (y=start; y<end; y+=(MAPBLOCKUNITS<<FRACBITS))
+    for (y=start; y<end; y+=FIXINT(MAPBLOCKUNITS))
     {
         ml.a.y = y;
         ml.b.y = y;
@@ -1275,66 +1436,131 @@ void AM_drawGrid(int color)
 static
 void AM_drawWalls(void)
 {
-    int i;
     static mline_t l;
+    byte wallcolor = 0;
 
-    for (i=0;i<numlines;i++)
+    int i;
+    for (i=0; i<numlines; i++)
     {
-        l.a.x = lines[i].v1->x;
-        l.a.y = lines[i].v1->y;
-        l.b.x = lines[i].v2->x;
-        l.b.y = lines[i].v2->y;
-        if (am_cheating || (lines[i].flags & ML_MAPPED))
+        line_t * ln = & lines[i];
+        l.a.x = ln->v1->x;
+        l.a.y = ln->v1->y;
+        l.b.x = ln->v2->x;
+        l.b.y = ln->v2->y;
+        // Do not draw walls that have not been seen.
+        if ((ln->flags & ML_MAPPED) || am_cheating)
         {
-            if ((lines[i].flags & ML_DONTDRAW) && !am_cheating)
+            // Some walls are marked DONTDRAW, not meant to be seen.
+            if ((ln->flags & ML_DONTDRAW) && !am_cheating)
                 continue;
-            if (!lines[i].backsector)
+
+            if (!ln->backsector)
             {
-                AM_drawMline(&l, WALLCOLORS+lightlev);
+                // one sided wall
+                wallcolor = WALLCOLORS;
+                goto draw_wallcolor_lightlev;
             }
             else
             {
-                switch ( lines[i].special ) {
-                    case 39 :
+                // two sided wall, special lines
+#ifdef HEXEN
+                if( EN_hexen )
+                {
+                    if (ln->flags & ML_SECRET) // secret door
+                    {
+//                            if (am_cheating) AM_drawMline(&l, 0);
+//                            else AM_drawMline(&l, WALLCOLORS+lightlev);
+                        wallcolor = ((am_cheating)? SECRETWALLCOLORS : WALLCOLORS);
+                        goto draw_wallcolor_lightlev;
+                    }
+
+                    switch ( ln->special )
+                    {
+                     case 13:  // locked doors
+                     case 83:  // ACS_Locked_execute, GREENKEY
+                        wallcolor = mapcolor.redkey; // green for heretic, hexen
+                        goto draw_wallcolor;
+                     case 70:
+                     case 71:  // teleporters, BLUEKEY
+                        wallcolor = mapcolor.teleport;
+                        goto draw_wallcolor;
+                     case 74:
+                     case 75:  // level teleporters, BLOODRED
+                        wallcolor = mapcolor.exitdoor;
+                        goto draw_wallcolor;
+                    }
+                }
+                else
+#endif
+                {
+                    // Doom, Heretic
+                    switch ( ln->special )
+                    {
+                     case 39:
                         // teleporters
-                        AM_drawMline(&l, WALLCOLORS+WALLRANGE/2);
-                        break;
-                    case 26:
-                    case 32:
-                        AM_drawMline(&l, BLUEKEYCOLOR);
-                        break;
-                    case 27:
-                    case 34:
-                        AM_drawMline(&l, YELLOWKEYCOLOR);
-                        break;
-                    case 28:
-                    case 33:
-                        AM_drawMline(&l, REDKEYCOLOR); // green for heretic
-                        break;
-                    default :
-                        if (lines[i].flags & ML_SECRET) // secret door
-                        {
-                            if (am_cheating) AM_drawMline(&l, SECRETWALLCOLORS + lightlev);
-                            else AM_drawMline(&l, WALLCOLORS+lightlev);
+                        // Doom: WALLCOLORS+WALLRANGE/2);
+                        wallcolor = mapcolor.teleport;
+                        goto draw_wallcolor;
+                     case 26:
+                     case 32:
+                        wallcolor = mapcolor.bluekey;
+                        goto draw_wallcolor;
+                     case 27:
+                     case 34:
+                        wallcolor = mapcolor.yellowkey;
+                        goto draw_wallcolor;
+                     case 28:
+                     case 33:
+                        wallcolor = mapcolor.redkey; // green for heretic, hexen
+                        goto draw_wallcolor;
+                    }
+
+                    if (ln->flags & ML_SECRET) // secret door
+                    {
+                        wallcolor = ((am_cheating)? SECRETWALLCOLORS : WALLCOLORS);
+                        goto draw_wallcolor_lightlev;
+                    }
+
+                }
+
+                {
+                        if (ln->backsector->floorheight
+                            != ln->frontsector->floorheight) {
+                            wallcolor = FDWALLCOLORS; // floor level change
+                            goto draw_wallcolor_lightlev;
                         }
-                        else if (lines[i].backsector->floorheight
-                            != lines[i].frontsector->floorheight) {
-                            AM_drawMline(&l, FDWALLCOLORS + lightlev); // floor level change
-                        }
-                        else if (lines[i].backsector->ceilingheight
-                            != lines[i].frontsector->ceilingheight) {
-                            AM_drawMline(&l, CDWALLCOLORS+lightlev); // ceiling level change
+                        else if (ln->backsector->ceilingheight
+                            != ln->frontsector->ceilingheight) {
+                            wallcolor = CDWALLCOLORS; // ceiling level change
+                            goto draw_wallcolor_lightlev;
                         }
                         else if (am_cheating) {
-                            AM_drawMline(&l, TSWALLCOLORS+lightlev);
+                            wallcolor = TSWALLCOLORS;
+                            goto draw_wallcolor_lightlev;
                         }
                 }
+                continue;
             }
         }
-        else if (plr->powers[pw_allmap])
+        else if (plr->powers[pw_allmap])  // fullmap cheat
         {
-            if (!(lines[i].flags & ML_DONTDRAW)) AM_drawMline(&l, GRAYS+3);
+            // Show areas not mapped yet.
+            if( (ln->flags & ML_DONTDRAW) )
+              continue;
+
+            wallcolor = mapcolor.greys + 3;
+            goto draw_wallcolor;
         }
+        continue;
+
+  draw_wallcolor_lightlev:
+#ifdef AM_MAP_VARIABLE_LIGHT
+       wallcolor += am_lightlev;
+#endif
+
+  draw_wallcolor:
+        // Draws wall line with selected color.
+        AM_drawMline( &l, wallcolor );
     }
 }
 
@@ -1347,14 +1573,13 @@ static
 void AM_rotate ( fixed_t* x, fixed_t* y, angle_t a )
 {
     fixed_t tmpx;
+    int angf = ANGLE_TO_FINE(a);
+    fixed_t cosa = finecosine[angf];
+    fixed_t sina = finesine[angf];
 
-    tmpx =
-        FixedMul( *x, cosine_ANG(a) )
-        - FixedMul( *y, sine_ANG(a) );
+    tmpx = FixedMul( *x, cosa ) - FixedMul( *y, sina );
 
-    *y   =
-        FixedMul( *x, sine_ANG(a) )
-        + FixedMul( *y, cosine_ANG(a) );
+    *y = FixedMul( *x, sina ) + FixedMul( *y, cosa );
 
     *x = tmpx;
 }
@@ -1412,20 +1637,26 @@ void AM_drawLineCharacter ( mline_t*    lineguy,
 static
 void AM_drawPlayers(void)
 {
+    player_t *  p;
+    mobj_t *    pmo;
+    int         color = mapcolor.white;  // player
     int         i;
-    player_t*   p;
-    int         color;
 
     if (!multiplayer)
     {
+        pmo = plr->mo;
         if (am_cheating)
+        {
             AM_drawLineCharacter (
                  cheat_player_arrow, NUMCHEATPLYRLINES, 0,
-                 plr->mo->angle, DWHITE, plr->mo->x, plr->mo->y);
+                 pmo->angle, color, pmo->x, pmo->y);
+        }
         else
+        {
             AM_drawLineCharacter (
                  player_arrow, NUMPLYRLINES, 0,
-                 plr->mo->angle, DWHITE, plr->mo->x, plr->mo->y);
+                 pmo->angle, color, pmo->x, pmo->y);
+        }
         return;
     }
 
@@ -1440,39 +1671,52 @@ void AM_drawPlayers(void)
         if( (deathmatch && !singledemo) && (p != plr) )
             continue;
 
-        if( ! p->mo )
+        pmo = p->mo;
+        if( ! pmo )
             continue;  // addbot, before mo gets set
 
-        if (p->powers[pw_invisibility])
-            color = 246; // *close* to black
+#if 0	
+        if( p == plr )
+        {  // normal player color
+        }
+        else
+#endif	
+        if ( p->powers[pw_invisibility] )
+        {
+            // 246  *close* to black
+            color = mapcolor.playerinvis;
+        }
         else
         {
             color = (p->skincolor) ?
-               SKIN_TO_SKINMAP(p->skincolor)[GREENS+8]
-             : GREENS ;  // default
+               SKIN_TO_SKINMAP(p->skincolor)[mapcolor.playerskin]
+             : mapcolor.player ;  // default
         }
 
         AM_drawLineCharacter (
-             player_arrow, NUMPLYRLINES, 0, p->mo->angle,
-             color, p->mo->x, p->mo->y);
+             player_arrow, NUMPLYRLINES, 0, pmo->angle,
+             color, pmo->x, pmo->y);
     }
 }
 
 static
-void AM_drawThings ( int colors, int colorrange)
+void AM_drawThings ( byte colors, byte colorrange )
 {
-    mobj_t*     t;
+    mobj_t*  mo;
+
+#ifdef AM_MAP_VARIABLE_LIGHT
+    colors += am_lightlev;
+#endif
 
     uint32_t i;
     for (i=0; i<numsectors; i++)
     {
-        t = sectors[i].thinglist;
-        while (t)
+        mo = sectors[i].thinglist;
+        while (mo)
         {
-            AM_drawLineCharacter
-                (thintriangle_guy, NUMTHINTRIANGLEGUYLINES,
-                 16<<FRACBITS, t->angle, colors+lightlev, t->x, t->y);
-            t = t->snext;
+            AM_drawLineCharacter( thintriangle_guy, NUMTHINTRIANGLEGUYLINES,
+                 FIXINT(16), mo->angle, colors, mo->x, mo->y);
+            mo = mo->snext;
         }
     }
 }
@@ -1499,7 +1743,7 @@ void AM_drawMarks(void)
 }
 
 static
-void AM_drawCrosshair(int color)
+void AM_drawCrosshair( byte color )
 {
     // vid : from video setup
     if( rendermode != render_soft )
@@ -1532,6 +1776,7 @@ void AM_Drawer (void)
 
     if (grid)
         AM_drawGrid(GRIDCOLORS);
+
     AM_drawWalls();
     AM_drawPlayers();
     if (am_cheating==2)

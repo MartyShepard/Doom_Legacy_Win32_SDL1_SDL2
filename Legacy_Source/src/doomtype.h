@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: doomtype.h 1721 2025-01-28 15:15:00Z wesleyjohnson $
+// $Id: doomtype.h 1772 2026-01-13 16:02:20Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -95,9 +95,14 @@ typedef uint8_t  boolean;
 # define true    TRUE
 # define boolean BOOL
 #else
-typedef enum {false, true} boolean;
+typedef enum {false, true} boolean;  // compiler makes it int sized
+typedef uint8_t  boolbyte;  // prefer small, and modern speed
 #endif
-
+#if defined(WIN32)
+ #ifndef boolbyte //Hat er vergessen mit svn1772
+  typedef uint8_t  boolbyte;
+ #endif
+#endif
 
 typedef uint8_t    byte;
 typedef uint32_t   tic_t;

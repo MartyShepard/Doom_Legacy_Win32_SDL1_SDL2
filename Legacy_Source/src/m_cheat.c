@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: m_cheat.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: m_cheat.c 1772 2026-01-13 16:02:20Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -658,6 +658,11 @@ void Command_CheatGimme_f(void)
         {
             am_cheating = 2;
             CONS_Printf("got map and things\n");
+        }
+        else if (!strncmp(s, "normmap", 7))
+        {
+            am_cheating = 0;
+            CONS_Printf("normal map\n");
         }
         else
             CONS_Printf("can't give '%s' : unknown\n", s);

@@ -4293,6 +4293,12 @@ void Commandline_GetCompileFeatures(void)
         printf("ENGINE [ ] Clip2 Limit\n");
 #endif
 
+#ifdef AM_MAP_VARIABLE_LIGHT
+        printf("ENGINE [X] Am MAP Variable Light\n");
+#else
+        printf("ENGINE [ ] Am MAP Variable Light\n");
+#endif
+
 #ifdef DYLT_CORONAS
         printf("ENGINE [X] Coronas in DynamicLights\n");
 #else

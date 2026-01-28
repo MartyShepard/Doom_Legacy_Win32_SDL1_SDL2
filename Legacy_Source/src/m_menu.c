@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: m_menu.c 1763 2025-11-20 11:49:30Z wesleyjohnson $
+// $Id: m_menu.c 1772 2026-01-13 16:02:20Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1868,13 +1868,16 @@ void M_DrawSetupMultiPlayerMenu(void)
     // skin 0 is default player sprite
     sprdef    = &skins[R_SkinAvailable(setupm_cvskin->string)]->spritedef;
     sprfrot = get_framerotation( sprdef, multi_state->frame & FF_FRAMEMASK, 0 );
+    
+    if( ! sprfrot )
+        return;  // no sprite frame
 
     colormap = (setupm_cvcolor->value) ?
          SKIN_TO_SKINMAP( setupm_cvcolor->value )
        : reg_colormaps;  // default green skin
 
     // draw box around guy
-    M_DrawTextBox(mx+PLBOXX,my+PLBOXY, PLBOXW, PLBOXH);
+    M_DrawTextBox(mx+PLBOXX, my+PLBOXY, PLBOXW, PLBOXH);
 
     // draw player sprite
     // temp usage of sprite lump, until end of function
@@ -5872,8 +5875,8 @@ boolean M_Responder (event_t* ev)
         break;
 #ifdef SDL2	
      case ev_textchar:  // SDL2 translated
-	key = ev->data1;  // STX
-	ch = ev->data2;  // if cv_sdl2_textchar is enabled, otherwise 0 and blocked.
+        key = ev->data1;  // STX
+        ch = ev->data2;  // if cv_sdl2_textchar is enabled, otherwise 0 and blocked.
         break;
 #endif
      default:
@@ -5914,7 +5917,7 @@ boolean M_Responder (event_t* ev)
             break;
 
           default:
-	    // [WDJ] Edit buffer with string, such as savegame slot desc.
+            // [WDJ] Edit buffer with string, such as savegame slot desc.
 #ifdef SDL2
             // Depending on cv_sdl2_textchar,
             // either ev_keydown, or ev_textchar, may have valid ch, the other will have ch = 0.
@@ -5922,7 +5925,7 @@ boolean M_Responder (event_t* ev)
 //    printf( "EDIT EVENT: type=%i, data1=%i, data2=%i\n", ev->type, ev->data1, ev->data2 );
 #endif
             if (ch
-		&& is_printable(ch)
+                && is_printable(ch)
                 && (edit_index < SAVESTRINGSIZE-1)
                 && (V_StringWidth(edit_buffer) < (SAVESTRINGSIZE-2)*8) )
             {
@@ -6504,7 +6507,7 @@ void M_new_config_notify( void )
 
         if( cv->name[0] == '_' )  // reserved name
             continue;
-	
+
         if( (cv->state & CS_CONFIG) == CFG_none )
         {
             count++;
