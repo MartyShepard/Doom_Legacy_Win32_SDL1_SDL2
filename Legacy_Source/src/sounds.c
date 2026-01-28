@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: sounds.c 1745 2025-04-10 09:36:34Z wesleyjohnson $
+// $Id: sounds.c 1767 2026-01-13 15:57:43Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -535,7 +535,7 @@ void  store_sfx( sfxid_t sfxid, const char *name, sfxinfo_t * refinfo, uint32_t 
 
     S_sfx[sfxid].name = (char *) Z_Malloc(7,PU_STATIC,NULL);
     memset( S_sfx[sfxid].name, 0, 7 );
-#if defined( __GNUC__ ) && ( __GNUC__ >= 12 )
+#if defined( __GNUC__ ) && ( __GNUC__ >= 11 )
         // [WDJ] GCC introduced their second guessing of every usage in ver 7.1, and since then
         // every programmer has to circumvent it.
         // With every version of GCC, I have to fix this code again, and it was never broken in the first place.

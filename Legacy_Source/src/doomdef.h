@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: doomdef.h 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: doomdef.h 1767 2026-01-13 15:57:43Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2024 by DooM Legacy Team.
@@ -40,7 +40,7 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define SVN_REVISION 1766
+#define SVN_REVISION 1767
 // Versioning
 #ifndef SVN_REV
 #define SVN_REV STR(SVN_REVISION)
@@ -67,7 +67,7 @@
 // Do some extra tests, that never happens but maybe.
 //#define PARANOIA
 // write message in log.txt (win32 and Linux only for the moment)
-#define LOGMESSAGES
+//#define LOGMESSAGES
 // Default to show debug messages.
 //#define DEBUG_MESSAGES_ON
 #endif
@@ -151,12 +151,11 @@
 # define ENABLE_DRAW24
 # define ENABLE_DRAW32
 #endif
+
 #define ENABLE_DRAW_ALPHA
 
 // Used for palette draw fade operations
 #define ENABLE_DRAW8_USING_12
-
-
 
 // [WDJ] 6/5/2012 Boom global colormap
 // Boom global colormap is selectable, now a standard feature, 12/15/2015.
@@ -179,8 +178,6 @@
 
 // Enable alternative fit to view width and height.
 #define FIT_RATIO
-
-
 
 // [WDJ] Built-in Launcher
 #define LAUNCHER
@@ -247,11 +244,8 @@
 // Read zip wads.
 // This requires  HAVE_LIBZIP  be set in make_options to get linking.
 #define ZIPWAD
-
 #endif
 #endif
-
-
 
 // DeePsea tall patches.
 // Allows patches that exceed 254 height.

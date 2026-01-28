@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_enemy.c 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: p_enemy.c 1767 2026-01-13 15:57:43Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -606,7 +606,7 @@ void P_RecursiveSound ( sector_t*  sec, byte num_soundblocks )
         if (secline->flags & ML_SOUNDBLOCK)
         {
             // Sound blocking linedef.
-	    // When num_soundblocks ==
+            // When num_soundblocks ==
             //  0: then continue recursion with num_soundblocks = 1.
             //  1: then this is second, which blocks the sound.
             if( num_soundblocks )
@@ -659,7 +659,7 @@ void P_NoiseAlert ( mobj_t* target, mobj_t* emmiter )
 //   req_range: the range that allows a melee attack
 // Return true if in melee range.
 static
-boolean P_CheckMeleeRange_orig( mobj_t* actor, fixed_t req_range )
+boolean P_CheckMeleeRange_at( mobj_t* actor, fixed_t req_range )
 #else
 static boolean P_CheckMeleeRange (mobj_t* actor)
 #endif
@@ -726,7 +726,7 @@ static boolean P_CheckMeleeRange( mobj_t* actor )
     if( EN_melee_radius_adj )  // not Doom 1.2 compatibility
       range += actor->target->info->radius - FIXINT(20);
     
-    return P_CheckMeleeRange_orig( actor, range );  // orig, with range param
+    return P_CheckMeleeRange_at( actor, range );  // orig, with range param
 }
 #endif
 
@@ -3063,6 +3063,61 @@ void A_SkelFist (mobj_t*        actor)
 }
 
 
+// [WDJ] Common vile raise code.
+static inline
+void vile_raise_corpse( mobj_t * actor, mobj_t * corpse, statenum_t vile_state, sfxid_t corpse_snd )
+{
+    {
+        // Temporary change of target, so can face corpse.
+        // target reference_count is not changed.
+        mobj_t * temp = actor->target;
+        actor->target = corpse;  // do not change reference
+        A_FaceTarget (actor);
+        actor->target = temp;  // reference is still correct
+    }
+
+    SET_TARGET_REF( corpse->target, NULL );
+
+    P_SetMobjState( actor, vile_state );
+    S_StartObjSound( corpse, corpse_snd );
+
+    mobjinfo_t * info = corpse->info;
+
+    P_SetMobjState( corpse, info->raisestate );
+    if( demoversion<129 )
+    {
+        // original code, with ghost bug
+        // does not work when monster has been crushed
+        corpse->height <<= 2;
+    }
+    else
+    {
+        // fix vile revives crushed monster as ghost bug
+        corpse->height = info->height;
+        corpse->radius = info->radius;
+    }
+    corpse->flags = info->flags & ~MF_FRIEND;
+    corpse->health = info->spawnhealth;
+
+    if( EN_mbf )
+    {
+        // killough 7/18/98:
+        // friendliness is transferred from vile to raised corpse
+        corpse->flags =
+            (info->flags & ~(MF_FRIEND|MF_JUSTHIT)) | (actor->flags & MF_FRIEND);
+
+#if 0
+        if( corpse->flags & (MF_FRIEND | MF_COUNTKILL) == MF_FRIEND)
+            totallive++;
+#endif
+
+        SET_TARGET_REF( corpse->lastenemy, NULL );
+
+        // killough 8/29/98: add to appropriate thread.
+        P_UpdateClassThink( &corpse->thinker, TH_unknown );
+    }
+}
+
 
 //
 // PIT_VileCheck
@@ -3158,9 +3213,6 @@ byte P_HealCorpse( mobj_t * actor, mobjinfo_t * actor_info, statenum_t healstate
 
     int    bx, by;
 
-    mobjinfo_t * info;
-    mobj_t     * temp;
-
     if( actor->movedir != DI_NODIR )
     {
         // check for corpses to raise
@@ -3201,49 +3253,7 @@ byte P_HealCorpse( mobj_t * actor, mobjinfo_t * actor_info, statenum_t healstate
 
 raise_corpse:
     // got one!
-    temp = actor->target;
-    actor->target = vilecheck_r_corpse;  // do not change reference
-    A_FaceTarget (actor);
-    actor->target = temp;  // reference is still correct
-
-    P_SetMobjState( actor, healstate ); // MBF21 parameter
-    S_StartObjSound( vilecheck_r_corpse, healsound );  // MBF21 parameter
-    info = vilecheck_r_corpse->info;
-
-    P_SetMobjState (vilecheck_r_corpse,info->raisestate);
-    if( demoversion<129 )
-    {
-        // original code, with ghost bug
-        // does not work when monster has been crushed
-        vilecheck_r_corpse->height <<= 2;
-    }
-    else
-    {
-        // fix vile revives crushed monster as ghost bug
-        vilecheck_r_corpse->height = info->height;
-        vilecheck_r_corpse->radius = info->radius;
-    }
-    vilecheck_r_corpse->flags = info->flags & ~MF_FRIEND;
-    vilecheck_r_corpse->health = info->spawnhealth;
-    SET_TARGET_REF( vilecheck_r_corpse->target, NULL );
-
-    if( EN_mbf )
-    {
-        // killough 7/18/98:
-        // friendliness is transferred from vile to raised corpse
-        vilecheck_r_corpse->flags =
-            (info->flags & ~(MF_FRIEND|MF_JUSTHIT)) | (actor->flags & MF_FRIEND);
-
-#if 0
-        if( vilecheck_r_corpse->flags & (MF_FRIEND | MF_COUNTKILL) == MF_FRIEND)
-            totallive++;
-#endif
-
-        SET_TARGET_REF( vilecheck_r_corpse->lastenemy, NULL );
-
-        // killough 8/29/98: add to appropriate thread.
-        P_UpdateClassThink( &vilecheck_r_corpse->thinker, TH_unknown );
-    }
+    vile_raise_corpse( actor, vilecheck_r_corpse, healstate, healsound );  // MBF21 parameters
     return 1;
 }
 #endif
@@ -3270,9 +3280,6 @@ void A_VileChase (mobj_t* actor)
     int    yl, yh;
 
     int    bx, by;
-
-    mobjinfo_t * info;
-    mobj_t     * temp;
 
     if (actor->movedir != DI_NODIR)
     {
@@ -3315,49 +3322,7 @@ void A_VileChase (mobj_t* actor)
 
 raise_corpse:
     // got one!
-    temp = actor->target;
-    actor->target = vilecheck_r_corpse;  // do not change reference
-    A_FaceTarget (actor);
-    actor->target = temp;  // reference is still correct
-
-    P_SetMobjState (actor, S_VILE_HEAL1);
-    S_StartObjSound( vilecheck_r_corpse, sfx_slop );
-    info = vilecheck_r_corpse->info;
-
-    P_SetMobjState (vilecheck_r_corpse,info->raisestate);
-    if( demoversion<129 )
-    {
-        // original code, with ghost bug
-        // does not work when monster has been crushed
-        vilecheck_r_corpse->height <<= 2;
-    }
-    else
-    {
-        // fix vile revives crushed monster as ghost bug
-        vilecheck_r_corpse->height = info->height;
-        vilecheck_r_corpse->radius = info->radius;
-    }
-    vilecheck_r_corpse->flags = info->flags & ~MF_FRIEND;
-    vilecheck_r_corpse->health = info->spawnhealth;
-    SET_TARGET_REF( vilecheck_r_corpse->target, NULL );
-
-    if( EN_mbf )
-    {
-        // killough 7/18/98:
-        // friendliness is transferred from vile to raised corpse
-        vilecheck_r_corpse->flags =
-            (info->flags & ~(MF_FRIEND|MF_JUSTHIT)) | (actor->flags & MF_FRIEND);
-
-#if 0
-        if( vilecheck_r_corpse->flags & (MF_FRIEND | MF_COUNTKILL) == MF_FRIEND)
-            totallive++;
-#endif
-
-        SET_TARGET_REF( vilecheck_r_corpse->lastenemy, NULL );
-
-        // killough 8/29/98: add to appropriate thread.
-        P_UpdateClassThink( &vilecheck_r_corpse->thinker, TH_unknown );
-    }
+    vile_raise_corpse( actor, vilecheck_r_corpse, S_VILE_HEAL1, sfx_slop );
     return;
 #endif
 }
@@ -5251,7 +5216,7 @@ void A_MonsterMeleeAttack_MBF21( mobj_t * actor )
     range += actor->target->info->radius - FIXINT(20);
 
     A_FaceTarget(actor);
-    if( ! P_CheckMeleeRange_orig( actor, range ) )  // orig, with range param
+    if( ! P_CheckMeleeRange_at( actor, range ) )  // orig, with range param
       return;
 
     if( sep != &empty_state_ext )  // [WDJ] Protect against default making sound.

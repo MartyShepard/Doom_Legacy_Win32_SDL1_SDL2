@@ -10546,9 +10546,6 @@ to run and you cannot survive otherwise.  The usual
 player will not realize what is happening, so we end
 up catering to the dumbest player.
 
--- commit
-
-
 *** w111_recursive_sound
 patchfile = w111_013_recursive_sound
 - commit revision 1764
@@ -10576,17 +10573,107 @@ Changed ffloorflags_e to a uint32_t field
 patchfile = w111_015_reference_count
 - commit revision 1766
 Enabled the reference_count.
-There was a persistent segfault, and corruption
-of some mobj lists, that seemed to be due
-to deleted mobj.
-The reference_count code was available and
-easier than anything else I could think of.
-Added SET_TARGET_REF3, to optimize transfer
-of reference from lastenemy to target, and
-similar operations.
-This seems to stop the segfault but has
-other expenses, such as the player
-accumulating over 900 references, due to
+There was a persistent segfault, and corruption of some mobj lists,
+that seemed to be due to deleted mobj.
+The reference_count code was available and easier than anything else
+I could think of.
+Added SET_TARGET_REF3, to optimize transfer of reference from
+lastenemy to target, and similar operations.
+This seems to stop the segfault but has other expenses,
+such as the player accumulating over 900 references, due to
 making a sound in a sector.
 
 There will be further work on this.
+
+-- commit
+
+*** w111_vile_raise
+patchfile = w111_016_vile_raise
+- commit revision 1767
+The MBF21 code duplicated some of the vile raise code.
+Made a common inline function for the vile raise code,
+to simplify maintenance.
+
+*** w111_CheckMeleeRange
+patchfile = w111_017_CheckMeleeRange
+- commit revision 1768
+Fixed some P_CheckMeleeRange MBF21 changes where it conflicts with
+Legacy improvements.  Made the protection checks such as info == NULL,
+apply to the MBF21 code too.
+
+Fix some of the A_Chase logic concerning  MT_NODE and MF_IGNOREPLAYER.
+The compiler complains "suggest parenthesis".  However, it is not clear
+that the added tests for MT_NODE and MF_IGNOREPLAYER are correct, 
+and especially after MBF FRIEND was added.
+Some alternatives have been included, but the last one seems to
+be the most correct.
+The MT_NODE should not be altered, so it should block chasing.
+The MF_IGNOREPLAYER should block and chase for normal monsters who
+only chase players, but should not block MBF FRIEND who chase monsters.
+
+Clean up the CheckWater tests of MF_TOUCHWATER and MF_UNDERWATER.
+There was much redundant clearing of these same flags, and every path
+cleared them.
+
+*** w111_for_var
+patchfile = w111_018_for_var
+- commit revision 1769
+Give individual for loops their own loop variable with
+the right variable type.  This allows the compiler
+to optimize them individually, and removes the implied
+connection between loops that the compiler cannot ignore.
+Move some variable declarations to be within the block
+where they are actually used.  This allows the compiler
+to optimize them into registers.
+
+*** w111_MFE
+patchfile = w111_019_MFE
+- commit revision 1770
+Change the flag defines for the eflags field,
+from MF_xxx, to MFE_xxx.
+The other MF_xxx defines are for the flags field,
+and this eliminates the confusion.
+
+*** w111_playersprite
+patchfile = w111_020_playersprite
+- commit revision 1771
+The player sprite was missing from Heretic multiplayer.
+This bug was introduced with changes for remapping sprites for MBF21 wads,
+trying to be compatible with DSDA.
+Added more predef mapping structure, to include SPR_PLAY,
+and SPR_BLUD in the sprites loaded by Heretic.
+
+*** w111_mapcolor
+patchfile = w111_021_mapcolor
+- commit revision 1772
+Revised the am_map scheme for setting the mapcolor,
+to one with a structure that can be loaded easily for
+Doom, Heretic, and Hexen.
+Adjusted the colors for Heretic.
+Moved the support for the map light strobe effect (which was
+partially commented out disabled) to conditional disabled.
+The map light strobe effect was just the map light ramping up repeatedly.
+
+Added typedef for boolbyte, a boolean in a byte, because
+the compiler will not let me reduce the memory wasted for enum and
+boolean.
+
+Added cheat normmap, to return to a normal mapping.
+
+*** w111_missile
+patchfile = w111_022_missile
+- commit revision 1773
+Rearrange the missile functions, and player missile functions,
+so that Hexen missiles can be supported.
+Created support functions that contain the common missile code,
+which are used by the many missile functions.
+
+Changed the constants NUMXXX to NUM_XXX, so they are readable.
+Changed the floortype constants to the Hexen floortype definition,
+which includes FLOOR_LIQUID, which allows more expressive
+tests than the previous SOLID, not SOLID.
+Any floortype >= FLOOR_LIQUID is a liquid.
+It has the same names, but in a different order, to accomplish this.
+These value are not saved anywhere (that I know of).
+
+-- commit
