@@ -2903,7 +2903,7 @@ void G_Savegame_Name( /*OUT*/ char * namebuf, /*IN*/ int slot )
         // shorten name to 8 char
         int ln = strlen( namebuf );
         #if !defined (__DJGPP__) // PC_LFN_DOS not used in Source
-        memmove( &namebuf[ln-4], &namebuf[ln-3], 4 );				
+        memmove( &namebuf[ln-4], &namebuf[ln-3], 4 );
         #else
         G_Savegame_Name_FixDOS_83NAME(namebuf, ln)         
         #endif
@@ -4670,11 +4670,11 @@ void G_Savegame_Name_FixDOS_83NAME( /*OUT*/ char * namebuf, /*IN*/ int Length )
    * D O O M S A V 9 |9| . D  S  G  \0 = zu lang. 
    */
    memmove( &namebuf[Length-7], &namebuf[Length-6], 6 );
-   namebuf[Length-1] = '\0';       // Ende Null Terminiert							
-  /*				
+   namebuf[Length-1] = '\0';       // Ende Null Terminiert
+  /*
    * Kopiert von Pos 7 ("99.DSG") nach Pos 6
    * Pos: 0 1 2 3 4 5 6 7 |8| 9 10 11 12 13 14 ......
-   * -------------------------------------------------				
+   * -------------------------------------------------
    * Pos: 1 2 3 4 5 6 7 8 |.|10 11 12 13			
    * -> D O O M S A 9 9 |.| D  S  G \0 = Passt
    */

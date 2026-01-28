@@ -971,10 +971,10 @@ void R_ExecuteSetViewSize (void)
     {
         // The draw for 320,200 ratio is different, as those pixels are not square.
         // For modern screens with square pixels, the ratio of 800,600 applies.
-#ifndef WIDESCREEN_WEAPONSPRITE        
+       
         int r_width = 600 * vid.width / vid.height;
-#else
-        int r_width = 600 * ((vid.height * (int)WS_ScaledWidth) / (int)WS_ScaledWidth) / vid.height;
+#ifdef WIDESCREEN_WEAPONSPRITE 
+        r_width = 600 * ((vid.height * (int)WS_ScaledWidth) / (int)WS_ScaledWidth) / vid.height;
 #endif       
         if( vid.width == 320 )  goto std_fit;
         if( r_width > 840  )  // wide screen

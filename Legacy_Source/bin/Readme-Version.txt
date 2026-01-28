@@ -38,9 +38,9 @@ Doom Legacy 1.48.19 (1773)  [Underbuild 002: 2026-01-28]
 	- 1600x1440 added (for 2560x1440 Bildschirme)
 	- Widescreen support for Weapon Sprite (Thanks to Edward850, i take a look in his Neo Fork)
 	- Ungrab/Grab den Fenstermodus mit Mittlerer Maustaste und Deaktivere/Aktiveren Maus(bewegeungen)
-	- wenn man icht im Game ist. Kann im Menü eingestellt werden (Middle Mouse Release on/off)
+	- wenn man nicht im Game ist. Kann im Menü eingestellt werden (Middle Mouse Release on/off)
 	  *PS: Mich hat das unheimlich gestört das die Maus so krass gefangen ist im Fenster.
-	- Fixed die sache im Save/Load Menu wwenn man verzeichnis modus ist und nach obene unten scrollt
+	- Fixed die sache im Save/Load Menu wenn man verzeichnis modus ist und nach obene unten scrollt
 		das dabei der obere breich verschwindet aber Geist Verzeichnisse bleiben. Jetzt scriollt
 		man nur so viele Verzeichnisse es gibt
 	- Verzeichnisse Löschen bug gefixed (Windows/DOS läuft anders. Nichts Linux)
