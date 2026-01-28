@@ -1,4 +1,4 @@
-Doom Legacy 1.48.19 (1770)  [Underbuild 002: 2026-01-22]
+Doom Legacy 1.48.19 (1773)  [Underbuild 002: 2026-01-28]
 
 	Compiled with GCC-7.2.0
   Windows 7/ 32GB / FX8350/ RTX 2060[12GB]/ Asus Xonar

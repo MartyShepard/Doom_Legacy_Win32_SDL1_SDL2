@@ -208,6 +208,12 @@ static void G_ReadDemoTiccmd (ticcmd_t* cmd,int playernum);
 static void G_WriteDemoTiccmd (ticcmd_t* cmd,int playernum);
 static void G_DoWorldDone (void);
 
+#ifdef LOAD_SAVE_MENU_PATCH 
+  static void G_Savegame_Name_FixSlash(char * namebuf,int slot );
+#endif
+#if defined (__DJGPP__)
+  static void G_Savegame_Name_FixDOS_83NAME(char * namebuf, int ln);
+#endif
 
 // demoversion the 'dynamic' version number, this should be == game VERSION
 // when playing back demos, 'demoversion' receives the version number of the
@@ -539,7 +545,6 @@ boolean         timingdemo;             // if true, exit with report on completi
 boolean         nodrawers;              // for comparative timing purposes
 boolean         noblit;                 // for comparative timing purposes
 tic_t           demostarttime;          // for comparative timing purposes
-
 
 
 void ShowMessage_OnChange(void);
@@ -2884,55 +2889,23 @@ char  savegamename[MAX_WADPATH];
 void G_Savegame_Name( /*OUT*/ char * namebuf, /*IN*/ int slot )
 {  
 #ifdef SAVEGAMEDIR     
-
-  #ifdef LOAD_SAVE_MENU_PATCH 
-    if (namebuf == NULL)
-        namebuf = "%s";
-  
-    sprintf(namebuf, savegamename, savegamedir, slot);
-    namebuf = Path_SlashAttack(namebuf);
- 
-    if (slot == 1 && slot == 10 && verbose > 1)
-    {
-      GenPrintf(EMSG_debug, "[%s][%d] SaveGame Verzeichnis : %s\n"
-                            "                  Slot        : %d\n",__FILE__,__LINE__,namebuf,slot);
-    
-      GenPrintf(EMSG_debug, "[%s][%d] SaveGame savegamedir : %s\n",__FILE__,__LINE__,savegamedir);
-      GenPrintf(EMSG_debug, "[%s][%d] SaveGame savegamename: %s\n",__FILE__,__LINE__,savegamename); 
-    }
-    #else
-    sprintf(namebuf, savegamename, savegamedir, slot);     
-    #endif    
+  #ifndef LOAD_SAVE_MENU_PATCH 
+    sprintf(namebuf, savegamename, savegamedir, slot); 
+  #else
+    G_Savegame_Name_FixSlash(namebuf, slot);    
+  #endif    
 #else
- 
     sprintf(namebuf, savegamename, slot);
 #endif
-
 #ifdef SMIF_PC_DOS
     if( slot > 9 )
     {
         // shorten name to 8 char
         int ln = strlen( namebuf );
-        #ifdef PC_LFN_DOS // PC_LFN_DOS not used in Source
+        #if !defined (__DJGPP__) // PC_LFN_DOS not used in Source
         memmove( &namebuf[ln-4], &namebuf[ln-3], 4 );				
         #else
-	/*
-	Original "DOOMSAV99.DSG":
-        Pos: 0 1 2 3 4 5 6 7 |8| 9 10 11 12 13 14 ......
-        -------------------------------------------------
-        Pos: 1 2 3 4 5 6 7 8 |.|10 11 12 13
-             D O O M S A V 9 |9| . D  S  G  \0 = zu lang. 
-        */
-        memmove( &namebuf[ln-7], &namebuf[ln-6], 6 );
-        namebuf[ln-1] = '\0'; // Ende Null Terminiert
-								
-        /*				
-        Kopiert von Pos 7 ("99.DSG") nach Pos 6
-        Pos: 0 1 2 3 4 5 6 7 |8| 9 10 11 12 13 14 ......
-        -------------------------------------------------				
-        Pos: 1 2 3 4 5 6 7 8 |.|10 11 12 13			
-          -> D O O M S A 9 9 |.| D  S  G \0 = Passt
-        */
+        G_Savegame_Name_FixDOS_83NAME(namebuf, ln)         
         #endif
     }
 #endif
@@ -3075,9 +3048,9 @@ void G_DoSaveGame (int   savegameslot, const char* savedescription)
     if( P_Savegame_Closefile( 1 ) < 0 )  return;
 
     gameaction = ga_nothing;
-    
-    GenPrintf(EMSG_debug,"Save Game Nr:%d \"%s\"\n",savegameslot,savename);
-   
+    #ifdef LOAD_SAVE_MENU_PATCH     
+    GenPrintf(EMSG_all,"Save Game Nr:%d \"%s\"\n",savegameslot,savename);
+    #endif
     consoleplayer_ptr->message = GGSAVED;
 
     // draw the pattern into the back screen
@@ -4663,3 +4636,48 @@ boolean G_CheckDemoStatus (void)
 
     return false;
 }
+
+// Marty ------------------------------
+#ifdef LOAD_SAVE_MENU_PATCH
+static
+void G_Savegame_Name_FixSlash( /*OUT*/ char * namebuf, /*IN*/ int slot )
+{  
+  if (namebuf == NULL)
+      namebuf = "%s";
+    
+  sprintf(namebuf, savegamename, savegamedir, slot);
+  namebuf = Path_SlashAttack(namebuf);
+ 
+  if (slot == 1 && slot == 10 && verbose > 1)
+  {
+    GenPrintf(EMSG_debug, "[%s][%d] SaveGame Verzeichnis : %s\n"
+                          "                  Slot        : %d\n",__FILE__,__LINE__,namebuf,slot);
+    
+    GenPrintf(EMSG_debug, "[%s][%d] SaveGame savegamedir : %s\n",__FILE__,__LINE__,savegamedir);
+    GenPrintf(EMSG_debug, "[%s][%d] SaveGame savegamename: %s\n",__FILE__,__LINE__,savegamename); 
+  }
+}
+#endif
+#if defined (__DJGPP__)
+static
+void G_Savegame_Name_FixDOS_83NAME( /*OUT*/ char * namebuf, /*IN*/ int Length )
+{
+  /*
+   * Original "DOOMSAV99.DSG":
+   * Pos: 0 1 2 3 4 5 6 7 |8| 9 10 11 12 13 14 ......
+   * -------------------------------------------------
+   * Pos: 1 2 3 4 5 6 7 8 |.|10 11 12 13
+   * D O O M S A V 9 |9| . D  S  G  \0 = zu lang. 
+   */
+   memmove( &namebuf[Length-7], &namebuf[Length-6], 6 );
+   namebuf[Length-1] = '\0';       // Ende Null Terminiert							
+  /*				
+   * Kopiert von Pos 7 ("99.DSG") nach Pos 6
+   * Pos: 0 1 2 3 4 5 6 7 |8| 9 10 11 12 13 14 ......
+   * -------------------------------------------------				
+   * Pos: 1 2 3 4 5 6 7 8 |.|10 11 12 13			
+   * -> D O O M S A 9 9 |.| D  S  G \0 = Passt
+   */
+}
+// Marty ---------------------------END
+#endif
