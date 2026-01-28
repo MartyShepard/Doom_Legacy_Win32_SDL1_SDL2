@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_mobj.h 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: p_mobj.h 1770 2026-01-13 16:00:35Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -376,48 +376,48 @@ typedef enum {
 typedef enum
 {
     // The mobj stands on solid floor (not on another mobj or in air)
-    MF_ONGROUND          = 0x0001,
+    MFE_ONGROUND          = 0x0001,
     // The mobj just hit the floor while falling, this is cleared on next frame
     // (instant damage in lava/slime sectors to prevent jump cheat..)
-    MF_JUSTHITFLOOR      = 0x0002,
+    MFE_JUSTHITFLOOR      = 0x0002,
     // The mobj stands in a sector with water, and touches the surface
     // this bit is set once and for all at the start of mobjthinker
-    MF_TOUCHWATER        = 0x0004,
+    MFE_TOUCHWATER        = 0x0004,
     // The mobj stands in a sector with water, and his waist is BELOW the water surface
     // (for player, allows swimming up/down)
-    MF_UNDERWATER        = 0x0008,
+    MFE_UNDERWATER        = 0x0008,
     // Set by P_MovePlayer() to disable gravity add in T_MobjThinker() ( for gameplay )
-    MF_SWIMMING          = 0x0010,
+    MFE_SWIMMING          = 0x0010,
     // used for client prediction code, player can't be blocked in z by walls
     // it is set temporarely when player follow the spirit
-    MF_NOZCHECKING       = 0x0020,
+    MFE_NOZCHECKING       = 0x0020,
     // "Friendly"; the mobj ignores players
-    MF_IGNOREPLAYER	 = 0x0040,
+    MFE_IGNOREPLAYER	 = 0x0040,
     // Actor will predict where the player will be
-    MF_PREDICT		 = 0x0080,
+    MFE_PREDICT		 = 0x0080,
   // MBF
     // Object is falling.
-    MF_FALLING           = 0x0100,
+    MFE_FALLING           = 0x0100,
     // Object is armed for TOUCHY explode.
-    MF_ARMED             = 0x0200,
+    MFE_ARMED             = 0x0200,
 #ifdef MBF21
     // Object is affected by scroller, pusher, puller
-    MF_SCROLLING         = 0x0400,
+    MFE_SCROLLING         = 0x0400,
 #endif
 #ifdef DSDA
     // [WDJ] Internal to DSDA. Got included by mistake, keep for reference.
-    MF_PLAYER_DAMAGED_BARREL =  0x0800,
-    MF_SPAWNED_BY_ICON   = 0x1000,
+    MFE_PLAYER_DAMAGED_BARREL =  0x0800,
+    MFE_SPAWNED_BY_ICON   = 0x1000,
     // Not a real thing, trasient, (e.g. for cheats),
     // [WDJ] was tested but not set
-    MF_FAKE              = 0x2000,
+    MFE_FAKE              = 0x2000,
 #endif
 #ifdef HEXEN
     // Not reachable by dehacked.
     // Alternate translucent
-    MF_ALTSHADOW         = 0x4000,
+    MFE_ALTSHADOW         = 0x4000,
     // Ice corpse, can be blasted.
-    MF_ICECORPSE         = 0x8000,
+    MFE_ICECORPSE         = 0x8000,
 #endif
 } mobjeflag_e;
 

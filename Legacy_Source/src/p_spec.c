@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_spec.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: p_spec.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -2895,7 +2895,7 @@ void P_PlayerOnSpecial3DFloor(player_t* player)
         continue;
 
       if( (EV_legacy >= 125)
-        && (player->mo->eflags & MF_JUSTHITFLOOR)
+        && (player->mo->eflags & MFE_JUSTHITFLOOR)
         && (sector->model < SM_fluid) // not water
         && (leveltime % (2*NEWTICRATERATIO))) //SoM: penalize jumping less.
       {
@@ -2960,7 +2960,7 @@ void P_PlayerInSpecialSector (player_t* player)
 
     //Fab: jumping in lava/slime does instant damage (no jump cheat)
     if( (EV_legacy >= 125)
-        && (player->mo->eflags & MF_JUSTHITFLOOR)
+        && (player->mo->eflags & MFE_JUSTHITFLOOR)
         && (sector->model < SM_fluid)  // not in water
         && (leveltime % (2*NEWTICRATERATIO))) //SoM: penalize jumping less.
     {

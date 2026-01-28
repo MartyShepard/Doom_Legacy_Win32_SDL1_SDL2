@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_game.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: b_game.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
 //
 // Copyright (C) 2002 by DooM Legacy Team.
 //
@@ -957,7 +957,7 @@ void B_BuildTiccmd(player_t* p, ticcmd_t* netcmd)
         {
             pbot->avoidtimer--;
             what = WH_avoid;
-            if( pmo->eflags & MF_UNDERWATER)
+            if( pmo->eflags & MFE_UNDERWATER)
             {
                 forwardmove = botforwardmove[1];
                 cmd->buttons |= BT_JUMP;

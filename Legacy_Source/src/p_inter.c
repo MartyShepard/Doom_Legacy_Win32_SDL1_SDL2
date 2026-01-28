@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_inter.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_inter.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1992,7 +1992,7 @@ static byte hexen_kill_player( m_obj_t* target )
     if( target->flags3 & MF3_ICEDAMAGE )
     {
         target->tflags &= MFT_TRANSLATION6; // turn color off
-        target->eflags |= MF_ICECORPSE;  // ice corpse, can be blasted.
+        target->eflags |= MFE_ICECORPSE;  // ice corpse, can be blasted.
         if( pclass >= PCLASS_FIGHTER && pclass <= PCLASS_PIG )
         {
             // FIXME: pclass indexing
@@ -2074,7 +2074,7 @@ static byte hexen_kill_monster( m_obj_t* target )
 
     if( target->flags3 & MF3_ICEDAMAGE )
     {
-        target->eflags |= MF_ICECORPSE;  // ice corpse, can be blasted
+        target->eflags |= MFE_ICECORPSE;  // ice corpse, can be blasted
         // The monster types are scattered, so pair table.
         int ii;
         for( ii=0; ii<num_hexen_ice_mon_kill; ii++ )
@@ -2086,7 +2086,7 @@ static byte hexen_kill_monster( m_obj_t* target )
                 goto apply_state;  // ice kill return
             }
         }
-        target->eflags &= ~MF_ICECORPSE;  // Remove it again
+        target->eflags &= ~MFE_ICECORPSE;  // Remove it again
     }
 
     if( tt == MT_HEXEN_MINOTAUR )
@@ -2841,7 +2841,7 @@ boolean P_DamageMobj ( mobj_t*   target,
             if( inflictor && (inflictor->flags3 & MF3_ICEDAMAGE) )
               goto ret_false;
 
-            if( target->eflags & MF_ICECORPSE )  // has been frozen, can be blasted
+            if( target->eflags & MFE_ICECORPSE )  // has been frozen, can be blasted
             {
                 target->tics = 1;
                 target->momx = target->momy = 0;
@@ -3217,7 +3217,7 @@ boolean P_DamageMobj ( mobj_t*   target,
 #endif
             // [WDJ] MBF
             // killough 11/98: thrust objects hanging off ledges
-            if( target->eflags & MF_FALLING && (target->tipcount >= MAXTIPCOUNT) )
+            if( (target->eflags & MFE_FALLING) && (target->tipcount >= MAXTIPCOUNT) )
                 target->tipcount = 0;
         }
     }

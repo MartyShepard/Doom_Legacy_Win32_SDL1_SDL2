@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_map.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: p_map.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -699,7 +699,7 @@ static boolean PIT_CheckThing (mobj_t* thing)
     // surroundings such as walls, then the touchy thing dies immediately.
     if( thing->flags & MF_TOUCHY  // touchy object
         && thing->health > 0      // touchy object is alive
-        && ((thing->eflags & MF_ARMED)  // Thing is an armed mine
+        && ((thing->eflags & MFE_ARMED)  // Thing is an armed mine
             || SENTIENT(thing))   // ... or a sentient thing
       )
     {
@@ -1759,7 +1759,7 @@ boolean P_TryMove ( mobj_t*       thing,
         goto impact;  // solid wall or thing
 
 #ifdef CLIENTPREDICTION2
-    if ( !(thing->flags & MF_NOCLIP) && !(thing->eflags & MF_NOZCHECKING))
+    if ( !(thing->flags & MF_NOCLIP) && !(thing->eflags & MFE_NOZCHECKING))
 #else
     if ( !(thing->flags & MF_NOCLIP) )
 #endif
@@ -1794,7 +1794,7 @@ boolean P_TryMove ( mobj_t*       thing,
         }
 
         // jump out of water
-        if((thing->eflags & (MF_UNDERWATER|MF_TOUCHWATER))==(MF_UNDERWATER|MF_TOUCHWATER))
+        if((thing->eflags & (MFE_UNDERWATER|MFE_TOUCHWATER))==(MFE_UNDERWATER|MFE_TOUCHWATER))
             maxstep = FIXINT(37);
 
         // Hit step, check step height.
@@ -1864,7 +1864,7 @@ boolean P_TryMove ( mobj_t*       thing,
 #ifdef MBF21
             // MBF21
             byte ledgeblock = EN_ledgeblock
-              && !(EN_mbf21 && thing->eflags & MF_SCROLLING);
+              && !(EN_mbf21 && (thing->eflags & MFE_SCROLLING));
 
             // [WDJ] DSDA-doom (e6y) had a large demo sync fix here, but
             // we do not demo sync with prboom anyway.
@@ -1959,7 +1959,7 @@ got_dropoff:
             goto block_move; // too big a step up for bouncers under gravity
 
         // killough 11/98: prevent falling objects from going up too many steps
-        if( thing->eflags & MF_FALLING
+        if( (thing->eflags & MFE_FALLING)
             && (tmr_floorz - thing->z >
                 FixedMul(thing->momx, thing->momx) + FixedMul(thing->momy, thing->momy))
           )
@@ -1992,9 +1992,9 @@ got_dropoff:
     // [WDJ] tmr_floorthing is in demoversion 113..131, otherwise NULL
     //added:28-02-98:
     if (tmr_floorthing)
-        thing->eflags &= ~MF_ONGROUND;  //not on real floor
+        thing->eflags &= ~MFE_ONGROUND;  //not on real floor
     else
-        thing->eflags |= MF_ONGROUND;
+        thing->eflags |= MFE_ONGROUND;
 
     P_SetThingPosition (thing);
 
@@ -2172,7 +2172,7 @@ void P_ApplyTorque(mobj_t * mo)
     int xl, xh, yl, yh;
     int bx,by;
     // Remember the current state, for tipcount-change
-    uint32_t moflags = mo->eflags;
+    uint32_t moeflags = mo->eflags;
 
     validcount++; // prevents checking same line twice
     tm_thing = mo;
@@ -2195,9 +2195,9 @@ void P_ApplyTorque(mobj_t * mo)
       
     // If any momentum, mark object as 'falling' using engine-internal flags
     if( mo->momx | mo->momy )
-        mo->eflags |= MF_FALLING;
+        mo->eflags |= MFE_FALLING;
     else  // Clear the engine-internal flag indicating falling object.
-        mo->eflags &= ~MF_FALLING;
+        mo->eflags &= ~MFE_FALLING;
 
     // If the object has been moving, step up the tipcount.
     // This helps reach equilibrium and avoid oscillations.
@@ -2206,7 +2206,7 @@ void P_ApplyTorque(mobj_t * mo)
     // of rotation, so we have to creatively simulate these 
     // systems somehow :)
 
-    if(!((mo->eflags | moflags) & MF_FALLING))  // If not falling for a while,
+    if(!((mo->eflags | moeflags) & MFE_FALLING))  // If not falling for a while,
         mo->tipcount = 0;  // Reset it to full strength
     else if(mo->tipcount < MAXTIPCOUNT)  // Else if not at max tipcount,
         mo->tipcount++;    // lessen tipping
@@ -2261,11 +2261,11 @@ boolean P_ThingHeightClip (mobj_t* thing)
     else
     { 
         noncrush = 1;
-        //thing->eflags &= ~MF_ONGROUND;
+        //thing->eflags &= ~MFE_ONGROUND;
     }
 
     //debug : be sure it falls to the floor
-    thing->eflags &= ~MF_ONGROUND;
+    thing->eflags &= ~MFE_ONGROUND;
 
     return noncrush;
 
@@ -3969,7 +3969,7 @@ boolean PIT_ChangeSector (mobj_t*  thing)
     // [WDJ] From Prboom, MBF, EternityEngine
     // killough 11/98: kill touchy things immediately
     if( (thing->flags & MF_TOUCHY)
-        && (thing->eflags & MF_ARMED || SENTIENT(thing)) )
+        && (thing->eflags & MFE_ARMED || SENTIENT(thing)) )
     {
         P_DamageMobj(thing, NULL, NULL, thing->health);  // kill object
         goto done; // keep checking

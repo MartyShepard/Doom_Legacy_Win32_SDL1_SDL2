@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_enemy.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: p_enemy.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1852,7 +1852,7 @@ static boolean P_LookForPlayers ( mobj_t*       actor,
     // Monster looking for a player to attack!
 
     // Don't look for a player if ignoring
-    if( actor->eflags & MF_IGNOREPLAYER )
+    if( actor->eflags & MFE_IGNOREPLAYER )
         return false;
 
 //        sector = actor->subsector->sector;
@@ -2442,7 +2442,7 @@ void A_Chase (mobj_t*   actor)
     if( !actor->target
         || !(actor->target->flags&MF_SHOOTABLE)
                 && actor->target->type != MT_NODE
-                && !(actor->eflags & MF_IGNOREPLAYER))
+                && !(actor->eflags & MFE_IGNOREPLAYER))
 #endif       
 #if 0
 // [WDJ] This matches the bool expr prec of && before ||.
@@ -2451,7 +2451,7 @@ void A_Chase (mobj_t*   actor)
     if( !actor->target
         || ( !(actor->target->flags&MF_SHOOTABLE)
              && actor->target->type != MT_NODE      // do not mess with walking nodes
-             && !(actor->eflags & MF_IGNOREPLAYER)  // do not chase when IGNOREPLAYER
+             && !(actor->eflags & MFE_IGNOREPLAYER)  // do not chase when IGNOREPLAYER
            )
        )
 #endif       
@@ -2462,7 +2462,7 @@ void A_Chase (mobj_t*   actor)
           || ( !(actor->target->flags&MF_SHOOTABLE)
                && actor->target->type != MT_NODE   // do not mess with walking nodes
              ) )
-         && !(actor->eflags & MF_IGNOREPLAYER)  // do not chase when IGNOREPLAYER (not even if target==NULL)
+         && !(actor->eflags & MFE_IGNOREPLAYER)  // do not chase when IGNOREPLAYER (not even if target==NULL)
       )
 #endif
 #if 1
@@ -2473,7 +2473,7 @@ void A_Chase (mobj_t*   actor)
               && actor->target->type != MT_NODE   // do not mess with walking nodes
             )
         )
-        && ( !(actor->eflags & MF_IGNOREPLAYER)  // do not chase when IGNOREPLAYER (not even if target==NULL)
+        && ( !(actor->eflags & MFE_IGNOREPLAYER)  // do not chase when IGNOREPLAYER (not even if target==NULL)
              || (actor->flags & MF_FRIEND)       // except a friend who chases monsters instead of players
            )
       )
@@ -2527,7 +2527,7 @@ void A_Chase (mobj_t*   actor)
     // [WDJ] Check for IGNOREPLAYER, and MBF friend, for all attacks in one place.
     if( ! actor->target
         || actor->target->type == MT_NODE
-        || ( (actor->eflags & MF_IGNOREPLAYER)  // do not attack when IGNOREPLAYER
+        || ( (actor->eflags & MFE_IGNOREPLAYER)  // do not attack when IGNOREPLAYER
 #if 1
              && ! (actor->flags & MF_FRIEND)    // except a friend who attacks monsters instead of players (MBF)
 #endif
@@ -2578,7 +2578,7 @@ void A_Chase (mobj_t*   actor)
         && !actor->threshold
         && !P_CheckSight (actor, actor->target)
         && (actor->target && actor->target->type != MT_NODE)
-        && !(actor->eflags & MF_IGNOREPLAYER))
+        && !(actor->eflags & MFE_IGNOREPLAYER))
     {
         if (P_LookForPlayers(actor,true))
             return;     // got a new target
@@ -2594,7 +2594,7 @@ void A_Chase (mobj_t*   actor)
             if( multiplayer
                 && !P_CheckSight (actor, actor->target)
                 && (actor->target && actor->target->type != MT_NODE)
-                && !(actor->eflags & MF_IGNOREPLAYER))
+                && !(actor->eflags & MFE_IGNOREPLAYER))
             {
                 if( P_LookForPlayers(actor,true) )
                     return;     // got a new target
@@ -3625,7 +3625,7 @@ void A_SkullAttack (mobj_t* actor)
     A_FaceTarget (actor);
     S_StartScreamSound(actor, actor->info->attacksound);
 
-    if( cv_predictingmonsters.EV || (actor->eflags & MF_PREDICT) ) //added by AC for predmonsters
+    if( cv_predictingmonsters.EV || (actor->eflags & MFE_PREDICT) ) //added by AC for predmonsters
     {
 
                 boolean canHit;

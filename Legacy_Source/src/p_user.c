@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_user.c 1762 2025-11-20 11:48:53Z wesleyjohnson $
+// $Id: p_user.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -357,7 +357,7 @@ void P_MovePlayer (player_t* player)
    
     if (!onground)
         bobfactor >>= 2;  // air and underwater
-    else if (pmo->eflags & MF_UNDERWATER)
+    else if (pmo->eflags & MFE_UNDERWATER)
         bobfactor >>= 1;
 
     if( EN_move_doom )
@@ -428,7 +428,7 @@ void P_MovePlayer (player_t* player)
         {
             movepushforward = cmd->forwardmove * (movefactor + extramovefactor);
 
-            if (pmo->eflags & MF_UNDERWATER)
+            if (pmo->eflags & MFE_UNDERWATER)
             {
                 // half forward speed when waist under water
                 // a little better grip if feets touch the ground
@@ -450,7 +450,7 @@ void P_MovePlayer (player_t* player)
         if (cmd->sidemove)
         {
             movepushside = cmd->sidemove * (movefactor + extramovefactor);
-            if (pmo->eflags & MF_UNDERWATER)
+            if (pmo->eflags & MFE_UNDERWATER)
             {
                 if (!onground)
                     movepushside >>= 1;
@@ -467,15 +467,15 @@ void P_MovePlayer (player_t* player)
         }
 
         // mouselook swim when waist underwater
-        pmo->eflags &= ~MF_SWIMMING;
-        if (pmo->eflags & MF_UNDERWATER)
+        pmo->eflags &= ~MFE_SWIMMING;
+        if (pmo->eflags & MFE_UNDERWATER)
         {
             fixed_t a;
             // swim up/down full move when forward full speed
             a = FixedMul( movepushforward*50, sine_ANG(player->aiming) >>5 );
             
             if ( a != 0 ) {
-                pmo->eflags |= MF_SWIMMING;
+                pmo->eflags |= MFE_SWIMMING;
                 pmo->momz += a;
             }
         }
@@ -487,7 +487,7 @@ void P_MovePlayer (player_t* player)
         if( pmo->flags2&MF2_FLY )
             player->flyheight = 10;
         else 
-        if(pmo->eflags & MF_UNDERWATER)
+        if(pmo->eflags & MFE_UNDERWATER)
             //TODO: goub gloub when push up in water
             pmo->momz = jumpgravity/2;
         else 
@@ -1001,7 +1001,7 @@ void P_ProcessCmdSpirit (player_t* player,ticcmd_t* cmd)
     {
         movepushforward = cmd->forwardmove * movefactor;
         
-        if (player->spirit->eflags & MF_UNDERWATER)
+        if (player->spirit->eflags & MFE_UNDERWATER)
         {
             // half forward speed when waist under water
             // a little better grip if feets touch the ground
@@ -1023,7 +1023,7 @@ void P_ProcessCmdSpirit (player_t* player,ticcmd_t* cmd)
     if (cmd->sidemove)
     {
         movepushside = cmd->sidemove * movefactor;
-        if (player->spirit->eflags & MF_UNDERWATER)
+        if (player->spirit->eflags & MFE_UNDERWATER)
         {
             if (!onground)
                 movepushside >>= 1;
@@ -1038,15 +1038,15 @@ void P_ProcessCmdSpirit (player_t* player,ticcmd_t* cmd)
     }
     
     // mouselook swim when waist underwater
-    player->spirit->eflags &= ~MF_SWIMMING;
-    if (player->spirit->eflags & MF_UNDERWATER)
+    player->spirit->eflags &= ~MFE_SWIMMING;
+    if (player->spirit->eflags & MFE_UNDERWATER)
     {
         fixed_t a;
         // swim up/down full move when forward full speed
         a = FixedMul( movepushforward*50, finesine[ (cmd->aiming>>(ANGLETOFINESHIFT-16)) ] >>5 );
         
         if ( a != 0 ) {
-            player->spirit->eflags |= MF_SWIMMING;
+            player->spirit->eflags |= MFE_SWIMMING;
             player->spirit->momz += a;
         }
     }
@@ -1056,7 +1056,7 @@ void P_ProcessCmdSpirit (player_t* player,ticcmd_t* cmd)
     {
         // can't jump while in air, can't jump while jumping
         if( !(player->GB_flags & GB_jumpdown2)
-            && (onground || (player->spirit->eflags & MF_UNDERWATER)) )
+            && (onground || (player->spirit->eflags & MFE_UNDERWATER)) )
         {
             if (onground)
                 player->spirit->momz = jumpgravity;
@@ -1065,7 +1065,7 @@ void P_ProcessCmdSpirit (player_t* player,ticcmd_t* cmd)
 
             //TODO: goub gloub when push up in water
             
-            if ( !(player->cheats & CF_FLYAROUND) && onground && !(player->spirit->eflags & MF_UNDERWATER))
+            if ( !(player->cheats & CF_FLYAROUND) && onground && !(player->spirit->eflags & MFE_UNDERWATER))
             {
                 S_StartScreamSound(player->spirit, sfx_jump);
 
@@ -1260,7 +1260,7 @@ void P_PlayerThink (player_t* player)
             int waterz = pmo->subsector->sector->floorheight + (FRACUNIT/4);
 
             // half in the water
-            if(pmo->eflags & MF_TOUCHWATER)
+            if(pmo->eflags & MFE_TOUCHWATER)
             {
                 if (pmo->z <= pmo->floorz) // onground
                 {

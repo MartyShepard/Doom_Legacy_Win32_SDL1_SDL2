@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_mobj.c 1768 2026-01-13 15:59:01Z wesleyjohnson $
+// $Id: p_mobj.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -536,7 +536,7 @@ void P_XYFriction(mobj_t * mo, fixed_t oldx, fixed_t oldy)
     {
         // not stopped
         // [WDJ] 3/2011 new bobbing and friction here, mostly Killough etal. 10/98.
-        if( (mo->eflags & MF_UNDERWATER)
+        if( (mo->eflags & MFE_UNDERWATER)
             && (EV_legacy >= 128) )
         {
             // slow down in water, not too much for playability issues
@@ -910,7 +910,7 @@ void P_XYMovement(mobj_t * mo)
     // No friction for missiles or skulls, when airborne.
     if ((mo->z > mo->floorz)
         && !(mo->flags2 & (MF2_FLY | MF2_ONMOBJ))
-        && !(mo->eflags & MF_UNDERWATER))
+        && !(mo->eflags & MFE_UNDERWATER))
     {
         return; // no friction when airborne
     }
@@ -918,7 +918,7 @@ void P_XYMovement(mobj_t * mo)
     // tmr_dropoffz is set by P_CheckPosition() and P_TryMove(), called earlier.
     if( (mo->flags & MF_CORPSE)
         || ((mo->flags & MF_BOUNCES) && (mo->z > tmr_dropoffz))  // hanging
-        || (mo->eflags & MF_FALLING)  // falling	
+        || (mo->eflags & MFE_FALLING)  // falling	
       )
     {
         // do not stop sliding
@@ -1022,14 +1022,14 @@ void  apply_gravity(mobj_t * mo)
     //Fab: NOT SURE WHETHER IT IS USEFUL, just put it here too
     //     TO BE SURE there is no problem for the release..
     //     (this is done in P_Mobjthinker below normally)
-    mo->eflags &= ~MF_JUSTHITFLOOR;
+    mo->eflags &= ~MFE_JUSTHITFLOOR;
 
     gravityadd = -cv_gravity.value / NEWTICRATERATIO;
 
     // if waist under water, slow down the fall
-    if( mo->eflags & MF_UNDERWATER )
+    if( mo->eflags & MFE_UNDERWATER )
     {
-        if( mo->eflags & MF_SWIMMING )
+        if( mo->eflags & MFE_SWIMMING )
             gravityadd = 0; // gameplay: no gravity while swimming
         else
             gravityadd >>= 2;
@@ -1182,7 +1182,7 @@ zmove_floater:
         if (mo->momz < 0)       // falling
         {
             if( (mo->flags & MF_TOUCHY)  // MBF
-                && (mo->health > 0) && (mo->eflags & MF_ARMED) )
+                && (mo->health > 0) && (mo->eflags & MFE_ARMED) )
             {
                 // Explode on floor.
                 P_DamageMobj( mo, NULL, NULL, mo->health );
@@ -1208,7 +1208,7 @@ zmove_floater:
 
             // set it once and not continuously
             if (mo->z < mo->floorz)
-                mo->eflags |= MF_JUSTHITFLOOR;
+                mo->eflags |= MFE_JUSTHITFLOOR;
 
             mo->momz = 0;
         }
@@ -1308,7 +1308,7 @@ zmove_floater:
 
     // z friction in water
     if( (EV_legacy >= 128)
-        && ((mo->eflags & (MF_TOUCHWATER | MF_UNDERWATER)))
+        && ((mo->eflags & (MFE_TOUCHWATER | MFE_UNDERWATER)))
         && !(mo->flags & (MF_MISSILE | MF_SKULLFLY)) )
     {
         mo->momz = FixedMul(mo->momz, FRICTION_NORM * 3 / 4);
@@ -1330,7 +1330,7 @@ bouncer:
             mo->momz = -mo->momz;  // bounce off floor
             if( !(mo->flags & MF_NOGRAVITY) )
             {
-                if (mo->eflags & MF_UNDERWATER)  // Legacy
+                if (mo->eflags & MFE_UNDERWATER)  // Legacy
                 {
                     apply_gravity(mo);
                 }
@@ -1354,7 +1354,7 @@ bouncer:
             }
             // TOUCHY objects explode on impact
             if( mo->flags & MF_TOUCHY
-                && (mo->eflags & MF_ARMED) && (mo->health > 0) )
+                && (mo->eflags & MFE_ARMED) && (mo->health > 0) )
             {
                 // Explode on floor.
                 P_DamageMobj( mo, NULL, NULL, mo->health );
@@ -1634,7 +1634,7 @@ void P_MobjCheckWater(mobj_t * mobj)
     sector = mobj->subsector->sector;
     z = sector->floorheight;
     oldeflags = mobj->eflags;
-    mobj->eflags &= ~(MF_UNDERWATER | MF_TOUCHWATER);  // set or cleared by every path
+    mobj->eflags &= ~(MFE_UNDERWATER | MFE_TOUCHWATER);  // set or cleared by every path
 
 #ifdef ENABLE_TIRED_RUN
     checkwater_is_drowning = 0;
@@ -1665,10 +1665,10 @@ void P_MobjCheckWater(mobj_t * mobj)
             z = sector->floorheight + (FRACUNIT / 4);   // water texture
 
         if (mobj->z <= z && mo_top > z)
-            mobj->eflags |= MF_TOUCHWATER;
+            mobj->eflags |= MFE_TOUCHWATER;
 
         if (mo_half <= z)
-            mobj->eflags |= MF_UNDERWATER;
+            mobj->eflags |= MFE_UNDERWATER;
     }
     else if (sector->ffloors)
     {
@@ -1687,11 +1687,11 @@ void P_MobjCheckWater(mobj_t * mobj)
 #endif
 
             if (mo_top > *rover->topheight)
-                mobj->eflags |= MF_TOUCHWATER;
+                mobj->eflags |= MFE_TOUCHWATER;
 
             if (mo_half < *rover->topheight)
             {
-                mobj->eflags |= MF_UNDERWATER;
+                mobj->eflags |= MFE_UNDERWATER;
 #ifdef ENABLE_TIRED_RUN
                 // To be here, must already be SWIMMABLE, so other water tests are irrelevant.
                 if (mo_top < *rover->topheight)
@@ -1700,8 +1700,8 @@ void P_MobjCheckWater(mobj_t * mobj)
             }
 
             if (EN_doom_etc
-                && !(oldeflags & (MF_TOUCHWATER | MF_UNDERWATER))
-                && (mobj->eflags & (MF_TOUCHWATER | MF_UNDERWATER))
+                && !(oldeflags & (MFE_TOUCHWATER | MFE_UNDERWATER))
+                && (mobj->eflags & (MFE_TOUCHWATER | MFE_UNDERWATER))
                 && mobj->type != MT_BLOOD
                 && mobj->type != MT_SMOK
                )
@@ -1721,14 +1721,14 @@ void P_MobjCheckWater(mobj_t * mobj)
 #endif
 
 #ifdef DEBUG_WATER_SOUND
-    if( (mobj->eflags ^ oldeflags) & MF_TOUCHWATER)
-        CONS_Printf("touchwater %d\n",mobj->eflags & MF_TOUCHWATER ? 1 : 0);
-    if( (mobj->eflags ^ oldeflags) & MF_UNDERWATER)
-        CONS_Printf("underwater %d\n",mobj->eflags & MF_UNDERWATER ? 1 : 0);
+    if( (mobj->eflags ^ oldeflags) & MFE_TOUCHWATER)
+        CONS_Printf("touchwater %d\n",mobj->eflags & MFE_TOUCHWATER ? 1 : 0);
+    if( (mobj->eflags ^ oldeflags) & MFE_UNDERWATER)
+        CONS_Printf("underwater %d\n",mobj->eflags & MFE_UNDERWATER ? 1 : 0);
 #endif
     // blood doesnt make noise when it falls in water
-    if( !(oldeflags & (MF_TOUCHWATER | MF_UNDERWATER))
-        && ((mobj->eflags & (MF_TOUCHWATER | MF_UNDERWATER)) )
+    if( !(oldeflags & (MFE_TOUCHWATER | MFE_UNDERWATER))
+        && ((mobj->eflags & (MFE_TOUCHWATER | MFE_UNDERWATER)) )
         && mobj->type != MT_BLOOD
         && (EV_legacy < 132) )
         P_SpawnSplash(mobj, z); //SoM: 3/17/2000
@@ -1864,7 +1864,7 @@ void T_MobjThinker(mobj_t * mobj)
 
         if (oldx != player->cmd.x || oldy != player->cmd.y)
         {
-            mobj->eflags |= MF_NOZCHECKING;
+            mobj->eflags |= MFE_NOZCHECKING;
             // cross special lines and pick up things
             if (!P_TryMove(mobj, player->cmd.x, player->cmd.y, true))
             {
@@ -1879,7 +1879,7 @@ void T_MobjThinker(mobj_t * mobj)
                         GenPrintf(EMSG_ver, "\2MissPrediction\n");
                 }
             }
-            mobj->eflags &= ~MF_NOZCHECKING;
+            mobj->eflags &= ~MFE_NOZCHECKING;
         }
         P_XYFriction(mobj, oldx, oldy);  // thing friction
     }
@@ -1889,7 +1889,7 @@ void T_MobjThinker(mobj_t * mobj)
     {
         P_XYMovement(mobj);
 #ifdef MBF21
-        mobj->eflags &= ~MF_SCROLLING;  // cancel being affected by scrollers, pushers, pullers
+        mobj->eflags &= ~MFE_SCROLLING;  // cancel being affected by scrollers, pushers, pullers
 #endif
         checkedpos = true;
 
@@ -1915,7 +1915,7 @@ void T_MobjThinker(mobj_t * mobj)
     else
         //added:28-02-98: always do the gravity bit now, that's simpler
         //                BUT CheckPosition only if wasn't do before.
-    if( (mobj->eflags & MF_ONGROUND) == 0
+    if( (mobj->eflags & MFE_ONGROUND) == 0
         || (mobj->z != mobj->floorz) || mobj->momz
 #ifdef HEXEN
         || hexen_blocking_mobj
@@ -1938,9 +1938,9 @@ void T_MobjThinker(mobj_t * mobj)
                 mobj->floorz = tmr_floorz;
                 mobj->ceilingz = tmr_ceilingz;
                 if (tmr_floorthing)
-                    mobj->eflags &= ~MF_ONGROUND;       //not on real floor
+                    mobj->eflags &= ~MFE_ONGROUND;       //not on real floor
                 else
-                    mobj->eflags |= MF_ONGROUND;
+                    mobj->eflags |= MFE_ONGROUND;
 
                 // now mobj->floorz should be the current sector's z floor
                 // or a valid thing's top z
@@ -2036,13 +2036,13 @@ void T_MobjThinker(mobj_t * mobj)
     }
     else
     {
-        mobj->eflags &= ~MF_JUSTHITFLOOR;
+        mobj->eflags &= ~MFE_JUSTHITFLOOR;
 
         // MBF
         if( ((mobj->momx | mobj->momy) == 0) && !SENTIENT(mobj) )
         {
             // At rest
-            mobj->eflags |= MF_ARMED;  // arm a mine which has come to rest.
+            mobj->eflags |= MFE_ARMED;  // arm a mine which has come to rest.
 
             // killough 9/12/98: objects fall off ledges if they are hanging off
             // slightly push off of ledge if hanging more than halfway off
@@ -2055,7 +2055,7 @@ void T_MobjThinker(mobj_t * mobj)
             }
             else
             {
-                mobj->eflags &= ~MF_FALLING;
+                mobj->eflags &= ~MFE_FALLING;
                 mobj->tipcount = 0;  // Reset torque
             }
         }
@@ -2236,7 +2236,7 @@ mobj_t * P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
         // "no place for spawned thing"...
 
         //added:28-02-98: defaults onground
-        mobj->eflags |= MF_ONGROUND;
+        mobj->eflags |= MFE_ONGROUND;
 
         //added:28-02-98: dirty hack : dont stack monsters coz it blocks
         //                moving floors and anyway whats the use of it?
@@ -2257,7 +2257,7 @@ mobj_t * P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
            mobj->z = tmfloorz;
            // thing not on solid ground
            if (tmfloorthing)
-           mobj->eflags &= ~MF_ONGROUND;
+           mobj->eflags &= ~MFE_ONGROUND;
 
            //if (mobj->type == MT_BARREL)
            //   debug_Printf("barrel at z %d floor %d ceiling %d\n",mobj->z,mobj->floorz,mobj->ceilingz);
@@ -3769,7 +3769,7 @@ mobj_t * P_SpawnMissile(mobj_t * source, mobj_t * dest, mobjtype_t type)
     fixed_t m_speed = th->info->speed;
 #endif
 
-    if( cv_predictingmonsters.EV || (source->eflags & MF_PREDICT))  //added by AC for predmonsters
+    if( cv_predictingmonsters.EV || (source->eflags & MFE_PREDICT))  //added by AC for predmonsters
     {
         boolean canHit;
         fixed_t px, py, pz;
