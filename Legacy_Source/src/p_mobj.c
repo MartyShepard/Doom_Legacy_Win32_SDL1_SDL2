@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_mobj.c 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: p_mobj.c 1768 2026-01-13 15:59:01Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -1634,6 +1634,7 @@ void P_MobjCheckWater(mobj_t * mobj)
     sector = mobj->subsector->sector;
     z = sector->floorheight;
     oldeflags = mobj->eflags;
+    mobj->eflags &= ~(MF_UNDERWATER | MF_TOUCHWATER);  // set or cleared by every path
 
 #ifdef ENABLE_TIRED_RUN
     checkwater_is_drowning = 0;
@@ -1665,20 +1666,13 @@ void P_MobjCheckWater(mobj_t * mobj)
 
         if (mobj->z <= z && mo_top > z)
             mobj->eflags |= MF_TOUCHWATER;
-        else
-            mobj->eflags &= ~MF_TOUCHWATER;
 
         if (mo_half <= z)
             mobj->eflags |= MF_UNDERWATER;
-        else
-            mobj->eflags &= ~MF_UNDERWATER;
     }
     else if (sector->ffloors)
     {
         ffloor_t * rover;
-
-        mobj->eflags &= ~(MF_UNDERWATER | MF_TOUCHWATER);
-
         for (rover = sector->ffloors; rover; rover = rover->next)
         {
             if (!(rover->flags & FF_SWIMMABLE) || rover->flags & FF_SOLID)
@@ -1694,10 +1688,6 @@ void P_MobjCheckWater(mobj_t * mobj)
 
             if (mo_top > *rover->topheight)
                 mobj->eflags |= MF_TOUCHWATER;
-#if 0
-            else
-                mobj->eflags &= ~MF_TOUCHWATER;
-#endif
 
             if (mo_half < *rover->topheight)
             {
@@ -1708,25 +1698,16 @@ void P_MobjCheckWater(mobj_t * mobj)
                     checkwater_is_drowning = 1;
 #endif
             }
-#if 0
-            else
-                mobj->eflags &= ~MF_UNDERWATER;
-#endif
 
             if (EN_doom_etc
                 && !(oldeflags & (MF_TOUCHWATER | MF_UNDERWATER))
-                && ((mobj->eflags & MF_TOUCHWATER)
-                    || (mobj->eflags & MF_UNDERWATER))
+                && (mobj->eflags & (MF_TOUCHWATER | MF_UNDERWATER))
                 && mobj->type != MT_BLOOD
                 && mobj->type != MT_SMOK
                )
                 P_SpawnSplash(mobj, *rover->topheight);
         } // for
         return;
-    }
-    else
-    {
-        mobj->eflags &= ~(MF_UNDERWATER | MF_TOUCHWATER);
     }
 
 #if 0
@@ -2333,7 +2314,9 @@ mobj_t * P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
             {
                 GenPrintf( EMSG_warn, "P_SpawnMobj spawnpoint z calculation conflicts with MTF_ flags, %X\n", mobj->spawnpoint->options & 0xFF80 );
                 if (z == ONFLOORZ)
+                {
                     mobj->z = R_PointInSubsector(x, y)->sector->floorheight + INT_TO_FIXED(optz);
+                }
                 else if (z == ONCEILINGZ)
                 {
                     // [WDJ] OLD code was doing something that conflicts with MBF, z needs to be (ceiling - height).

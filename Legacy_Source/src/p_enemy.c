@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_enemy.c 1767 2026-01-13 15:57:43Z wesleyjohnson $
+// $Id: p_enemy.c 1768 2026-01-13 15:59:01Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -670,15 +670,18 @@ static boolean P_CheckMeleeRange (mobj_t* actor)
     if(!plmo)
         goto ret_false;
 
+#ifdef MBF21
+#else
+    // [WDJ] FIXME plmo->info may be NULL (seen in phobiata.wad)
+    if (plmo->info == NULL )
+        goto ret_false;
+#endif
+    
     // [WDJ] prboom, killough, friend monsters do not attack other friend
     if( BOTH_FRIEND(actor, plmo) )
         goto ret_false;
 
     dist = P_AproxDistance_mobj( plmo, actor );
-
-    // [WDJ] FIXME plmo->info may be NULL (seen in phobiata.wad)
-    if (plmo->info == NULL )
-        goto ret_false;
 #ifdef MBF21
     if ( dist >= req_range )
         goto ret_false;
@@ -717,16 +720,31 @@ static boolean P_CheckMeleeRange( mobj_t* actor )
     // MBF21 modifications
 #ifdef UDMF    
     if( actor->subsector->sector->flags & SECF_NO_ATTACK )
-      return false;
+        goto ret_false;
 #endif
 
     // Original (MELEERANGE - 20*FRACUNIT + pl->info->radius)
     int range = actor->info->melee_range;  // replaces fixed MELEERANGE
 
     if( EN_melee_radius_adj )  // not Doom 1.2 compatibility
-      range += actor->target->info->radius - FIXINT(20);
+    {
+        // [WDJ] Because this replaces P_CheckMeleeRange, it needs the same protections.
+        mobj_t *  plmo = actor->target;
+        if(!plmo)
+            goto ret_false;
+
+        mobjinfo_t *  plmo_info = plmo->info;
+        // [WDJ] FIXME plmo->info may be NULL (seen in phobiata.wad)
+        if( plmo_info == NULL )
+            goto ret_false;
+
+        range += plmo_info->radius - FIXINT(20);
+    }
     
     return P_CheckMeleeRange_at( actor, range );  // orig, with range param
+
+ret_false:
+    return false;
 }
 #endif
 
@@ -2394,7 +2412,7 @@ void A_Chase (mobj_t*   actor)
             actor->threshold--;
     }
 
-    if( EN_heretic && cv_fastmonsters.EV)
+    if( EN_heretic && cv_fastmonsters.EV)  // set by gameskill == sk_nightmare
     { // Monsters move faster in nightmare mode
         actor->tics -= actor->tics/2;
         if(actor->tics < 3)
@@ -2419,22 +2437,48 @@ void A_Chase (mobj_t*   actor)
     }
 
 // [WDJ] compiler complains, "suggest parenthesis"
+// When no target, or a non-shootable target.
 #if 0
-   // Original code was
-        if (!actor->target
+// Original code was
+    if( !actor->target
         || !(actor->target->flags&MF_SHOOTABLE)
                 && actor->target->type != MT_NODE
                 && !(actor->eflags & MF_IGNOREPLAYER))
-#else
-// but, based on other tests, the last two tests were added later.
-// [WDJ] I think they meant:
-    if ( !( actor->target
-            && ( actor->target->flags&MF_SHOOTABLE
-                 || actor->target->type == MT_NODE
-               ) )
-         && !(actor->eflags & MF_IGNOREPLAYER)
+#endif       
+#if 0
+// [WDJ] This matches the bool expr prec of && before ||.
+// But it is not quite right logically.
+// When target==NULL, it will chase, even when IGNOREPLAYER.
+    if( !actor->target
+        || ( !(actor->target->flags&MF_SHOOTABLE)
+             && actor->target->type != MT_NODE      // do not mess with walking nodes
+             && !(actor->eflags & MF_IGNOREPLAYER)  // do not chase when IGNOREPLAYER
+           )
        )
 #endif       
+#if 0
+// But, based on other tests, the last two tests were added later.
+// [WDJ] I think they meant:
+    if( (!actor->target
+          || ( !(actor->target->flags&MF_SHOOTABLE)
+               && actor->target->type != MT_NODE   // do not mess with walking nodes
+             ) )
+         && !(actor->eflags & MF_IGNOREPLAYER)  // do not chase when IGNOREPLAYER (not even if target==NULL)
+      )
+#endif
+#if 1
+// The problem is that MBF now has FRIEND that searches for monsters and not just players.	
+// [WDJ] I think we need now:
+    if( (!actor->target
+         || ( !(actor->target->flags&MF_SHOOTABLE)
+              && actor->target->type != MT_NODE   // do not mess with walking nodes
+            )
+        )
+        && ( !(actor->eflags & MF_IGNOREPLAYER)  // do not chase when IGNOREPLAYER (not even if target==NULL)
+             || (actor->flags & MF_FRIEND)       // except a friend who chases monsters instead of players
+           )
+      )
+#endif
     {
         // [WDJ] Recursion check from EternityEngine.
         // haleyjd 07/26/04: Detect and prevent infinite recursion if
@@ -2481,11 +2525,20 @@ void A_Chase (mobj_t*   actor)
         return;
     }
 
+    // [WDJ] Check for IGNOREPLAYER, and MBF friend, for all attacks in one place.
+    if( ! actor->target
+        || actor->target->type == MT_NODE
+        || ( (actor->eflags & MF_IGNOREPLAYER)  // do not attack when IGNOREPLAYER
+#if 1
+             && ! (actor->flags & MF_FRIEND)    // except a friend who attacks monsters instead of players (MBF)
+#endif
+           )
+      )
+        goto nomissile;  // skip melee and missile attacks
+
     // check for melee attack
     if (actor->info->meleestate
-        && P_CheckMeleeRange (actor)
-        && (actor->target && actor->target->type != MT_NODE)
-        && !(actor->eflags & MF_IGNOREPLAYER))
+        && P_CheckMeleeRange (actor) )
     {
         if (actor->info->attacksound)
             S_StartAttackSound(actor, actor->info->attacksound);
@@ -2502,9 +2555,7 @@ void A_Chase (mobj_t*   actor)
     }
 
     // check for missile attack
-    if (actor->info->missilestate
-        && (actor->target && actor->target->type != MT_NODE)
-        && !(actor->eflags & MF_IGNOREPLAYER))
+    if( actor->info->missilestate )
     {
         if( !cv_fastmonsters.EV && actor->movecount )
         {
