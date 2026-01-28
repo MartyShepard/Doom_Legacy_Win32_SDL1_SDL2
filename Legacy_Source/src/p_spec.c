@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_spec.c 1762 2025-11-20 11:48:53Z wesleyjohnson $
+// $Id: p_spec.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -656,15 +656,15 @@ sector_t*  getNextSector ( line_t* line,  sector_t* sec )
 //
 fixed_t P_FindLowestFloorSurrounding(sector_t* sec)
 {
-    int                 i;
     line_t*             check;
     sector_t*           other;
     fixed_t             lowfloor = sec->floorheight;
 
-    for (i=0; i < sec->linecount ; i++)
+    uint16_t li;
+    for (li=0; li < sec->linecount ; li++)
     {
         // for each line in the sector linelist
-        check = sec->linelist[i];
+        check = sec->linelist[li];
         other = getNextSector(check,sec);
 
         if (!other)
@@ -686,7 +686,6 @@ fixed_t P_FindLowestFloorSurrounding(sector_t* sec)
 //
 fixed_t P_FindHighestFloorSurrounding(sector_t* sec)
 {
-    int                 i;
     line_t*             check;
     sector_t*           other;
     fixed_t             highfloor = -FIXED_MAX;
@@ -697,10 +696,11 @@ fixed_t P_FindHighestFloorSurrounding(sector_t* sec)
     highfloor = EN_boom_physics? FIXINT(-32000) : FIXINT(-500);
 #endif
 
-    for (i=0 ;i < sec->linecount ; i++)
+    uint16_t li;
+    for (li=0; li < sec->linecount ; li++)
     {
         // for each line in sector linelist
-        check = sec->linelist[i];
+        check = sec->linelist[li];
         other = getNextSector(check,sec);
 
         if (!other)
@@ -721,24 +721,24 @@ fixed_t P_FindHighestFloorSurrounding(sector_t* sec)
 // SoM: 3/7/2000: Use Lee Killough's version insted.
 // Rewritten by Lee Killough to avoid fixed array and to be faster
 //
-fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
+fixed_t P_FindNextHighestFloor(sector_t* sec, fixed_t currentheight)
 {
-  sector_t* other;
-  int i;
-
-  for (i=0; i < sec->linecount ; i++)
+  uint16_t li;
+  for (li=0; li < sec->linecount ; li++)
   {
+    sector_t* other = getNextSector( sec->linelist[li],sec );
       // for each line in sector linelist
-    if ((other = getNextSector(sec->linelist[i],sec)) &&
-         other->floorheight > currentheight)
+    if( other
+        && (other->floorheight > currentheight) )
     {
-      int height = other->floorheight;
-      while (++i < sec->linecount)
+      fixed_t height = other->floorheight;
+      while (++li < sec->linecount)
       {
         // for rest of lines in sector linelist
-        if ((other = getNextSector(sec->linelist[i],sec))
-            && other->floorheight < height
-            && other->floorheight > currentheight)
+        other = getNextSector( sec->linelist[li],sec );
+        if( other
+            && (other->floorheight < height)
+            && (other->floorheight > currentheight) )
           height = other->floorheight;
       }
       return height;
@@ -760,24 +760,25 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 // passed is returned.
 //
 //
-fixed_t P_FindNextLowestFloor(sector_t* sec, int currentheight)
+fixed_t P_FindNextLowestFloor(sector_t* sec, fixed_t currentheight)
 {
-  sector_t* other;
-  int i;
-
-  for (i=0 ;i < sec->linecount ; i++)
+  uint16_t li;
+  for (li=0; li < sec->linecount ; li++)
   {
+    sector_t* other = getNextSector( sec->linelist[li], sec );
+
     // for all lines in sector linelist
-    if ((other = getNextSector(sec->linelist[i],sec))
-        && other->floorheight < currentheight)
+    if( other
+        && (other->floorheight < currentheight) )
     {
-      int height = other->floorheight;
-      while (++i < sec->linecount)
+      fixed_t height = other->floorheight;
+      while (++li < sec->linecount)
       {
         // for rest of lines in sector linelist
-        if ((other = getNextSector(sec->linelist[i],sec))
-            && other->floorheight > height
-            && other->floorheight < currentheight)
+        other = getNextSector( sec->linelist[li], sec );
+        if( other
+            && (other->floorheight > height)
+            && (other->floorheight < currentheight) )
         {
           height = other->floorheight;
         }
@@ -798,24 +799,25 @@ fixed_t P_FindNextLowestFloor(sector_t* sec, int currentheight)
 // passed is returned.
 //
 //
-fixed_t P_FindNextLowestCeiling(sector_t* sec, int currentheight)
+fixed_t P_FindNextLowestCeiling(sector_t* sec, fixed_t currentheight)
 {
-  sector_t* other;
-  int i;
-
-  for (i=0 ;i < sec->linecount ; i++)
+  uint16_t li;
+  for (li=0; li < sec->linecount ; li++)
   {
     // for all lines in sector linelist
-    if ((other = getNextSector(sec->linelist[i],sec))
-        && other->ceilingheight < currentheight)
+    sector_t* other = getNextSector( sec->linelist[li], sec );
+
+    if( other
+        && (other->ceilingheight < currentheight) )
     {
-      int height = other->ceilingheight;
-      while (++i < sec->linecount)
+      fixed_t height = other->ceilingheight;
+      while (++li < sec->linecount)
       {
         // for rest of lines in sector linelist
-        if ((other = getNextSector(sec->linelist[i],sec))
-            && other->ceilingheight > height
-            && other->ceilingheight < currentheight)
+        other = getNextSector( sec->linelist[li], sec);
+        if( other
+            && (other->ceilingheight > height)
+            && (other->ceilingheight < currentheight) )
         {
           height = other->ceilingheight;
         }
@@ -838,24 +840,25 @@ fixed_t P_FindNextLowestCeiling(sector_t* sec, int currentheight)
 // passed is returned.
 //
 //
-fixed_t P_FindNextHighestCeiling(sector_t* sec, int currentheight)
+fixed_t P_FindNextHighestCeiling(sector_t* sec, fixed_t currentheight)
 {
-  sector_t* other;
-  int i;
-
-  for (i=0 ;i < sec->linecount ; i++)
+  uint16_t li;
+  for (li=0; li < sec->linecount ; li++)
   {
     // for all lines in sector linelist
-    if ((other = getNextSector(sec->linelist[i],sec))
-        && other->ceilingheight > currentheight)
+    sector_t* other = getNextSector( sec->linelist[li], sec );
+
+    if( other
+        && (other->ceilingheight > currentheight) )
     {
-      int height = other->ceilingheight;
-      while (++i < sec->linecount)
+      fixed_t height = other->ceilingheight;
+      while (++li < sec->linecount)
       {
         // for rest of lines in sector linelist
-        if ((other = getNextSector(sec->linelist[i],sec))
-            && other->ceilingheight < height
-            && other->ceilingheight > currentheight)
+        other = getNextSector( sec->linelist[li], sec);
+        if( other
+            && (other->ceilingheight < height)
+            && (other->ceilingheight > currentheight) )
         {
           height = other->ceilingheight;
         }
@@ -875,22 +878,19 @@ fixed_t P_FindNextHighestCeiling(sector_t* sec, int currentheight)
 //
 // FIND LOWEST CEILING IN THE SURROUNDING SECTORS
 //
-fixed_t
-P_FindLowestCeilingSurrounding(sector_t* sec)
+fixed_t P_FindLowestCeilingSurrounding(sector_t* sec)
 {
-    int                 i;
-    line_t*             check;
-    sector_t*           other;
     fixed_t             height = FIXED_MAX;
 
     // [WDJ] removed extra foundsector test that defeated this limit.
     if(EN_boom_physics)  height = FIXINT(32000); //SoM: 3/7/2000: Remove ovf
                                               
-    for (i=0 ;i < sec->linecount ; i++)
+    uint16_t li;
+    for (li=0; li < sec->linecount ; li++)
     {
         // for all lines in sector linelist
-        check = sec->linelist[i];
-        other = getNextSector(check,sec);
+        line_t* check = sec->linelist[li];
+        sector_t* other = getNextSector(check,sec);
 
         if (!other)
             continue;
@@ -908,9 +908,6 @@ P_FindLowestCeilingSurrounding(sector_t* sec)
 //
 fixed_t P_FindHighestCeilingSurrounding(sector_t* sec)
 {
-    int         i;
-    line_t*     check;
-    sector_t*   other;
     fixed_t     height = -FIXED_MAX;
 
 #if 0
@@ -919,11 +916,12 @@ fixed_t P_FindHighestCeilingSurrounding(sector_t* sec)
     height = EN_boom_physics? FIXINT(-32000) : 0;
 #endif
 
-    for (i=0 ;i < sec->linecount ; i++)
+    uint16_t li;
+    for (li=0; li < sec->linecount ; li++)
     {
         // for all lines in sector linelist
-        check = sec->linelist[i];
-        other = getNextSector(check,sec);
+        line_t* check = sec->linelist[li];
+        sector_t* other = getNextSector(check,sec);
 
         if (!other)
             continue;
@@ -948,27 +946,26 @@ fixed_t P_FindHighestCeilingSurrounding(sector_t* sec)
 fixed_t P_FindShortestTextureAround(int secnum)
 {
   fixed_t minsize = FIXED_MAX;
-  side_t*     side;
-  int i;
   sector_t* sec = &sectors[secnum];
 
   // Boom (jff): prevent overflow in height calcs.
   if( EN_boom_physics )
     minsize = FIXINT(32000);
 
-  for (i = 0; i < sec->linecount; i++)
+  uint16_t li;
+  for (li=0; li < sec->linecount ; li++)
   {
-    // sector line list [i]
-    if (twoSided(secnum, i))
+    // sector line list [li]
+    if (twoSided(secnum, li))
     {
       // two sided line, list index i
-      side = getSide(secnum,i,0);
+      side_t* side = getSide(secnum, li, 0);
       if (side->bottomtexture > 0)
       {
         if (textureheight[side->bottomtexture] < minsize)
           minsize = textureheight[side->bottomtexture];
       }
-      side = getSide(secnum,i,1);
+      side = getSide(secnum, li, 1);
       if (side->bottomtexture > 0)
       {
         if (textureheight[side->bottomtexture] < minsize)
@@ -992,25 +989,24 @@ fixed_t P_FindShortestTextureAround(int secnum)
 fixed_t P_FindShortestUpperAround(int secnum)
 {
   fixed_t minsize = FIXED_MAX;
-  side_t*     side;
-  int i;
   sector_t * sec = &sectors[secnum];
 
   // Boom (jff): prevent overflow in height calcs.
   if( EN_boom_physics )
     minsize = FIXINT(32000);
 
-  for (i = 0; i < sec->linecount; i++)
+  uint16_t li;
+  for (li=0; li < sec->linecount ; li++)
   {
-    if (twoSided(secnum, i))
+    if (twoSided(secnum, li))
     {
-      side = getSide(secnum,i,0);
+      side_t* side = getSide(secnum, li, 0);
       if (side->toptexture > 0)
       {
         if (textureheight[side->toptexture] < minsize)
           minsize = textureheight[side->toptexture];
       }
-      side = getSide(secnum,i,1);
+      side = getSide(secnum, li, 1);
       if (side->toptexture > 0)
       {
         if (textureheight[side->toptexture] < minsize)
@@ -1037,28 +1033,27 @@ fixed_t P_FindShortestUpperAround(int secnum)
 //
 sector_t * P_FindModelFloorSector(fixed_t floordestheight, int secnum)
 {
-  int i;
-  sector_t* sec=NULL;
-  int linecount;
+  sector_t* sn_sec = &sectors[secnum];
+  sector_t* sec = sn_sec;
+  int sn_linecount = sn_sec->linecount;  // secnum linecount
 
-  sec = &sectors[secnum];
-  linecount = sec->linecount;
-  for (i = 0; i < ((!EN_boom && sec->linecount<linecount)?
-                   sec->linecount : linecount); i++)
+  uint16_t li;
+  for (li = 0; li < ((!EN_boom && sec->linecount<sn_linecount)?
+                   sec->linecount : sn_linecount); li++)
   {
-    if ( twoSided(secnum, i) )
+    if ( twoSided(secnum, li) )
     {
 #if 1
       // [WDJ] Improved execution, no division needed.
-      sec = getSector(secnum,i,
-                     ((getSide(secnum,i,0)->sector == &sectors[secnum])? 1:0 )
+      sec = getSector(secnum, li,
+                      ((getSide(secnum, li, 0)->sector == sn_sec)? 1:0 )
                      );
 #else
       // Boom original uses unnecessary division.
-      if (getSide(secnum,i,0)->sector-sectors == secnum)
-          sec = getSector(secnum,i,1);
+      if (getSide(secnum, li, 0)->sector - sectors == secnum)
+          sec = getSector(secnum, li, 1);
       else
-          sec = getSector(secnum,i,0);
+          sec = getSector(secnum, li, 0);
 #endif
 
       if (sec->floorheight == floordestheight)
@@ -1081,23 +1076,29 @@ sector_t * P_FindModelFloorSector(fixed_t floordestheight, int secnum)
 // Note: If no sector at that height bounds the sector passed, return NULL
 //
 //
-sector_t *P_FindModelCeilingSector(fixed_t ceildestheight,int secnum)
+sector_t * P_FindModelCeilingSector(fixed_t ceildestheight, int secnum)
 {
-  int i;
-  sector_t* sec=NULL;
-  int linecount;
+  sector_t* sn_sec = &sectors[secnum];
+  sector_t* sec = sn_sec;
+  int sn_linecount = sn_sec->linecount;  // secnum linecount
 
-  sec = &sectors[secnum];
-  linecount = sec->linecount;
-  for (i = 0; i < (!EN_boom && sec->linecount<linecount?
-                   sec->linecount : linecount); i++)
+  uint16_t li;
+  for (li = 0; li < (!EN_boom && sec->linecount<sn_linecount?
+                   sec->linecount : sn_linecount); li++)
   {
-    if ( twoSided(secnum, i) )
+    if ( twoSided(secnum, li) )
     {
-      if (getSide(secnum,i,0)->sector-sectors == secnum)
-          sec = getSector(secnum,i,1);
+#if 1
+      // [WDJ] Improved execution, no division needed.
+      sec = getSector(secnum, li,
+                      ((getSide(secnum, li, 0)->sector == sn_sec)? 1:0 )
+                     );
+#else
+      if (getSide(secnum, li, 0)->sector - sectors == secnum)
+          sec = getSector(secnum, li, 1);
       else
-          sec = getSector(secnum,i,0);
+          sec = getSector(secnum, li, 0);
+#endif
 
       if (sec->ceilingheight == ceildestheight)
         return sec;
@@ -1217,17 +1218,15 @@ static void P_Init_TagLists(void)
 // max is the default value
 lightlev_t  P_FindMinSurroundingLight ( sector_t*  sector, lightlev_t max )
 {
-    int         i;
     lightlev_t  min;
-    line_t*     line;
-    sector_t*   check;
 
     min = max;  // initial value
-    for (i=0 ; i < sector->linecount ; i++)
+    uint16_t li;
+    for (li=0 ; li < sector->linecount ; li++)
     {
         // for all lines in sector linelist
-        line = sector->linelist[i];
-        check = getNextSector(line,sector);
+        line_t* line = sector->linelist[li];
+        sector_t* check = getNextSector(line,sector);
 
         if (!check)
             continue;
@@ -3098,10 +3097,9 @@ void P_AddFakeFloor(sector_t* taggedsec, sector_t* modsec, line_t* master, uint3
 
   // Make list of control sectors that affect this sector, and grow it
   {
-    int  i;
-
     // Initial condition numattached==0, is also handled by this code
     // if already attached, then do not need to process again
+    uint16_t  i;
     for(i = 0; i < modsec->numattached; i++)
     {
       if(modsec->attached[i] == taggedindex)
@@ -4269,9 +4267,9 @@ boolean PIT_PushThing(mobj_t* thing)
         sx = tmpusher->x_src;
         sy = tmpusher->y_src;
         dist = P_AproxDistance(thing->x - sx,thing->y - sy);
-	// INT_TO_PUSH( mag - (FIXED_TO_INT(dist)/2)) ) / 2
+        // INT_TO_PUSH( mag - (FIXED_TO_INT(dist)/2)) ) / 2
         speed = (tmpusher->magnitude - (FIXED_TO_INT(dist)>>1))
-	        <<(FRACBITS-PUSH_FACTOR-1);
+                <<(FRACBITS-PUSH_FACTOR-1);
 
         // Square law distance effect by Killough 10/98, from prboom (not in Boom)
         // [WDJ] Modified to float

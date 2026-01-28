@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_segs.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: r_segs.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -143,7 +143,7 @@ static texture_render_t * mid_texren = NULL;
 static texture_render_t * bottom_texren = NULL;
 
 
-static int             numthicksides;
+static unsigned int      numthicksides;
 //static short*          thicksidecol;
 
 
@@ -445,7 +445,7 @@ void R_Clear_drawmem( void )
 }
 
 static
-draw_ffplane_t *  create_draw_ffplane( int num_req )
+draw_ffplane_t *  create_draw_ffplane( unsigned int num_req )
 {
     static const int aug_num_req = (sizeof(draw_ffplane_t) + DRAWMEM_ALIGN_MASK) & ~DRAWMEM_ALIGN_MASK;
     draw_ffplane_t * dffp = (draw_ffplane_t *) alloc_drawmem( aug_num_req + num_req );
@@ -454,7 +454,7 @@ draw_ffplane_t *  create_draw_ffplane( int num_req )
 }
 
 static
-draw_ffside_t *  create_draw_ffside( int num_req )
+draw_ffside_t *  create_draw_ffside( unsigned int num_req )
 {
     static const int aug_num_req = (sizeof(draw_ffside_t) + DRAWMEM_ALIGN_MASK) & ~DRAWMEM_ALIGN_MASK;
     draw_ffside_t * dffs = (draw_ffside_t *) alloc_drawmem( aug_num_req + num_req );
@@ -611,7 +611,7 @@ void expand_drawsegs( void )
 #else
     drawseg_t * new_drawsegs = portable_realloc(drawsegs, newmax*sizeof(*drawsegs));
 #endif
-    if( new_drawsegs == 0 )
+    if( new_drawsegs == NULL )
     {
 #if !defined( __DJGPP__ ) || !defined( __WIN32__ )
         I_Error( "Failed realloc for drawsegs\n" );
@@ -1242,7 +1242,6 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
     lightlev_t      vlight;  // visible light 0..255
     lightlev_t      orient_light = 0;  // wall orientation effect
     int             texnum;
-    int             i;
     fixed_t	    windowclip_top, windowclip_bottom;
     fixed_t         lightheight, texheightz;
     fixed_t         realbot;
@@ -1372,11 +1371,12 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
 
       // setup lightlist
       // highest light to lowest light, [0] is sector light at top
-      for(i = 0; i < dc_numlights; i++)
+      unsigned int gi;
+      for(gi = 0; gi < dc_numlights; gi++)
       {
         // setup a lightlist entry
-        ff_light = &frontsector->lightlist[i];
-        rlight = &dc_lightlist[i];  // create in this list slot
+        ff_light = &frontsector->lightlist[gi];
+        rlight = &dc_lightlist[gi];  // create in this list slot
 
         // fake floor light heights in screen coord.
         rlight->height = (centeryfrac) - FixedMul((ff_light->height - viewz), dm_yscale);
@@ -1507,9 +1507,10 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
 
             // for each 3Dfloor light
             // highest light to lowest light, [0] is sector light at top
-            for(i = 0; i < dc_numlights; i++)
+            unsigned int gi;
+            for(gi = 0; gi < dc_numlights; gi++)
             {
-              rlight = &dc_lightlist[i];
+              rlight = &dc_lightlist[gi];
 
               if((rlight->flags & FF_NOSHADE))
                 continue; // next 3dfloor light
@@ -1551,9 +1552,9 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
 
                 // Finish dc_lightlist height adjustments.
                 // highest light to lowest light, [0] is sector light at top
-                for(i++ ; i < dc_numlights; i++)
+                for(gi++ ; gi < dc_numlights; gi++)
                 {
-                  rlight = &dc_lightlist[i];
+                  rlight = &dc_lightlist[gi];
                   rlight->height += rlight->heightstep;
                 }
                 goto next_x;
@@ -1633,7 +1634,7 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
     int             texnum;
     sector_t        tempsec;
     int             base_fog_alpha;
-    int             i, cnt;
+    int             cnt;
     fixed_t         bottombounds = INT_TO_FIXED(rdraw_viewheight);
     fixed_t         topbounds = INT_TO_FIXED(con_clipviewtop - 2);
     fixed_t         offsetvalue = 0;
@@ -1725,10 +1726,11 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
 
       cnt = 0; // cnt of rlight created, some ff_light will be skipped
       // highest light to lowest light, [0] is sector light at top
-      for(i = 0; i < dc_numlights; i++)
+      unsigned int gi;
+      for(gi = 0; gi < dc_numlights; gi++)
       {
         // Limit list to lights that affect this thickside.
-        ff_light = &frontsector->lightlist[i];
+        ff_light = &frontsector->lightlist[gi];
         rlight = &dc_lightlist[cnt];	// create in this list slot
 
         if(ff_light->height < *ffloor->bottomheight)
@@ -1739,9 +1741,10 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
           // This light is above the ffloor thickside.
           // Ignore it if the next light down is also above the ffloor thickside, when
           // that light will block.
-          if(i+1 < dc_numlights
-             && frontsector->lightlist[i+1].height > *ffloor->topheight
-             && !(frontsector->lightlist[i+1].flags & FF_NOSHADE) )
+          unsigned int gi2 = gi + 1;
+          if( (gi2 < dc_numlights)
+             && frontsector->lightlist[gi2].height > *ffloor->topheight
+             && !(frontsector->lightlist[gi2].flags & FF_NOSHADE) )
             continue;  // too high, next ff_light
         }
 
@@ -1898,9 +1901,10 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
             // The dm_window is outside the view window (topbounds, bottombounds).
             // Apply dc_lightlist height adjustments. The height at the following x are dependent upon this.
             // highest light to lowest light, [0] is sector light at top
-            for(i = 0; i < dc_numlights; i++)
+            unsigned int gi;
+            for( gi = 0; gi < dc_numlights; gi++)
             {
-              rlight = &dc_lightlist[i];
+              rlight = &dc_lightlist[gi];
               rlight->height += rlight->heightstep;
               if(rlight->flags & (FF_CUTSOLIDS|FF_CUTEXTRA))
                 rlight->botheight += rlight->botheightstep;
@@ -1918,10 +1922,11 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
 
           // Setup dc_lightlist as to the 3dfloor light sources and effects.
           // highest light to lowest light, [0] is sector light at top
-          for(i = 0; i < dc_numlights; i++)
+          unsigned int gi;
+          for( gi = 0; gi < dc_numlights; gi++)
           {
             // Check if the current light affects the colormap/lightlevel
-            rlight = &dc_lightlist[i];
+            rlight = &dc_lightlist[gi];
             lighteffect = !(rlight->flags & FF_NOSHADE);
             if(lighteffect)
             {
@@ -2000,9 +2005,9 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
 
               // Finish dc_lightlist height adjustments.
               // highest light to lowest light, [0] is sector light at top
-              for(i++ ; i < dc_numlights; i++)
+              for( gi++ ; gi < dc_numlights; gi++)
               {
-                rlight = &dc_lightlist[i];
+                rlight = &dc_lightlist[gi];
                 rlight->height += rlight->heightstep;
                 if(rlight->flags & (FF_CUTSOLIDS|FF_CUTEXTRA))
                   rlight->botheight += rlight->botheightstep;
@@ -2272,7 +2277,6 @@ void R_RenderSegLoop (void)
     int        yl, yh;
 
     int        mid, top, bottom;
-    int        i;
     lighttable_t  * ro_colormap = NULL;  // override colormap
     extracolormap_t  * ro_extracolormap = NULL;  // override colormap
 
@@ -2298,9 +2302,10 @@ void R_RenderSegLoop (void)
         // The lightlevel and extra_colormap were copied from ffloor by R_StoreWallRange.
         // NOTE: Due to StoreWallRange, the dc_lightlist entries do NOT correspond to
         // the sector lightlist[i].
-        for(i = 0; i < dc_numlights; i++)
+        unsigned int gi;
+        for( gi = 0; gi < dc_numlights; gi++)
         {
-            rlight = & dc_lightlist[i];
+            rlight = & dc_lightlist[gi];
 
             // [WDJ] FF_FOG is also set when frontsector lightlist caster has FF_FOG.
             if( rlight->flags & FF_FOG )
@@ -2407,14 +2412,16 @@ void R_RenderSegLoop (void)
 //	  first_subsec_seg->frontscale[rw_x] = rw_scale;
 
           // Over all ffloor planes.
-          for(i = 0; i < numffplane; i++)
+          unsigned int fi;
+          for( fi = 0; fi < numffplane; fi++)
           {
-            if(ffplane[i].height < viewz)
+            ff_planemgr_t * ffp = & ffplane[fi];
+            if( ffp->height < viewz)
             {
-              int top_w = HEIGHTFRAC_TO_INT( ffplane[i].front_frac ) + 1;
+              int top_w = HEIGHTFRAC_TO_INT( ffp->front_frac ) + 1;
               // [WDJ] To prevent little black lines, front_clip_bot is +1 from a normal clip.
-//              int bottom_w = ffplane[i].front_clip_bot[rw_x] - 1;  // get black lines
-              int bottom_w = ffplane[i].front_clip_bot[rw_x];
+//              int bottom_w = ffp->front_clip_bot[rw_x] - 1;  // get black lines
+              int bottom_w = ffp->front_clip_bot[rw_x];
 
               if(top_w < ceilingclip[rw_x])
                 top_w = ceilingclip[rw_x];
@@ -2425,18 +2432,18 @@ void R_RenderSegLoop (void)
               if (top_w <= bottom_w)
               {
 #ifdef DYNAMIC_VISPLANE_COVER
-                ffplane[i].plane->cover[rw_x].top = top_w;
-                ffplane[i].plane->cover[rw_x].bottom = bottom_w;
+                ffp->plane->cover[rw_x].top = top_w;
+                ffp->plane->cover[rw_x].bottom = bottom_w;
 #else
-                ffplane[i].plane->top[rw_x] = top_w;
-                ffplane[i].plane->bottom[rw_x] = bottom_w;
+                ffp->plane->top[rw_x] = top_w;
+                ffp->plane->bottom[rw_x] = bottom_w;
 #endif
               }
             }
-            else if (ffplane[i].height > viewz)
+            else if (ffp->height > viewz)
             {
-              int top_w = ffplane[i].plane_clip_top[rw_x];
-              int bottom_w = HEIGHTFRAC_TO_INT( ffplane[i].front_frac );
+              int top_w = ffp->plane_clip_top[rw_x];
+              int bottom_w = HEIGHTFRAC_TO_INT( ffp->front_frac );
 
               if (top_w < ceilingclip[rw_x])
                 top_w = ceilingclip[rw_x];
@@ -2447,11 +2454,11 @@ void R_RenderSegLoop (void)
               if (top_w <= bottom_w)
               {
 #ifdef DYNAMIC_VISPLANE_COVER
-                ffplane[i].plane->cover[rw_x].top = top_w;
-                ffplane[i].plane->cover[rw_x].bottom = bottom_w;
+                ffp->plane->cover[rw_x].top = top_w;
+                ffp->plane->cover[rw_x].bottom = bottom_w;
 #else
-                ffplane[i].plane->top[rw_x] = top_w;
-                ffplane[i].plane->bottom[rw_x] = bottom_w;
+                ffp->plane->top[rw_x] = top_w;
+                ffp->plane->bottom[rw_x] = bottom_w;
 #endif
               }
             }
@@ -2494,9 +2501,10 @@ void R_RenderSegLoop (void)
 
           // Setup dc_lightlist as to the 3dfloor light and colormaps.
           // highest light to lowest light, [0] is sector light at top
-          for(i = 0; i < dc_numlights; i++)
+          unsigned int gi;
+          for( gi = 0; gi < dc_numlights; gi++)
           {
-            rlight = & dc_lightlist[i];
+            rlight = & dc_lightlist[gi];
 
             if( !fixedcolormap )
             {
@@ -2666,11 +2674,12 @@ void R_RenderSegLoop (void)
         {
           // Apply dc_lightlist height adjustments.
           // highest light to lowest light, [0] is sector light at top
-          for(i = 0; i < dc_numlights; i++)
+          unsigned int gi;
+          for( gi = 0; gi < dc_numlights; gi++)
           {
-            dc_lightlist[i].height += dc_lightlist[i].heightstep;
-            if(dc_lightlist[i].flags & FF_SOLID)
-              dc_lightlist[i].botheight += dc_lightlist[i].botheightstep;
+            dc_lightlist[gi].height += dc_lightlist[gi].heightstep;
+            if(dc_lightlist[gi].flags & FF_SOLID)
+              dc_lightlist[gi].botheight += dc_lightlist[gi].botheightstep;
           }
         }
 
@@ -2685,22 +2694,23 @@ void R_RenderSegLoop (void)
           }
         }*/
 
-
-        for(i = 0; i < MAXFFLOORS; i++)
+        unsigned int fi;
+        for( fi = 0; fi < MAXFFLOORS; fi++)
         {
-          if (ffplane[i].valid_mark)
+          ff_planemgr_t * ffp = & ffplane[fi];
+          if (ffp->valid_mark)
           {
-            int y_w = HEIGHTFRAC_TO_INT( ffplane[i].back_frac );
+            int y_w = HEIGHTFRAC_TO_INT( ffp->back_frac );
 
             // [WDJ] Would think this should just be (y_w - 1),
             // but adding 1 prevents little black lines between joined sector plane draws.
-//            ffplane[i].front_clip_bot[rw_x] = y_w - 1;  // get little black lines
-            ffplane[i].front_clip_bot[rw_x] = y_w;
-            ffplane[i].plane_clip_top[rw_x] = y_w + 1;
-            ffplane[i].back_frac += ffplane[i].back_step;
+//            ffp->front_clip_bot[rw_x] = y_w - 1;  // get little black lines
+            ffp->front_clip_bot[rw_x] = y_w;
+            ffp->plane_clip_top[rw_x] = y_w + 1;
+            ffp->back_frac += ffp->back_step;
           }
 
-          ffplane[i].front_frac += ffplane[i].front_step;
+          ffp->front_frac += ffp->front_step;
         }
 
         rw_scale += rw_scalestep;
@@ -2839,17 +2849,19 @@ void R_StoreWallRange( int   start, int   stop)
     ds_p->draw_ffplane = NULL;
     ds_p->draw_ffside = NULL;
 
-    for(i = 0; i < MAXFFLOORS; i++)
+    unsigned int fi;
+    for( fi = 0; fi < MAXFFLOORS; fi++)
     {
-      ffplane[i].valid_mark = false;
+      ffplane[fi].valid_mark = false;
     }
 
     // The ffplane and numffplane are of the subsector processed by BSP.
     if(numffplane)
     {
       // This should be in BSP
-      for(i = 0; i < numffplane; i++)
-        ffplane[i].front_pos = ffplane[i].height - viewz;
+      unsigned int fi;
+      for( fi = 0; fi < numffplane; fi++)
+        ffplane[fi].front_pos = ffplane[fi].height - viewz;
     }
 
     if (!backsector)
@@ -3371,21 +3383,22 @@ void R_StoreWallRange( int   start, int   stop)
       cnt = 0; // cnt of rlight created, some ff_light will be skipped
       // Setup dc_lightlist, as to 3dfloor heights, lights, and extra_colormap.
       // highest light to lowest light, [0] is sector light at top
-      for(i = 0; i < dc_numlights; i++)
+      unsigned int gi;
+      for( gi = 0; gi < dc_numlights; gi++)
       {
         // [WDJ] This makes the dc_lightlist shorter in the render loop, but the resultant
         // entries dc_lightlist[i] will not correspond to the sector lightlist[i].
         // All references to ff_light must be done here.
-        ff_light = &frontsector->lightlist[i];
+        ff_light = &frontsector->lightlist[gi];
         rlight = &dc_lightlist[cnt];
 
-        if(i != 0)
+        if( gi > 0 )
         {
           if(ff_light->height < frontsector->floorheight)
             continue;
 
           if(ff_light->height > frontsector->ceilingheight)
-            if(i+1 < dc_numlights && frontsector->lightlist[i+1].height > frontsector->ceilingheight)
+            if( (gi+1 < dc_numlights) && (frontsector->lightlist[gi+1].height > frontsector->ceilingheight) )
               continue;
         }
         rlight->height = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul( FIXED_TO_HEIGHTFRAC(ff_light->height - viewz), rw_scale );
@@ -3428,19 +3441,22 @@ void R_StoreWallRange( int   start, int   stop)
 
     if(numffplane)
     {
-      for(i = 0; i < numffplane; i++)
+      unsigned int fi;
+      for( fi = 0; fi < numffplane; fi++)
       {
-        ffplane[i].front_pos = FIXED_TO_HEIGHTFRAC( ffplane[i].front_pos );
-        ffplane[i].front_step = FixedMul(-rw_scalestep, ffplane[i].front_pos);
-        ffplane[i].front_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffplane[i].front_pos, rw_scale);
+        ff_planemgr_t * ffp = & ffplane[fi];
+        ffp->front_pos = FIXED_TO_HEIGHTFRAC( ffp->front_pos );
+        ffp->front_step = FixedMul(-rw_scalestep, ffp->front_pos);
+        ffp->front_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffp->front_pos, rw_scale);
       }
     }
 
     if (backsector)
     {
+        unsigned int fi = 0;
         worldbacktop = FIXED_TO_HEIGHTFRAC( worldbacktop );
         worldbackbottom = FIXED_TO_HEIGHTFRAC( worldbackbottom );
-        
+
         if (worldbacktop < worldtop)
         {
             pixhigh = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul (worldbacktop, rw_scale);
@@ -3452,8 +3468,6 @@ void R_StoreWallRange( int   start, int   stop)
             pixlow = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul (worldbackbottom, rw_scale);
             pixlowstep = -FixedMul (rw_scalestep,worldbackbottom);
         }
-
-        i = 0;
 
         if(backsector->ffloors)
         {
@@ -3470,12 +3484,13 @@ void R_StoreWallRange( int   start, int   stop)
                    && ((viewz < bff_bh && (bff->flags & FF_OUTER_PLANES))
                        || (viewz > bff_bh && (bff->flags & FF_INNER_PLANES))) )
                 {
-                  ffplane[i].valid_mark = true;
-                  ffplane[i].back_pos = FIXED_TO_HEIGHTFRAC(bff_bh - viewz);
-                  ffplane[i].back_step = FixedMul(-rw_scalestep, ffplane[i].back_pos);
-                  ffplane[i].back_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffplane[i].back_pos, rw_scale);
-                  i++;
-                  if(i >= MAXFFLOORS)
+                  ff_planemgr_t * ffp = & ffplane[fi];
+                  ffp->valid_mark = true;
+                  ffp->back_pos = FIXED_TO_HEIGHTFRAC(bff_bh - viewz);
+                  ffp->back_step = FixedMul(-rw_scalestep, ffp->back_pos);
+                  ffp->back_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffp->back_pos, rw_scale);
+                  fi++;
+                  if( fi >= MAXFFLOORS )
                       break;
                 }
 
@@ -3485,17 +3500,18 @@ void R_StoreWallRange( int   start, int   stop)
                    && ((viewz > bff_th && (bff->flags & FF_OUTER_PLANES))
                        || (viewz < bff_th && (bff->flags & FF_INNER_PLANES))) )
                 {
-                  ffplane[i].valid_mark = true;
-                  ffplane[i].back_pos = FIXED_TO_HEIGHTFRAC(bff_th - viewz);
-                  ffplane[i].back_step = FixedMul(-rw_scalestep, ffplane[i].back_pos);
-                  ffplane[i].back_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffplane[i].back_pos, rw_scale);
-                  i++;
-                  if(i >= MAXFFLOORS)
+                  ff_planemgr_t * ffp = & ffplane[fi];
+                  ffp->valid_mark = true;
+                  ffp->back_pos = FIXED_TO_HEIGHTFRAC(bff_th - viewz);
+                  ffp->back_step = FixedMul(-rw_scalestep, ffp->back_pos);
+                  ffp->back_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffp->back_pos, rw_scale);
+                  fi++;
+                  if( fi >= MAXFFLOORS )
                       break;
                 }
             }
 #ifdef DEBUG_STOREWALL   
-            if( i > 0 )  GenPrintf( EMSG_debug, "w: backsector ffloors = %i\n", i );
+            if( fi > 0 )  GenPrintf( EMSG_debug, "w: backsector ffloors = %i\n", fi );
 #endif
         } // if(backsector->ffloors)
         else if(frontsector && frontsector->ffloors)
@@ -3513,12 +3529,13 @@ void R_StoreWallRange( int   start, int   stop)
                    && ((viewz < fff_bh && (fff->flags & FF_OUTER_PLANES))
                        || (viewz > fff_bh && (fff->flags & FF_INNER_PLANES))) )
                 {
-                  ffplane[i].valid_mark = true;
-                  ffplane[i].back_pos = FIXED_TO_HEIGHTFRAC(fff_bh - viewz);
-                  ffplane[i].back_step = FixedMul(-rw_scalestep, ffplane[i].back_pos);
-                  ffplane[i].back_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffplane[i].back_pos, rw_scale);
-                  i++;
-                  if(i >= MAXFFLOORS)
+                  ff_planemgr_t * ffp = & ffplane[fi];
+                  ffp->valid_mark = true;
+                  ffp->back_pos = FIXED_TO_HEIGHTFRAC(fff_bh - viewz);
+                  ffp->back_step = FixedMul(-rw_scalestep, ffp->back_pos);
+                  ffp->back_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffp->back_pos, rw_scale);
+                  fi++;
+                  if( fi >= MAXFFLOORS )
                       break;
                 }
 
@@ -3528,17 +3545,18 @@ void R_StoreWallRange( int   start, int   stop)
                    && ((viewz > fff_th && (fff->flags & FF_OUTER_PLANES))
                        || (viewz < fff_th && (fff->flags & FF_INNER_PLANES))) )
                 {
-                  ffplane[i].valid_mark = true;
-                  ffplane[i].back_pos = FIXED_TO_HEIGHTFRAC(fff_th - viewz);
-                  ffplane[i].back_step = FixedMul(-rw_scalestep, ffplane[i].back_pos);
-                  ffplane[i].back_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffplane[i].back_pos, rw_scale);
-                  i++;
-                  if(i >= MAXFFLOORS)
+                  ff_planemgr_t * ffp = & ffplane[fi];
+                  ffp->valid_mark = true;
+                  ffp->back_pos = FIXED_TO_HEIGHTFRAC(fff_th - viewz);
+                  ffp->back_step = FixedMul(-rw_scalestep, ffp->back_pos);
+                  ffp->back_frac = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul(ffp->back_pos, rw_scale);
+                  fi++;
+                  if( fi >= MAXFFLOORS )
                       break;
                 }
             }
 #ifdef DEBUG_STOREWALL   
-            if( i > 0 )  GenPrintf( EMSG_debug, "w: backsector ffloors = %i\n", i );
+            if( fi > 0 )  GenPrintf( EMSG_debug, "w: backsector ffloors = %i\n", fi );
 #endif
         }  // if backsector->ffloors
     } // if backsector
@@ -3581,8 +3599,12 @@ void R_StoreWallRange( int   start, int   stop)
         // Ref to ffloor
         // These ffloor will be further altered by R_ExpandPlane.
         // The ffplane[].plane also ref to ffloor.
-        for(i = 0; i < numffplane; i++)
-          dffp->ffloorplanes[i] = ffplane[i].plane = R_CheckPlane(ffplane[i].plane, rw_x, rw_stopx - 1);
+        unsigned int fi;
+        for( fi = 0; fi < numffplane; fi++)
+        {
+          ff_planemgr_t * ffp = & ffplane[fi];
+          dffp->ffloorplanes[fi] = ffp->plane = R_CheckPlane(ffp->plane, rw_x, rw_stopx - 1);
+        }
 
         // [WDJ] The only place that calls R_RenderSegLoop, where backscale is filled in.
         // For now, get the entire vid width.

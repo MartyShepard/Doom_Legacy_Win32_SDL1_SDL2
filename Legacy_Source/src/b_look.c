@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_look.c 1758 2025-11-20 11:44:54Z wesleyjohnson $
+// $Id: b_look.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 2002-2016 by DooM Legacy Team.
 //
@@ -190,7 +190,6 @@ boolean B_Is_Usable_Special_Line( short line_special )
 
 boolean B_LookForSpecialLine(player_t* p, fixed_t* x, fixed_t* y)
 {
-    int  i, j;
     sector_t * in_sector, * sector2;
     line_t * edge;
     msecnode_t * in_sector_node;
@@ -199,10 +198,13 @@ boolean B_LookForSpecialLine(player_t* p, fixed_t* x, fixed_t* y)
     while (in_sector_node)
     {
         in_sector = in_sector_node->m_sector;
-        for (i = 0; i < in_sector->linecount; i++)
+
+        uint16_t li;
+        for (li = 0; li < in_sector->linecount; li++)
         {
             // for all lines in sector linelist
-            edge = in_sector->linelist[i];
+            edge = in_sector->linelist[li];
+
             // sector_t * specialsector = (in_sector == edge->frontsector) ? edge->backsector : edge->frontsector;
             if( B_Is_Usable_Special_Line( edge->special ) )
                 goto ret_edge_center;
@@ -212,10 +214,11 @@ boolean B_LookForSpecialLine(player_t* p, fixed_t* x, fixed_t* y)
                 // its a double sided linedef
                 sector2 = (edge->frontsector == in_sector) ? edge->backsector : edge->frontsector;
 
-                for (j = 0; j < sector2->linecount; j++)
+                uint16_t lj;
+                for (lj = 0; lj < sector2->linecount; lj++)
                 {
                     // for all lines in sector linelist
-                    edge = sector2->linelist[j];
+                    edge = sector2->linelist[lj];
                     // sector_t * specialsector = (sector == edge->frontsector) ? edge->backsector : edge->frontsector;
                     if( B_Is_Usable_Special_Line( edge->special ) )
                         goto ret_edge_center;

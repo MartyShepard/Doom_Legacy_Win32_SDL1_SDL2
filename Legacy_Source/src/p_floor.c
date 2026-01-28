@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_floor.c 1762 2025-11-20 11:48:53Z wesleyjohnson $
+// $Id: p_floor.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -101,18 +101,18 @@ void DemoAdapt_p_floor( void )
 result_e T_MovePlane ( sector_t*     sector,
                        fixed_t       speed,
                        fixed_t       dest,
-                       boolean       crush, // enables crushing damage
-                       int           floorOrCeiling,
-                       int           direction )
+                       boolean       crush_flag, // enables crushing damage
+                       byte          floorOrCeiling,  // 1=ceiling
+                       int8_t        direction )
 {
-  boolean       flag;
+  boolean       contact_flag;
   fixed_t       lastpos;    // when hit something, must return to lastpos
   fixed_t       destheight; //jff 02/04/98 used to keep floors/ceilings
                             // from moving thru each other
   fixed_t       newheight;
 
 
-  switch(floorOrCeiling)
+  switch(floorOrCeiling) // 1=ceiling
   {
     case 0:
       // Moving a floor
@@ -132,25 +132,25 @@ result_e T_MovePlane ( sector_t*     sector,
           if (newheight < dest)
           { // reached dest, or start was below dest
             sector->floorheight = dest;  // final position
-            flag = P_CheckSector(sector,crush);
+            contact_flag = P_CheckSector(sector, crush_flag);
 #ifdef COMPAT_FLOOR_STOP
-            if (flag == true)  // hit something
+            if (contact_flag == true)  // hit something
 #else
-            if (flag == true && sector->numattached)
+            if (contact_flag == true && sector->numattached)  // BUG
 #endif
             {
               sector->floorheight =lastpos;
-              P_CheckSector(sector,crush);
+              P_CheckSector(sector, crush_flag);
             }
             return MP_pastdest;
           }
           else
           { // floor moving down
             sector->floorheight = newheight;  // intermediate position
-            flag = P_CheckSector(sector,crush);
+            contact_flag = P_CheckSector(sector, crush_flag);
             // PrBoom: EN_boom_floor = !comp[comp_floors]
             // Vanilla compatibility, or 3D floor.
-            if( flag == true
+            if( contact_flag == true
                 && (!EN_boom_floor || sector->numattached) )
             {
               // Diff here between Boom and original Doom.
@@ -158,7 +158,7 @@ result_e T_MovePlane ( sector_t*     sector,
               // It stops floors from moving when objects stuck in ceiling.
               // May be necessary because of 3D floors.
               sector->floorheight = lastpos;
-              P_CheckSector(sector, crush);
+              P_CheckSector(sector, crush_flag);
               return MP_crushed;
             }
           }
@@ -183,11 +183,11 @@ result_e T_MovePlane ( sector_t*     sector,
           if (newheight > destheight)
           { // reached dest, or start was above dest
             sector->floorheight = destheight;  // final position
-            flag = P_CheckSector(sector,crush);
-            if (flag == true)
+            contact_flag = P_CheckSector(sector, crush_flag);
+            if (contact_flag == true)
             {
               sector->floorheight = lastpos;
-              P_CheckSector(sector,crush);
+              P_CheckSector(sector, crush_flag);
             }
             return MP_pastdest;
           }
@@ -195,16 +195,16 @@ result_e T_MovePlane ( sector_t*     sector,
           { // floor moving up
             // crushing is possible
             sector->floorheight = newheight;  // intermediate position
-            flag = P_CheckSector(sector,crush);
-            if (flag == true)
+            contact_flag = P_CheckSector(sector, crush_flag);
+            if (contact_flag == true)
             {
               if(!EN_boom_floor)
               {
-                if (crush == true)
+                if (crush_flag == true)
                   return MP_crushed;
               }
               sector->floorheight = lastpos;
-              P_CheckSector(sector,crush);
+              P_CheckSector(sector, crush_flag);
               return MP_crushed;
             }
           }
@@ -235,11 +235,11 @@ result_e T_MovePlane ( sector_t*     sector,
           if (newheight < destheight)
           { // reached dest, or start was below dest
             sector->ceilingheight = destheight;  // final position
-            flag = P_CheckSector(sector,crush);
-            if (flag == true)
+            contact_flag = P_CheckSector(sector, crush_flag);
+            if (contact_flag == true)
             {
               sector->ceilingheight = lastpos;
-              P_CheckSector(sector,crush);
+              P_CheckSector(sector, crush_flag);
             }
             return MP_pastdest;
           }
@@ -247,13 +247,13 @@ result_e T_MovePlane ( sector_t*     sector,
           { // ceiling moving down
             // crushing is possible
             sector->ceilingheight = newheight;  // intermediate position
-            flag = P_CheckSector(sector,crush);
-            if (flag == true)
+            contact_flag = P_CheckSector(sector, crush_flag);
+            if (contact_flag == true)
             {
-              if (crush == true)
+              if (crush_flag == true)
                 return MP_crushed;
               sector->ceilingheight = lastpos;
-              P_CheckSector(sector,crush);
+              P_CheckSector(sector, crush_flag);
               return MP_crushed;
             }
           }
@@ -281,18 +281,18 @@ result_e T_MovePlane ( sector_t*     sector,
                 if( gamedesc_id == GDESC_doom2 )  return MP_pastdest; // ignore
             }
 #endif
-            flag = P_CheckSector(sector,crush);
+            contact_flag = P_CheckSector(sector, crush_flag);
 #ifdef COMPAT_FLOOR_STOP
             // [WDJ] Doom2 Map05 will close secret rooms tagged with 9, unless
             // the ceiling is stopped.  Cannot be conditional on 3D floor.
-            if (flag == true)
+            if (contact_flag == true)
 #else
             // [WDJ] BUG: Doom2 Map05, this closes secret rooms tagged with 9,
             // because the ceiling is not stopped.
-            if (flag == true && sector->numattached)
+            if (contact_flag == true && sector->numattached)
 # if 0
             // alternative plan
-            if (flag == true
+            if (contact_flag == true
                 &&( sector->numattached
                     || lastpos > dest ) // insta-move, started wrong side of dest
                 )
@@ -301,15 +301,15 @@ result_e T_MovePlane ( sector_t*     sector,
             {
               // Boom stops.
               sector->ceilingheight = lastpos;
-              P_CheckSector(sector,crush);
+              P_CheckSector(sector, crush_flag);
             }
             return MP_pastdest;
           }
           else
           { // ceiling moving up
             sector->ceilingheight = newheight;  // intermediate position
-            flag = P_CheckSector(sector,crush);
-            if (flag == true && sector->numattached) // 3D floor only
+            contact_flag = P_CheckSector(sector, crush_flag);
+            if (contact_flag == true && sector->numattached) // 3D floor only
             {
               // This code not in Boom.
               // It stops ceiling from moving when objects stuck in floor.
@@ -318,7 +318,7 @@ result_e T_MovePlane ( sector_t*     sector,
               // May be necessary because of 3D floors.
               // Crush on 3D floor may cause moving floor to get stuck.
               sector->ceilingheight = lastpos;
-              P_CheckSector(sector,crush);
+              P_CheckSector(sector, crush_flag);
               return MP_crushed;
             }
           }
@@ -532,7 +532,6 @@ int EV_DoFloor ( line_t* line, floor_e floortype )
     sector_t*           sec;
     floormove_t*        mfloor;
     int                 rtn = 0;
-    int                 i;
 
     int secnum = -1;  // init search FindSector
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
@@ -674,11 +673,12 @@ int EV_DoFloor ( line_t* line, floor_e floortype )
               mfloor->direction = 1;
 //              mfloor->sector = sec;
               mfloor->speed = FLOORSPEED;
-              for (i = 0; i < sec->linecount; i++)
+              uint16_t li;
+              for (li = 0; li < sec->linecount; li++)
               {
-                if (twoSided (secnum, i) )
+                if (twoSided (secnum, li) )
                 {
-                  side = getSide(secnum,i,0);
+                  side = getSide(secnum, li, 0);
                   // jff 8/14/98 don't scan texture 0, its not real
                   if (side->bottomtexture > 0 ||
                       (!EN_boom_physics && !side->bottomtexture))
@@ -686,7 +686,7 @@ int EV_DoFloor ( line_t* line, floor_e floortype )
                     if (textureheight[side->bottomtexture] < minsize)
                       minsize = textureheight[side->bottomtexture];
                   }
-                  side = getSide(secnum,i,1);
+                  side = getSide(secnum, li, 1);
                   // jff 8/14/98 don't scan texture 0, its not real
                   if (side->bottomtexture > 0 ||
                       (!EN_boom_physics && !side->bottomtexture))
@@ -818,7 +818,6 @@ int EV_BuildStairs ( line_t*  line, stair_e type )
   int                   do_another;
   int                   rtn = 0;
   int                   secnum, new_secnum, old_secnum;
-  int                   i;
   uint16_t              adj_texture;
   boolean               crushing = false;  // crushing stairs
     
@@ -895,19 +894,21 @@ int EV_BuildStairs ( line_t*  line, stair_e type )
     do
     {
       do_another = 0;
-      for (i = 0; i < sec->linecount; i++)
+      uint16_t li;
+      for (li = 0; li < sec->linecount; li++)
       {
+        line_t * lnp = sec->linelist[li];  // a stair sector linedef
         // for each line of the sector linelist
-        if ( !((sec->linelist[i])->flags & ML_TWOSIDED) )
+        if ( !(lnp->flags & ML_TWOSIDED) )
           continue;
                                   
-        tsec = (sec->linelist[i])->frontsector;
+        tsec = lnp->frontsector;
         new_secnum = tsec-sectors;
           
         if (secnum != new_secnum)
           continue;
 
-        tsec = (sec->linelist[i])->backsector;
+        tsec = lnp->backsector;
         if (!tsec) continue;     //jff 5/7/98 if no backside, continue
         new_secnum = tsec - sectors;
 
@@ -969,10 +970,8 @@ int EV_DoDonut(line_t*  line)
 {
   sector_t* s1;
   sector_t* s2;
-  sector_t* s2model;
   int       secnum;
   int       rtn = 0;
-  int       i;
 
   floormove_t* mfloor;  // new floor
 
@@ -995,25 +994,27 @@ int EV_DoDonut(line_t*  line)
       continue;                           //jff 5/7/98
                       
     // find a two sided line around the pool whose other side isn't the pillar
-    for (i = 0; i < s2->linecount; i++)
+    uint16_t li;
+    for (li = 0; li < s2->linecount; li++)
     {
+      // [WDJ] using s2lnp gives larger code (by 32 bytes), but is more readable.
+      line_t* s2lnp = s2->linelist[li];  // a donut sector linedef
       // for each line of sector s2 linelist
-      // [WDJ] using ptr s = s2->linelist[i] gives larger code (by 32 bytes).
       //jff 3/29/98 use true two-sidedness, not the flag
       // killough 4/5/98: changed demo_compatibility to compatibility
       if(!EN_boom_physics)
       {
-        if (!(s2->linelist[i]->flags & ML_TWOSIDED)
-            || (s2->linelist[i]->backsector == s1))
+        if (!(s2lnp->flags & ML_TWOSIDED)
+            || (s2lnp->backsector == s1))
           continue;
       }
-      else if (!s2->linelist[i]->backsector
-               || s2->linelist[i]->backsector == s1)
+      else if (!s2lnp->backsector
+               || (s2lnp->backsector == s1))
         continue;
 
       rtn = 1; //jff 1/26/98 no donut action - no switch change on return
 
-      s2model = s2->linelist[i]->backsector;  // s2model is model sector for changes
+      sector_t* s2model = s2lnp->backsector;  // s2model is model sector for changes
         
       //  Spawn rising slime
       mfloor = Z_Malloc (sizeof(*mfloor), PU_LEVSPEC, 0);

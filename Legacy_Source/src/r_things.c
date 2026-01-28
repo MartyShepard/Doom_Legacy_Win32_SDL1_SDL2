@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_things.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: r_things.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1547,7 +1547,6 @@ vissprite_t * split_sprite_horz_cut( vissprite_t * sprite, int cut_y, fixed_t cu
 static
 void R_Split_Sprite_over_FFloor (vissprite_t* sprite, mobj_t* thing)
 {
-  int           i;
   int           cut_y;  // where lightheight cuts on screen
   fixed_t       lightheight;
   sector_t*     sector;
@@ -1555,10 +1554,10 @@ void R_Split_Sprite_over_FFloor (vissprite_t* sprite, mobj_t* thing)
   vissprite_t * bot_sprite;
 
   sector = sprite->sector;
-
-  for(i = 1; i < sector->numlights; i++)	// from top to bottom
+  uint16_t  gi;
+  for( gi = 1; gi < sector->numlights; gi++)	// from top to bottom
   {
-    ff_light = &frontsector->lightlist[i];
+    ff_light = &frontsector->lightlist[gi];
     lightheight = ff_light->height;
      
     // must be a caster
@@ -2373,7 +2372,7 @@ void init_corona_data( void )
 #endif
 
 #ifdef ENABLE_COLORED_PATCH
-    int i;
+    unsigned int i;
     for( i = 0; i< NUMLIGHTS; i++ )
     {
         if( corona_patch_size )
@@ -3437,9 +3436,10 @@ void R_sort_drawseg_masked( void )
         {
             // plane boundaries are independent of this seg.
             visplane_t * plane;
-            int p, vk;
+            int vk;
             byte  num_plane = 0; // number of planes in plane_draw
 
+            byte p;  // max floors 40
             for(p = 0; p < dffp->numffloorplanes; p++)
             {
                 plane = dffp->ffloorplanes[p];
@@ -3964,7 +3964,7 @@ void drawseg_vrs_sprites( drawseg_t * ds )
         // Sprite vrs ffloor planes.
         {
             visplane_t * plane;
-            int p;
+            byte p;
 
             // Sprite vrs planes.
             // This is independent of this drawseg, as this seg is only part of the far edge of the ffloor.
@@ -4294,11 +4294,11 @@ void R_Draw_Masked (void)
             // A sprite that is on such a cut can be drawn too soon for an adjacent floor subsector.
             // The x1 and x2 are the limits of the plane, not the cut.
 
-            int  p;
             visplane_t * plane;
             drawsprite_t * dspr, * dspr_next;
 
             // Floor planes are sorted by vertical distance from viewz, farthest from viewz first.
+            byte p;
             for(p = 0; p < dffp->numffloorplanes; p++)   // far planes to near planes
             {
                 plane = dffp->ffloorplanes[p];

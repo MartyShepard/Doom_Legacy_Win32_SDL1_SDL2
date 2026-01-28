@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_map.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_map.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -4064,8 +4064,8 @@ boolean P_CheckSector(sector_t* sector, boolean crunch)
 
   if(sector->numattached)
   {
-    int            i;
     sector_t*      sec;
+    uint16_t i;
     for(i = 0; i < sector->numattached; i ++)
     {
       // for each sector attached to the moved sector

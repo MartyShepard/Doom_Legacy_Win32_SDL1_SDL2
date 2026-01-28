@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_lights.c 1762 2025-11-20 11:48:53Z wesleyjohnson $
+// $Id: p_lights.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -264,11 +264,12 @@ int EV_TurnTagLightsOff(line_t* line)
         {
             // for each sector with matching tag
             min = sector->lightlevel;
-            uint32_t i;
-            for (i = 0; i < sector->linecount; i++)
+
+            uint32_t li;
+            for (li = 0; li < sector->linecount; li++)
             {
                 // for all lines in sector linelist
-                templine = sector->linelist[i];
+                templine = sector->linelist[li];
                 tsec = getNextSector(templine,sector);
                 if (!tsec)
                     continue;
@@ -291,7 +292,7 @@ int EV_TurnTagLightsOff(line_t* line)
 //  return 1
 int EV_LightTurnOn ( line_t* line, lightlev_t bright )
 {
-    int         fsecn, j;
+    int         fsecn;
     lightlev_t  sll;  // set or max light level
     sector_t*   sector;
     sector_t*   adjsec;
@@ -312,10 +313,11 @@ int EV_LightTurnOn ( line_t* line, lightlev_t bright )
         if( bright == 0 )
         {
             // Find max adjacent light.
-            for (j = 0; j < sector->linecount; j++)
+            uint16_t lj;
+            for (lj = 0; lj < sector->linecount; lj++)
             {
                 // for each line in sector linelist
-                adjline = sector->linelist[j];
+                adjline = sector->linelist[lj];
                 adjsec = getNextSector(adjline,sector);
 
                 if( !adjsec )
@@ -460,7 +462,7 @@ achieved_target:
 int EV_LightTurnOnPartway(line_t * line, fixed_t level)
 {
   sector_t * sector;
-  int i, j;
+  int i;
   int minll, maxll;
 
   // [WDJ] Fix segfault
@@ -481,9 +483,10 @@ int EV_LightTurnOnPartway(line_t * line, fixed_t level)
       minll = sector->lightlevel;
 
       // Find the min and max light levels.
-      for (j = 0; j < sector->linecount; j++)
+      uint16_t lj;
+      for (lj = 0; lj < sector->linecount; lj++)
       {
-          sector_t * adjsec = getNextSector(sector->linelist[j], sector);
+          sector_t * adjsec = getNextSector( sector->linelist[lj], sector );
           if(adjsec)
           {
               if( maxll < adjsec->lightlevel )
@@ -961,7 +964,7 @@ void CV_MonBall_OnChange( void )
 
 void CV_corona_OnChange( void )
 {
-    int i;
+    unsigned int i;
     // Force light setup, without another test.
     for( i=0; i<NUMLIGHTS; i++ )
     {

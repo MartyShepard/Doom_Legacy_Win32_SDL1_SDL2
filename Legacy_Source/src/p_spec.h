@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_spec.h 1760 2025-11-20 11:47:07Z wesleyjohnson $
+// $Id: p_spec.h 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -120,10 +120,10 @@ side_t*  getSide ( int currentSector, int line, int side );
 fixed_t  P_FindLowestFloorSurrounding(sector_t* sec);
 fixed_t  P_FindHighestFloorSurrounding(sector_t* sec);
 
-fixed_t  P_FindNextHighestFloor ( sector_t* sec, int currentheight );
+fixed_t  P_FindNextHighestFloor ( sector_t* sec, fixed_t currentheight );
 
 //SoM: 3/6/2000
-fixed_t  P_FindNextLowestFloor ( sector_t* sec, int currentheight );
+fixed_t  P_FindNextLowestFloor ( sector_t* sec, fixed_t currentheight );
 
 fixed_t  P_FindLowestCeilingSurrounding(sector_t* sec);
 fixed_t  P_FindHighestCeilingSurrounding(sector_t* sec);
@@ -145,8 +145,8 @@ sector_t*  getNextSector ( line_t* line, sector_t* sec );
 sector_t*  P_FindModelFloorSector ( fixed_t floordestheight, int secnum );
 
 //SoM: 3/15/2000
-fixed_t   P_FindNextHighestCeiling(sector_t * sec, int currentheight);
-fixed_t   P_FindNextLowestCeiling(sector_t * sec, int currentheight);
+fixed_t   P_FindNextHighestCeiling(sector_t * sec, fixed_t currentheight);
+fixed_t   P_FindNextLowestCeiling(sector_t * sec, fixed_t currentheight);
 fixed_t   P_FindShortestUpperAround(int secnum);
 fixed_t   P_FindShortestTextureAround(int secnum);
 sector_t* P_FindModelCeilingSector(fixed_t ceildestheight,int secnum);
@@ -542,7 +542,7 @@ typedef struct
     fixed_t     speed;
 
     // 1 = up, 0 = waiting at top, -1 = down
-    int         direction;
+    int8_t      direction;
 
     // tics to wait at the top
     int         topwait;
@@ -886,9 +886,9 @@ typedef enum
 result_e  T_MovePlane ( sector_t*     sector,
                         fixed_t       speed,
                         fixed_t       dest,
-                        boolean       crush,
-                        int           floorOrCeiling,
-                        int           direction );
+                        boolean       crush_flag,
+                        byte          floorOrCeiling,
+                        int8_t        direction );
 
 int   EV_BuildStairs( line_t* line, stair_e type );
 

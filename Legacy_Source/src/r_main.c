@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_main.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: r_main.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -151,7 +151,7 @@ fixed_t                 projection_y;
 int                     framecount;
 
 int                     sscount;
-int                     linecount;
+//int                     linecount;
 int                     loopcount;
 
 // fog render gobals
@@ -250,10 +250,14 @@ consvar_t cv_detaillevel    = {"detaillevel","0",CV_SAVE|CV_CALL,detaillevel_con
 consvar_t cv_scalestatusbar = {"scalestatusbar","0",CV_SAVE|CV_CALL,CV_YesNo,R_SetViewSize};
 
 #ifdef WIDESCREEN_WEAPONSPRITE
+  void R_SetWidescreenSize (void);   //Proto
+  byte R_GetWideScreen_Aspect(void); //Proto
+  double R_GetWideScreen_ScaledWidth(byte auto_value); //Proto
+
   double VanillaAspect  = 1.3333333333333333;
   double WS_ScaledWidth;
   CV_PossibleValue_t WidescreenAspect_cons_t[]={{0,"AUTO"},{1,"On"},{2,"Off"},{0,NULL}};
-  consvar_t cv_WidescreenAspect = {"widescreen","0", CV_SAVE|CV_CALL, WidescreenAspect_cons_t, R_SetViewSize}; 
+  consvar_t cv_WidescreenAspect = {"widescreen","0", CV_SAVE|CV_CALL, WidescreenAspect_cons_t, R_SetViewSize};
 #endif
 
 #ifdef FIT_RATIO
@@ -861,51 +865,7 @@ void R_SetViewSize (void)
     setsizeneeded = true;
 }
 
-#ifdef WIDESCREEN_WEAPONSPRITE
-/*
- * R_SetWidescreenSize
- * thanks to Credits got to Edward850/ Doom-Legacy-Neo
- */
-byte         SetWidescreen = false;
-void R_SetWidescreenSize (void)
-{
-    SetWidescreen = true;  
-}
 
-byte R_GetWideScreen_Aspect(void)
-{
-  double Result;
-  Result = (double)vid.width/(double)vid.height;
-  if ( Result > VanillaAspect )
-    return 1;
-  
-  return 0;
-}
-
-double R_GetWideScreen_ScaledWidth(byte auto_value)
-{        
-  double ScaledWidth;
-  ScaledWidth = VanillaAspect * (double)vid.height;
-  /* 
-  GenPrintf(EMSG_debug, "Widescreen Weapon Aspect %f: User Value = %d\n",
-           (double)vid.width/(double)vid.height,auto_value );
-  */         
-  /*Automatisch*/
-  switch(auto_value)
-  {
-    case 0: //Auto
-    {
-      if (R_GetWideScreen_Aspect()==1)
-        return ScaledWidth;
-      else
-        return 0;
-    }
-    case 1 : return ScaledWidth;
-    case 2 :
-    default: return 0;
-  }
-}
-#endif
 //
 // R_ExecuteSetViewSize
 //
@@ -1013,7 +973,7 @@ void R_ExecuteSetViewSize (void)
         // The draw for 320,200 ratio is different, as those pixels are not square.
         // For modern screens with square pixels, the ratio of 800,600 applies.
 #ifndef WIDESCREEN_WEAPONSPRITE        
-        int r_width = 600 * vid.height / vid.height;
+        int r_width = 600 * vid.width / vid.height;
 #else
         int r_width = 600 * ((vid.height * (int)WS_ScaledWidth) / (int)WS_ScaledWidth) / vid.height;
 #endif       
@@ -1034,7 +994,7 @@ std_fit:
         }
     }
 #endif   
- 
+
 #ifdef FIT_RATIO
 #ifdef DEBUG_FIT_RATIO
     unsigned int base_ratio = ((BASEVIDWIDTH << 16) / BASEVIDHEIGHT) + 1;  // will be rounded
@@ -1119,7 +1079,7 @@ std_fit:
     pspritescale  = INT_TO_FIXED(rdraw_viewwidth)/BASEVIDWIDTH;
     pspriteiscale = INT_TO_FIXED(BASEVIDWIDTH)/rdraw_viewwidth;   // x axis scale
     //added:02-02-98:now aspect ratio correct for psprites
-    pspriteyscale = INT_TO_FIXED((vid.height*rdraw_viewwidth)/vid.width)/BASEVIDHEIGHT;    
+    pspriteyscale = INT_TO_FIXED((vid.height*rdraw_viewwidth)/vid.width)/BASEVIDHEIGHT;
 #endif
 
 #ifdef WIDESCREEN_WEAPONSPRITE
@@ -1830,3 +1790,49 @@ void R_Register_EngineStuff (void)
 
     CV_RegisterVar_list( engine_client_cvar_list );
 }
+
+#ifdef WIDESCREEN_WEAPONSPRITE
+/*
+ * R_SetWidescreenSize
+ * thanks to Credits got to Edward850/ Doom-Legacy-Neo
+ */
+byte         SetWidescreen = false;
+void R_SetWidescreenSize (void)
+{
+    SetWidescreen = true;  
+}
+
+byte R_GetWideScreen_Aspect(void)
+{
+  double Result;
+  Result = (double)vid.width/(double)vid.height;
+  if ( Result > VanillaAspect )
+    return 1;
+  
+  return 0;
+}
+
+double R_GetWideScreen_ScaledWidth(byte auto_value)
+{        
+  double ScaledWidth;
+  ScaledWidth = VanillaAspect * (double)vid.height;
+  /* 
+  GenPrintf(EMSG_debug, "Widescreen Weapon Aspect %f: User Value = %d\n",
+           (double)vid.width/(double)vid.height,auto_value );
+  */         
+  /*Automatisch*/
+  switch(auto_value)
+  {
+    case 0: //Auto
+    {
+      if (R_GetWideScreen_Aspect()==1)
+        return ScaledWidth;
+      else
+        return 0;
+    }
+    case 1 : return ScaledWidth;
+    case 2 :
+    default: return 0;
+  }
+}
+#endif

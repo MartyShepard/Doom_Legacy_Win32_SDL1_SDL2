@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_plane.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: r_plane.h 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -202,5 +202,5 @@ typedef struct ff_planemgr_s
 } ff_planemgr_t;
 
 extern ff_planemgr_t  ffplane[MAXFFLOORS];
-extern int           numffplane;
+extern unsigned int   numffplane;
 #endif

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_draw.c 1757 2025-11-20 11:44:00Z wesleyjohnson $
+// $Id: r_draw.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -171,8 +171,8 @@ byte*                   dc_skintran; // ptr to one skintranstables table
 
 
 struct r_lightlist_s*   dc_lightlist = NULL;
-int                     dc_numlights = 0;
-int                     dc_maxlights;
+unsigned int            dc_numlights = 0;
+unsigned int            dc_maxlights;
 
 int     dc_texheight;
 
@@ -687,7 +687,6 @@ void R_DrawColumnShadowed(void)
     int count;
 //    int realyh, realyl;
     int realyh;
-    int i;
     int height, bheight = 0;
     int solid = 0;
 
@@ -711,6 +710,7 @@ void R_DrawColumnShadowed(void)
 
     // SoM: This runs through the lightlist from top to bottom and cuts up
     // the column accordingly.
+    unsigned int i;
     for (i = 0; i < dc_numlights; i++)
     {
         // If the height of the light is above the column, get the colormap

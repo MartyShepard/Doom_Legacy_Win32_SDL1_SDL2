@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_genlin.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_genlin.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -583,7 +583,6 @@ int EV_DoGenStairs ( line_t* line )
   int                   ok;
   int                   rtn = 0;
   int                   secnum, old_secnum, new_secnum;
-  int                   i;
   boolean               manual;
     
   sector_t*             sec;
@@ -695,11 +694,13 @@ manual_stair:
     do
     {
       ok = 0;
-      for (i = 0; i < sec->linecount; i++)
+      uint16_t li;
+      for (li = 0; li < sec->linecount; li++)
       {
         // for each line in sector linelist
-        register line_t * slinei = sec->linelist[i];
+        register line_t * slinei = sec->linelist[li];
             // [WDJ] ptr slinei, saves 0 bytes, but is easier to read.
+
         if ( !(slinei->backsector) )   // ignore line with no backsector
           continue;
                                   

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_enemy.c 1768 2026-01-13 15:59:01Z wesleyjohnson $
+// $Id: p_enemy.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -564,9 +564,6 @@ static mobj_t*         soundtarget;
 static
 void P_RecursiveSound ( sector_t*  sec, byte num_soundblocks )
 {
-    int         i;
-    line_t*     secline;
-
     // wake up all monsters in this sector
 
     // [WDJ] Moved the validcount test to the caller, saving
@@ -588,10 +585,12 @@ void P_RecursiveSound ( sector_t*  sec, byte num_soundblocks )
     // they live forever.
     SET_TARGET_REF( sec->soundtarget, soundtarget );
 
-    for (i=0 ; i<sec->linecount ; i++)
+    uint16_t li;
+    for (li=0 ; li<sec->linecount ; li++)
     {
         // for each line of the sector linelist
-        secline = sec->linelist[i];
+        line_t*  secline = sec->linelist[li];
+
         if (! (secline->flags & ML_TWOSIDED) )
             continue;  // nothing on other side
 

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_defs.h 1765 2025-11-21 17:46:17Z wesleyjohnson $
+// $Id: r_defs.h 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2015 by DooM Legacy Team.
@@ -438,7 +438,7 @@ typedef struct sector_s
     //SoM: 3/6/2000: end stuff...
 
     // list of ptrs to lines that have this sector as a side
-    int                 linecount;
+    uint16_t            linecount;
     line_t           ** linelist;  // [linecount] size
 
     //SoM: 2/23/2000: Improved fake floor hack
@@ -447,10 +447,10 @@ typedef struct sector_s
     int  *              attached;   // list of control sectors (by secnum)
                                     // realloc in P_AddFakeFloor
                                     // [WDJ] 7/2010 deallocate in P_SetupLevel
-    int                 numattached;
+    uint16_t            numattached;
     ff_light_t *        lightlist;  // array of fake floor lights
                                     // ZMalloc PU_LEVEL, in R_Prep3DFloors
-    int                 numlights;
+    uint16_t            numlights;
     int                 validsort; //if == validsort already been sorted
 
     // SoM: 4/3/2000: per-sector colormaps!
@@ -771,7 +771,7 @@ typedef struct
     vertex_t*   v2;  // end vertex
        // side1 is right side when looking from v1 to v2  (start to end)
 
-    int         side;
+    byte        side;
         // 0= seg is on right side of linedef
         // 1= seg is on left side of linedef (seg direction is opposite linedef)
 
@@ -797,19 +797,19 @@ typedef struct
     sector_t*   backsector;   // side of linedef away from sector, optional
 
 #ifdef HWRENDER   
-    polyvertex_t  *pv1, *pv2; // float polygon vertex
+    polyvertex_t * pv1, * pv2; // float polygon vertex
     // length of the seg : used by the hardware renderer
     float       length;
 
     //Hurdler: 04/12/2000: added for static lightmap
     // hardware renderer
-    lightmap_t  *lightmaps;
+    lightmap_t * lightmaps;
 #endif
 
     // SoM: Why slow things down by calculating lightlists for every
     // thick side.
-    int               numlights;
     r_lightlist_t*    rlights;
+    uint16_t          numlights;
 } seg_t;
 
 

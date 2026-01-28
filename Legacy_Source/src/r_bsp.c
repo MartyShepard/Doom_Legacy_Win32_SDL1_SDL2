@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_bsp.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: r_bsp.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -1050,12 +1050,13 @@ void R_Prep3DFloors(sector_t*  sector)
   ffloor_t*      rover;
   ffloor_t*      best;
   fixed_t        bestheight, maxheight;
-  int            count, i, mapnum;
+  int            mapnum;
   sector_t*      modelsec;
   ff_light_t   * ff_light;
+  unsigned int   count;
 
   // count needed lightlist entries
-  count = 1;
+  count = 1;  // allocate includes sector light at [0]
   for(rover = sector->ffloors; rover; rover = rover->next)
   {
     if((rover->flags & FF_EXISTS)
@@ -1090,9 +1091,10 @@ void R_Prep3DFloors(sector_t*  sector)
   // Work down from highest light to lowest light.
   // Determine each light in lightlist.
   maxheight = FIXED_MAX;  // down from max, previous light
-  for(i = 1; i < count; i++)
+  unsigned int gi;
+  for(gi = 1; gi < count; gi++)
   {
-    ff_light = & sector->lightlist[i];
+    ff_light = & sector->lightlist[gi];
     bestheight = -FIXED_MAX;
     best = NULL;
     for(rover = sector->ffloors; rover; rover = rover->next)
@@ -1120,7 +1122,7 @@ void R_Prep3DFloors(sector_t*  sector)
     }
     if(!best)  // failure escape
     {
-      sector->numlights = i;
+      sector->numlights = gi;
       return;
     }
 
@@ -1142,8 +1144,8 @@ void R_Prep3DFloors(sector_t*  sector)
     if(best->flags & FF_NOSHADE)
     {
       // FF_NOSHADE, copy next higher light
-      ff_light->lightlevel = sector->lightlist[i-1].lightlevel;
-      ff_light->extra_colormap = sector->lightlist[i-1].extra_colormap;
+      ff_light->lightlevel = sector->lightlist[ gi-1 ].lightlevel;
+      ff_light->extra_colormap = sector->lightlist[ gi-1 ].extra_colormap;
     }
     else
     {
@@ -1168,7 +1170,7 @@ void R_Prep3DFloors(sector_t*  sector)
       else
       {
         // Slab light does not show below slab, indirect to light above slab
-        best->lastlight = i - 1;
+        best->lastlight = gi - 1;
       }
     }
   }
@@ -1176,14 +1178,18 @@ void R_Prep3DFloors(sector_t*  sector)
 
 
 // Find light under planeheight, plain version
+// Only called when have ffloors, thus have lightlist and numlights > 0.
 // Return a fake-floor light.
 ff_light_t *  R_GetPlaneLight(sector_t* sector, fixed_t planeheight)
 {
+  // [WDJ] Cannot index past numlights-1, as that is off end of list,
+  // but this only tests that addr, which is allowed.
   ff_light_t * light1 = & sector->lightlist[1];  // first fake-floor
+  ff_light_t * lightend = & sector->lightlist[sector->numlights];  // after last lightlist addr
 
   // [0] is sector light, which is above all
   // lightlist is highest first
-  for( ; light1 < & sector->lightlist[sector->numlights]; light1++)
+  for( ; light1 < lightend; light1++)
   {
     if( light1->height <= planeheight)  break;
   }
@@ -1197,7 +1203,7 @@ ff_light_t *  R_GetPlaneLight(sector_t* sector, fixed_t planeheight)
 ff_light_t *  R_GetPlaneLight_viewz(sector_t* sector, fixed_t  planeheight)
 {
   ff_light_t * light1 = & sector->lightlist[1];  // first fake-floor
-  ff_light_t * lightend = & sector->lightlist[sector->numlights];  // past last
+  ff_light_t * lightend = & sector->lightlist[sector->numlights];  // addr past last
 
 #if 0
   // faster

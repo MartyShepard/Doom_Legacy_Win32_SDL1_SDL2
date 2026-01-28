@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_plane.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: r_plane.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -131,7 +131,7 @@ visplane_t*             vsp_currentplane;
 // [WDJ] Renamed so they do not confuse with ffloor
 // The ffplanes of the subsector processed by BSP.
 ff_planemgr_t           ffplane[MAXFFLOORS];
-int                     numffplane;
+unsigned int            numffplane;
 
 //SoM: 3/23/2000: Boom visplane hashing routine.
 #define visplane_hash(picnum,lightlevel,height) \
