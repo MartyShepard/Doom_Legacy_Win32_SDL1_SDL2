@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_heretic.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_heretic.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by Raven Software, Corp.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -43,6 +43,8 @@
 #include "s_sound.h"
 #include "m_random.h"
 #include "dstrings.h"
+#include "p_tick.h"
+  // SET_TARGET_REF
 
 //---------------------------------------------------------------------------
 //
@@ -73,8 +75,10 @@ void A_ContMobjSound( mobj_t* actor )
 // to turn counter clockwise.  'delta' is set to the amount 'source'
 // needs to turn.
 //
+// Used by Heretic, Hexen
 //----------------------------------------------------------------------------
-int P_FaceMobj( mobj_t* source, mobj_t* target, angle_t* delta )
+
+int P_FaceMobj( mobj_t* source, mobj_t* target, angle_t* delta_out )
 {
     angle_t angle1, angle2, diff;
 
@@ -85,12 +89,12 @@ int P_FaceMobj( mobj_t* source, mobj_t* target, angle_t* delta )
         diff = angle2 - angle1;
         if(diff > ANG180)
         {
-            *delta = ANGLE_MAX - diff;
+            *delta_out = ANGLE_MAX - diff;
             return 0;
         }
         else
         {
-            *delta = diff;
+            *delta_out = diff;
             return 1;
         }
     }
@@ -99,12 +103,12 @@ int P_FaceMobj( mobj_t* source, mobj_t* target, angle_t* delta )
         diff = angle1 - angle2;
         if(diff > ANG180)
         {
-            *delta = ANGLE_MAX - diff;
+            *delta_out = ANGLE_MAX - diff;
             return 1;
         }
         else
         {
-            *delta = diff;
+            *delta_out = diff;
             return 0;
         }
     }
@@ -191,6 +195,8 @@ boolean P_SeekerMissile_MBF21( mobj_t * actor, mobj_t ** seek_target, angle_t th
     return true;
 }
 
+// Heretic: MummyFX1Seek, SkullRodPL2Seek PhoenixPuff
+// Hexen: BishopMissileSeek, SorcFX1Seek, 
 boolean P_SeekerMissile(mobj_t * actor, angle_t thresh, angle_t turnMax)
 {
     return P_SeekerMissile_MBF21( actor, &actor->tracer, thresh, turnMax, false );
@@ -199,6 +205,9 @@ boolean P_SeekerMissile(mobj_t * actor, angle_t thresh, angle_t turnMax)
 #else
 // Heretic
 
+// Used Heretic, Hexen
+// Heretic: MummyFX1Seek, SkullRodPL2Seek PhoenixPuff
+// Hexen: BishopMissileSeek, SorcFX1Seek, 
 boolean P_SeekerMissile( mobj_t* actor, angle_t thresh, angle_t turnMax )
 {
     int dir;
@@ -260,6 +269,7 @@ boolean P_SeekerMissile( mobj_t* actor, angle_t thresh, angle_t turnMax )
 #endif
 
 //---------------------------------------------------------------------------
+// Heretic, Hexen
 //
 // FUNC P_SpawnMissileAngle
 //
@@ -268,54 +278,85 @@ boolean P_SeekerMissile( mobj_t* actor, angle_t thresh, angle_t turnMax )
 //
 //---------------------------------------------------------------------------
 
+// Heretic: MT_SRCRFX1..2, MT_MNTRFX1, MT_WIZFX1
+// Hexen: MT_MNTRFX1, MT_ICEGUY_FX2, MT_SORCFX1..4,
+//        MT_KORAX_SPIRIT1..6, MT_FSWORD_MISSILE
 mobj_t* P_SpawnMissileAngle(mobj_t * source, mobjtype_t type,
         angle_t angle, fixed_t momz)
 {
-    fixed_t z;
     mobj_t * mo;
 
+    fixed_t z = source->z;
     switch(type)
     {
+        // Heretic, Hexen
      case MT_MNTRFX1: // Minotaur swing attack missile
-        z = source->z + FIXINT(40);
+        z += FIXINT(40);
         break;
      case MT_MNTRFX2: // Minotaur floor fire missile
         z = ONFLOORZ;
+#ifdef HEXEN
+        if( EN_hexen )
+          z += source->floorclip;
+#endif
         break;
+        // Heretic
      case MT_SRCRFX1: // Sorcerer Demon fireball
-        z = source->z + FIXINT(48);
+        z += FIXINT(48);
         break;
+#ifdef HEXEN
+        // Hexen
+     case MT_ICEGUY_FX2: // Secondary Projectiles of the Ice Guy
+        z += FIXINT(3);
+        break;
+     case MT_MSTAFF_FX2:
+        z += FIXINT(40);
+        break;
+#endif
      default:
-        z = source->z + FIXINT(32);
+        z += FIXINT(32);
         break;
     }
-    if(source->flags2&MF2_FEETARECLIPPED)
+
+#ifdef HEXEN
+    if( EN_hexen )
+    {
+        z -= source->floorclip;
+    }
+    else
+#endif
+    if(source->flags2 & MF2_FEETARECLIPPED)
     {
         z -= FOOTCLIPSIZE;
     }
+
     mo = P_SpawnMobj(source->x, source->y, z, type);
+
     if(mo->info->seesound)
     {
         S_StartObjSound(mo, mo->info->seesound);
     }
-    mo->target = source; // Originator
+
+    SET_TARGET_REF( mo->target, source );  // Originator
+
     mo->angle = angle;
     // This one spot does not pull common expressions well, explicit is smaller.
-    int angf = ANGLE_TO_FINE( angle );
 #ifdef MONSTER_VARY
     fixed_t speed = mo->speed;
 #else
     fixed_t speed = mo->info->speed;
 #endif
+    int angf = ANGLE_TO_FINE( angle );
     mo->momx = FixedMul(speed, finecosine[angf]);
     mo->momy = FixedMul(speed, finesine[angf]);
     mo->momz = momz;
-    return (P_CheckMissileSpawn(mo) ? mo : NULL);
+
+    return (P_CheckMissileSpawn(mo));  // mo or NULL
 }
 
 
 extern uint16_t WeaponAmmo_pickup[];
-extern uint16_t clipammo[NUMAMMO];
+extern uint16_t clipammo[NUM_AMMO];
 extern byte cheat_mus_seq[];
 extern byte cheat_choppers_seq[];
 extern byte cheat_god_seq[];
@@ -457,7 +498,7 @@ typedef struct {
 } ammo_install_t;
 
 // Index by ammotype_t
-static const ammo_install_t  heretic_ammo_table[NUMAMMO] = {
+static const ammo_install_t  heretic_ammo_table[NUM_AMMO] = {
    { 100,  5 }, // am_goldwand, clip used in deathmatch 1 & 3 mul by 5 (P_GiveWeapon)
    {  50,  2 }, // am_crossbow
    { 200,  6 }, // am_blaster
@@ -467,7 +508,7 @@ static const ammo_install_t  heretic_ammo_table[NUMAMMO] = {
 };
 
 // Index by ammotype_t
-static const ammo_install_t  doom_ammo_table[NUMAMMO] = {
+static const ammo_install_t  doom_ammo_table[NUM_AMMO] = {
    { 200, 10 }, // am_clip
    {  50,  4 }, // am_shell
    { 300, 20 }, // am_cell
@@ -477,7 +518,7 @@ static const ammo_install_t  doom_ammo_table[NUMAMMO] = {
 };
 
 // Index by weapontype_t
-static const byte  heretic_weapon_ammo_table[NUMWEAPONS] = {
+static const byte  heretic_weapon_ammo_table[NUM_WEAPONS] = {
    0, // wp_staff
   25, // wp_goldwand
   10, // wp_crossbow
@@ -490,7 +531,7 @@ static const byte  heretic_weapon_ammo_table[NUMWEAPONS] = {
 };
 
 // Index by weapontype_t
-static const byte  doom_weapon_ammo_table[NUMWEAPONS] = {
+static const byte  doom_weapon_ammo_table[NUM_WEAPONS] = {
    0, // wp_fist
   20, // wp_pistol
    8, // wp_shotgun
@@ -596,7 +637,7 @@ void  sfx_ammo_text_install( byte set_heretic )
     }
 
     // SFX
-    for( ; st->sfxid < NUMSFX_DEF; st++ )
+    for( ; st->sfxid < NUM_SFX_DEF; st++ )
     {
         S_sfx[st->sfxid].priority = st->priority;
         if( st->name )
@@ -605,19 +646,19 @@ void  sfx_ammo_text_install( byte set_heretic )
    
 
     // AMMO
-    for( ai = 0; ai < NUMAMMO; ai++ )  // index ammotype_t
+    for( ai = 0; ai < NUM_AMMO; ai++ )  // index ammotype_t
     {
         maxammo[ ai ]  = aat[ai].max_val;
         clipammo[ ai ] = aat[ai].clip_val;
     }
 
-    for( ai = 0; ai < NUMWEAPONS; ai++ )  // index weapontype_t
+    for( ai = 0; ai < NUM_WEAPONS; ai++ )  // index weapontype_t
     {
         WeaponAmmo_pickup[ai] = wat[ai];
     }
 
     // TEXT
-    for( ; tt->textid < NUMTEXT ; tt++ )
+    for( ; tt->textid < NUM_TEXT ; tt++ )
     {
         text[tt->textid] = tt->text;
     }

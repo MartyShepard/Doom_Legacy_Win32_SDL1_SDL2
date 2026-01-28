@@ -45,7 +45,7 @@
 // See ENABLE_SOUND in doomdef.h.
 
 #include "s_sound.h"
-  // NUMSFX, flags
+  // NUM_SFX, flags
 
 #include "lx_ctrl.h"
   // SOUND_DEVICE_OPTION
@@ -103,7 +103,7 @@ extern  byte  verbose;
 // Sound Server
 #include "sndserv/soundsrv.h"
 // Sound driver access to S_sfx will use srv_sfx (simpler copy).
-extern  server_sfx_t   srv_sfx[NUMSFX];
+extern  server_sfx_t   srv_sfx[NUM_SFX];
 #define  S_sfx   srv_sfx
 
 // server linkage

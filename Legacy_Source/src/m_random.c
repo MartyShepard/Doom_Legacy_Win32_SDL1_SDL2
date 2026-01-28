@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: m_random.c 1668 2024-03-03 04:38:16Z wesleyjohnson $
+// $Id: m_random.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -81,7 +81,7 @@ byte P_Random ()
 int P_SignedRandom ()
 {
     int r = P_Random();
-    return r-P_Random();
+    return r - P_Random();
 }
 
 #else
@@ -97,7 +97,7 @@ int P_SignedRandomFL (char *fn, int ln)
     int r;
     debug_Printf("P_SignedRandom at : %sp %d\n", fn, ln);
     r = rndtable[++prndindex];
-    return r-rndtable[++prndindex];
+    return r - rndtable[++prndindex];
 }
 
 #endif

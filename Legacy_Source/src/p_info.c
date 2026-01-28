@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_info.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: p_info.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright(C) 2000 Simon Howard
 // Copyright (C) 2001-2011 by DooM Legacy Team.
@@ -445,7 +445,7 @@ void P_ParseInterText(char * line)
 // Setup/Misc. Functions
 //
 
-boolean default_weaponowned[NUMWEAPONS];
+boolean default_weaponowned[NUM_WEAPONS];
 
 // Init weapon positions, dependent upon info.
 void P_InitWeapons(void)

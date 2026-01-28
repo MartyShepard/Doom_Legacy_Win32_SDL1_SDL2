@@ -253,7 +253,7 @@ void R_DrawShadeColumn_32(void)
     {
         // 8bpp: *dest = reg_colormaps[ LIGHTTABLE(dc_source[frac >> FRACBITS]) + (*dest) ];
         // [WDJ] The source is a patch of alpha values, 0..255.
-        // light level values are 0..NUMCOLORMAPS-1, which is 0..32
+        // light level values are 0..NUM_COLORMAPS-1, which is 0..32
 //        alpha = dc_source[frac >> FRACBITS] >> 3;  // reduce 0..255 to 0..32
         alpha = dc_source[frac >> FRACBITS];
         register pixel32_t * p32 = (pixel32_t*)dest;

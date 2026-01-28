@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: g_input.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: g_input.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -178,8 +178,8 @@ extern int             dclicktime2;
 extern int             dclickstate2;
 extern int             dclicks2;
 
-extern byte  gamekeydown[NUMINPUTS];
-extern byte  gamekeytapped[NUMINPUTS];
+extern byte  gamekeydown[NUM_INPUTS];
+extern byte  gamekeytapped[NUM_INPUTS];
 
 // two key codes (or virtual key) per game control
 extern  int  gamecontrol[num_gamecontrols][2];

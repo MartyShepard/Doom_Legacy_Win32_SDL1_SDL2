@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: dehacked.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: dehacked.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -107,9 +107,9 @@ static boolean  bex_include_notext = 0;  // bex include with skip deh text
 // Save compare values, to handle multiple DEH files and lumps
 static action_fi_t  deh_actions[NUMSTATES_DEF];
 static char*        deh_sprnames[NUMSPRITES_DEF];
-static char*        deh_sfxnames[NUMSFX_DEF];
-static char*        deh_musicname[NUMMUSIC_DEF];
-static char*        deh_text[NUMTEXT];
+static char*        deh_sfxnames[NUM_SFX_DEF];
+static char*        deh_musicname[NUM_MUSIC_DEF];
+static char*        deh_text[NUM_TEXT];
 
 #define NAME4_AS_NUM( n )  (*((uint32_t*)(n)))
 
@@ -365,7 +365,7 @@ void deh_replace_string( char ** oldstring, char * newstring, DRS_type_e drstype
         // look up in table
         for(i=0; ; i++)
         {
-            if( format_ref_table[i].text_id > NUMTEXT )  break;
+            if( format_ref_table[i].text_id > NUM_TEXT )  break;
             if( format_ref_table[i].text_id == text_id )
             {
                 num_s = format_ref_table[i].num_s;
@@ -2150,7 +2150,7 @@ void read_sound( myfile_t* f, int deh_sound_id )
               value=(value+4)/8;
           else
               value=(value+8)/8;
-          if(value>=-1 && value<(NUMSFX_DEF-1))
+          if(value>=-1 && value<(NUM_SFX_DEF-1))
               ssp->name=deh_sfxnames[value+1];
           else
               deh_error("Sound %d : offset out of bound\n", deh_sound_id);
@@ -2330,7 +2330,7 @@ void read_text( myfile_t* f, int len1, int len2 )
       strncpy( str1, s, len1 ); // copy name to proper string
       str1[len1] = '\0';
       // sound table, before DEHEXTRA
-      for(i=0;i<NUMSFX_DEF;i++)
+      for(i=0;i<NUM_SFX_DEF;i++)
       {
         const char * dsfx = deh_sfxnames[i];
         if( dsfx && !strcmp(dsfx,str1))
@@ -2343,7 +2343,7 @@ void read_text( myfile_t* f, int len1, int len2 )
       }
       // music names limited to 6 chars
       // music table
-      for(i=1;i<NUMMUSIC_DEF;i++)
+      for(i=1;i<NUM_MUSIC_DEF;i++)
       {
         const char * dmus = deh_musicname[i];
         if( dmus && (!strcmp(dmus, str1)) )
@@ -2367,7 +2367,7 @@ void read_text( myfile_t* f, int len1, int len2 )
     }
 
     // special text : text changed in Legacy but with dehacked support
-    for(i=SPECIALDEHACKED;i<NUMTEXT;i++)
+    for(i=SPECIALDEHACKED;i<NUM_TEXT;i++)
     {
        int ltxt = strlen(deh_text[i]);
 
@@ -2416,7 +2416,7 @@ void read_text( myfile_t* f, int len1, int len2 )
        }
        for(i=0;;i++)
        {
-           if( hash_text_table[i].indirect >= NUMTEXT ) break;  // not found
+           if( hash_text_table[i].indirect >= NUM_TEXT ) break;  // not found
            if( hash_text_table[i].hash == hash )
            {
                deh_replace_string( &text[hash_text_table[i].indirect], &(s[len1]), DRS_string );
@@ -2864,7 +2864,7 @@ void bex_strings( myfile_t* f, byte bex_permission )
                 if( filename_reject( stxt, 10 ) )  goto no_text_change;
             }
 #endif
-            if( i >= perm_min && text_index < NUMTEXT)
+            if( i >= perm_min && text_index < NUM_TEXT)
             {
                 // May be const string, which will segfault on write
                 deh_replace_string( &text[text_index], stxt, DRS_string );
@@ -3960,7 +3960,7 @@ void DEH_LoadDehackedFile( myfile_t* f, byte bex_permission )
                uint16_t sound_indx = remap_sound(i);
 #else
                uint16_t sound_indx = i;
-               if( sound_indx>=0 && sound_indx<NUMSFX_EXT )
+               if( sound_indx>=0 && sound_indx<NUM_SFX_EXT )
                {
                    deh_error("Sound %d beyond limits\n", sound_indx);
                    sound_indx = sfx_freeslot_last; // must still read the sound line
@@ -4021,7 +4021,7 @@ void DEH_LoadDehackedFile( myfile_t* f, byte bex_permission )
         else if(!strcasecmp(word,"Weapon"))
              {
                // "Weapon <num>"
-               if(i<NUMWEAPONS && i>=0)
+               if(i<NUM_WEAPONS && i>=0)
                    read_weapon(f,i);
                else
                    deh_error("Weapon %d don't exist\n",i);
@@ -4029,7 +4029,7 @@ void DEH_LoadDehackedFile( myfile_t* f, byte bex_permission )
         else if(!strcasecmp(word,"Ammo"))
              {
                // "Ammo <num>"
-               if(i<NUMAMMO && i>=0)
+               if(i<NUM_AMMO && i>=0)
                    read_ammo(f,i);
                else
                    deh_error("Ammo %d don't exist\n",i);
@@ -4133,11 +4133,11 @@ void DEH_Init(void)
       deh_actions[i]=states[i].action;
   for(i=0;i<NUMSPRITES_DEF;i++)
       deh_sprnames[i]=sprnames[i];
-  for(i=0;i<NUMSFX_DEF;i++)
+  for(i=0;i<NUM_SFX_DEF;i++)
       deh_sfxnames[i]=S_sfx[i].name;
-  for(i=1;i<NUMMUSIC_DEF;i++)
+  for(i=1;i<NUM_MUSIC_DEF;i++)
       deh_musicname[i]=S_music[i].name;
-  for(i=0;i<NUMTEXT;i++)
+  for(i=0;i<NUM_TEXT;i++)
       deh_text[i]=text[i];
 
   monster_infight_deh = INFT_none; // not set

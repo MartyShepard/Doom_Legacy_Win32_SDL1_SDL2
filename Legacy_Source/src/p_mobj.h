@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_mobj.h 1770 2026-01-13 16:00:35Z wesleyjohnson $
+// $Id: p_mobj.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -54,7 +54,7 @@
 #define P_MOBJ_H
 
 #include "doomdef.h"
-  // NUMSKINCOLORS
+  // NUM_SKINCOLORS
 #include "doomtype.h"
 
 // We need the WAD data structure for Map things,
@@ -422,8 +422,8 @@ typedef enum
 } mobjeflag_e;
 
 
-#if NUMSKINCOLORS > 16
-#error MF_TRANSLATION can only handle NUMSKINCOLORS <= 16
+#if NUM_SKINCOLORS > 16
+#error MF_TRANSLATION can only handle NUM_SKINCOLORS <= 16
 #endif
 
 
@@ -646,8 +646,8 @@ void    P_SpawnSmoke (fixed_t x, fixed_t y, fixed_t z);
 void    P_SpawnPuff (fixed_t x, fixed_t y, fixed_t z);
 mobj_t* P_SpawnMissile (mobj_t* source, mobj_t* dest, mobjtype_t type);
 
+mobj_t* P_SpawnPlayerMissile(mobj_t * source, mobjtype_t type );
 mobj_t* P_SPMAngle ( mobj_t* source, mobjtype_t type, angle_t angle );
-#define P_SpawnPlayerMissile(s,t) P_SPMAngle(s,t,s->angle)
 
 
 // Extra Mapthing

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: m_cheat.c 1772 2026-01-13 16:02:20Z wesleyjohnson $
+// $Id: m_cheat.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -278,10 +278,10 @@ boolean cht_Responder(event_t * ev)
             plyr->armorpoints = idfa_armor;
             plyr->armortype = idfa_armor_class;
 
-            for (i = 0; i < NUMWEAPONS; i++)
+            for (i = 0; i < NUM_WEAPONS; i++)
                 plyr->weaponowned[i] = true;
 
-            for (i = 0; i < NUMAMMO; i++)
+            for (i = 0; i < NUM_AMMO; i++)
                 plyr->ammo[i] = plyr->maxammo[i];
 
             //plyr->message = STSTR_FAADDED;
@@ -293,10 +293,10 @@ boolean cht_Responder(event_t * ev)
             plyr->armorpoints = idkfa_armor;
             plyr->armortype = idkfa_armor_class;
 
-            for (i = 0; i < NUMWEAPONS; i++)
+            for (i = 0; i < NUM_WEAPONS; i++)
                 plyr->weaponowned[i] = true;
 
-            for (i = 0; i < NUMAMMO; i++)
+            for (i = 0; i < NUM_AMMO; i++)
                 plyr->ammo[i] = plyr->maxammo[i];
 
             plyr->cards = it_allkeys;
@@ -554,7 +554,7 @@ void Command_CheatGimme_f(void)
         }
         else if (!strncmp(s, "ammo", 4))
         {
-            for (j = 0; j < NUMAMMO; j++)
+            for (j = 0; j < NUM_AMMO; j++)
                 plyr->ammo[j] = plyr->maxammo[j];
 
             CONS_Printf("got ammo\n");
@@ -574,10 +574,10 @@ void Command_CheatGimme_f(void)
         }
         else if (!strncmp(s, "weapons", 7))
         {
-            for (j = 0; j < NUMWEAPONS; j++)
+            for (j = 0; j < NUM_WEAPONS; j++)
                 plyr->weaponowned[j] = true;
 
-            for (j = 0; j < NUMAMMO; j++)
+            for (j = 0; j < NUM_AMMO; j++)
                 plyr->ammo[j] = plyr->maxammo[j];
 
             CONS_Printf("got weapons\n");
@@ -1001,13 +1001,13 @@ static void CheatWeaponsFunc(player_t * player, Cheat_t * cheat)
     player->armortype = 2;
     if(! (player->GF_flags & GF_backpack) )
     {
-        for (i = 0; i < NUMAMMO; i++)
+        for (i = 0; i < NUM_AMMO; i++)
         {
             player->maxammo[i] *= 2;
         }
         player->GF_flags |= GF_backpack;
     }
-    for (i = 0; i < NUMWEAPONS - 1; i++)
+    for (i = 0; i < NUM_WEAPONS - 1; i++)
     {
         player->weaponowned[i] = true;
     }
@@ -1019,7 +1019,7 @@ static void CheatWeaponsFunc(player_t * player, Cheat_t * cheat)
         player->weaponowned[wp_phoenixrod] = false;
         player->weaponowned[wp_mace] = false;
     }
-    for (i = 0; i < NUMAMMO; i++)
+    for (i = 0; i < NUM_AMMO; i++)
     {
         player->ammo[i] = player->maxammo[i];
     }
@@ -1094,7 +1094,7 @@ static void CheatArtifact3Func(player_t * player, Cheat_t * cheat)
     count = cheat->args[1] - '0';
     if (type_num == 26 && count == 0)
     {   // All artifacts
-        for (i = arti_none + 1; i < NUMARTIFACTS; i++)
+        for (i = arti_none + 1; i < NUM_ARTIFACTS; i++)
         {
             // [WDJ] Fix strange test of shareware enum
             if (gamedesc_id == GDESC_heretic_shareware)
@@ -1110,7 +1110,7 @@ static void CheatArtifact3Func(player_t * player, Cheat_t * cheat)
         }
         P_SetMessage(player, TXT_CHEATARTIFACTS3, 51);
     }
-    else if (type_num > arti_none && type_num < NUMARTIFACTS && count > 0 && count < 10)
+    else if (type_num > arti_none && type_num < NUM_ARTIFACTS && count > 0 && count < 10)
     {
         // [WDJ] Fix strange test of shareware enum
         if (gamedesc_id == GDESC_heretic_shareware)

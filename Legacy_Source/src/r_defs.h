@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_defs.h 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_defs.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2015 by DooM Legacy Team.
@@ -309,11 +309,24 @@ typedef struct r_lightlist_s {
 
 
 typedef enum {
+// solids    
+   FLOOR_SOLID,   // default, normal
+   FLOOR_ICE,
+// liquids
+   // Any floor type >= FLOOR_LIQUID will floorclip sprites (Hexen).
+   FLOOR_LIQUID,  // group (hexen)
+   FLOOR_WATER,
+   FLOOR_SLUDGE, 
+   FLOOR_LAVA,
+
+#if 0
+    // old values, these are not saved anywhere
    FLOOR_SOLID,
    FLOOR_WATER,  
    FLOOR_LAVA,   
    FLOOR_SLUDGE, 
    FLOOR_ICE,
+#endif
 } floortype_e;
 
 //=========
@@ -674,7 +687,7 @@ typedef enum {
     LT_CHDL,
     LT_KFR1,
 
-    NUMLIGHTS
+    NUM_LIGHTS
 } sprite_light_ind_e;
 
 // [WDJ] Sprite light sources bit defines.

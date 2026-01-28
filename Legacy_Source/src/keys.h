@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: keys.h 1466 2019-10-01 02:37:37Z wesleyjohnson $
+// $Id: keys.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2010 by DooM Legacy Team.
 //
@@ -242,7 +242,7 @@ enum key_input_e
 
   // number of total 'button' inputs, includes keyboard keys, plus virtual
   // keys (mousebuttons and joybuttons become keys)
-  NUMINPUTS
+  NUM_INPUTS
 };
 
 #endif

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_main.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_main.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -830,7 +830,7 @@ void R_Init_LightTables (void)
     //  for each level / distance combination.
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
-        startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
+        startmap = ((LIGHTLEVELS-1-i)*2)*NUM_COLORMAPS/LIGHTLEVELS;
         for (j=0 ; j<MAXLIGHTZ ; j++)
         {
             //added:02-02-98:use BASEVIDWIDTH, vid.width is not set already,
@@ -842,8 +842,8 @@ void R_Init_LightTables (void)
             if (level < 0)
                 level = 0;
 
-            if (level >= NUMCOLORMAPS)
-                level = NUMCOLORMAPS-1;
+            if (level >= NUM_COLORMAPS)
+                level = NUM_COLORMAPS-1;
 
             zlight[i][j] = & reg_colormaps[ LIGHTTABLE( level ) ];
         }
@@ -957,7 +957,6 @@ void R_ExecuteSetViewSize (void)
     centerx = rdraw_viewwidth/2;
     centerxfrac = INT_TO_FIXED(centerx);
     centeryfrac = INT_TO_FIXED(centery);
-    
 #ifdef WIDESCREEN_WEAPONSPRITE
   WS_ScaledWidth = R_GetWideScreen_ScaledWidth(cv_WidescreenAspect.EV);
 #endif
@@ -1021,8 +1020,6 @@ std_fit:
         break;
     }
 #endif   
-
-
 
     //added:01-02-98:aspect ratio is now correct, added an 'projection_y'
     //      since the scale is not always the same between horiz. & vert.
@@ -1136,7 +1133,7 @@ std_fit:
     //  for each level / scale combination.
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
-        startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
+        startmap = ((LIGHTLEVELS-1-i)*2)*NUM_COLORMAPS/LIGHTLEVELS;
         for (j=0 ; j<MAXLIGHTSCALE ; j++)
         {
             level = startmap - j*vid.width/(rdraw_viewwidth<<detailshift)/DISTMAP;
@@ -1144,8 +1141,8 @@ std_fit:
             if (level < 0)
                 level = 0;
 
-            if (level >= NUMCOLORMAPS)
-                level = NUMCOLORMAPS-1;
+            if (level >= NUM_COLORMAPS)
+                level = NUM_COLORMAPS-1;
 
             scalelight[i][j] = & reg_colormaps[ LIGHTTABLE( level ) ];
         }

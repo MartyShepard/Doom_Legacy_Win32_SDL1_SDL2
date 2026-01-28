@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_saveg.c 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: p_saveg.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2017 by DooM Legacy Team.
@@ -105,7 +105,7 @@
 #include "t_func.h"
 #include "m_random.h"
 #include "d_items.h"
-  // NUMWEAPONS, NUMAMMO, NUMPOWERS
+  // NUM_WEAPONS, NUM_AMMO, NUM_POWERS
 #include "m_argv.h"
   // to save command line
 #include "m_misc.h"
@@ -612,7 +612,7 @@ void P_ArchivePlayers(void)
 
         flags = 0;
         diff = 0;
-        for (j = 0; j < NUMPOWERS; j++)
+        for (j = 0; j < NUM_POWERS; j++)
             if (ply->powers[j])
                 diff |= 1 << j;
         if (ply->refire)
@@ -647,7 +647,7 @@ void P_ArchivePlayers(void)
         WRITEU16(save_p, ply->armorpoints);
         WRITEBYTE(save_p, ply->armortype);
 
-        for (j = 0; j < NUMPOWERS; j++)
+        for (j = 0; j < NUM_POWERS; j++)
         {
             if (diff & (1 << j))
                 WRITE32(save_p, ply->powers[j]);
@@ -664,13 +664,13 @@ void P_ArchivePlayers(void)
                 WRITEU16(save_p, ply->frags[j]);
         }
 
-        for (j = 0; j < NUMWEAPONS; j++)
+        for (j = 0; j < NUM_WEAPONS; j++)
         {
             WRITEBYTE(save_p, ply->favoritweapon[j]);
             if (ply->weaponowned[j])
                 flags |= 1 << j;
         }
-        for (j = 0; j < NUMAMMO; j++)
+        for (j = 0; j < NUM_AMMO; j++)
         {
             WRITEU16(save_p, ply->ammo[j]);
             WRITEU16(save_p, ply->maxammo[j]);
@@ -704,7 +704,7 @@ void P_ArchivePlayers(void)
 
         WRITEBYTE(save_p, ply->skincolor);
 
-        for (j = 0; j < NUMPSPRITES; j++)
+        for (j = 0; j < NUM_PSPRITES; j++)
         {
             pspdef_t * psp = & ply->psprites[j];
             if (psp->state)
@@ -769,7 +769,7 @@ void P_UnArchivePlayers(void)
         ply->armorpoints = READU16(save_p);
         ply->armortype = READBYTE(save_p);
 
-        for (j = 0; j < NUMPOWERS; j++)
+        for (j = 0; j < NUM_POWERS; j++)
         {
             if (diff & (1 << j))
                 ply->powers[j] = READ32(save_p);
@@ -787,9 +787,9 @@ void P_UnArchivePlayers(void)
                 ply->frags[j] = READU16(save_p);
         }
 
-        for (j = 0; j < NUMWEAPONS; j++)
+        for (j = 0; j < NUM_WEAPONS; j++)
             ply->favoritweapon[j] = READBYTE(save_p);
-        for (j = 0; j < NUMAMMO; j++)
+        for (j = 0; j < NUM_AMMO; j++)
         {
             ply->ammo[j] = READU16(save_p);
             ply->maxammo[j] = READU16(save_p);
@@ -822,7 +822,7 @@ void P_UnArchivePlayers(void)
 
         ply->skincolor = READBYTE(save_p);
 
-        for (j = 0; j < NUMPSPRITES; j++)
+        for (j = 0; j < NUM_PSPRITES; j++)
         {
             pspdef_t * psp = & ply->psprites[j];
             flags = READU16(save_p);
@@ -869,7 +869,7 @@ void P_UnArchivePlayers(void)
             }
         }
 
-        for (j = 0; j < NUMWEAPONS; j++)
+        for (j = 0; j < NUM_WEAPONS; j++)
             ply->weaponowned[j] = (flags & (1 << j)) != 0;
 
         ply->viewheight = cv_viewheight.value << FRACBITS;

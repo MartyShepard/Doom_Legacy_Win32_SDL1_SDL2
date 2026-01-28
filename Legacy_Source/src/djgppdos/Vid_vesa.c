@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: Vid_vesa.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: Vid_vesa.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -859,7 +859,7 @@ boolean VID_FreeAndAllocVidbuffer (viddef_t* lvid)
     lvid->ybytes = lvid->widthbytes;
     lvid->screen_size = lvid->ybytes * lvid->height;
 #endif
-    vidbuffersize = (lvid->screen_size * NUMSCREENS);
+    vidbuffersize = (lvid->screen_size * NUM_SCREENS);
 
     // free allocated buffer for previous video mode
     if (lvid->buffer!=NULL)

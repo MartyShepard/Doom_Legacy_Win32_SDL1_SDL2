@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: doomdata.h 1674 2024-03-03 04:41:20Z wesleyjohnson $
+// $Id: doomdata.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2011 by DooM Legacy Team.
@@ -293,7 +293,7 @@ typedef struct
 } mapthing_t;
 
 
-extern char *Color_Names[NUMSKINCOLORS];
+extern char *Color_Names[NUM_SKINCOLORS];
 
 
 #endif  // DOOMDATA_H

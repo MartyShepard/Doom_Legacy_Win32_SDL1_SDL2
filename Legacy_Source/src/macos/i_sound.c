@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: i_sound.c 1622 2022-04-03 22:02:37Z wesleyjohnson $
+// $Id: i_sound.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -402,7 +402,7 @@ void I_StartupSound()
 
 #if 0   
     CONS_Printf("\tload all sound data\n");
-    for (i=1 ; i<NUMSFX ; i++)
+    for (i=1 ; i<NUM_SFX ; i++)
     { 
 	// Alias? Example is the chaingun sound linked to pistol.
 	if (S_sfx[i].name) { 
@@ -775,7 +775,7 @@ int I_RegisterSong(int handle, int len)
         return handle;
 	
     // Make sure song number is valid
-    if (handle < mus_e1m1 || handle > NUMMUSIC)
+    if (handle < mus_e1m1 || handle > NUM_MUSIC)
         return -1;
 	
     mus_song = handle;

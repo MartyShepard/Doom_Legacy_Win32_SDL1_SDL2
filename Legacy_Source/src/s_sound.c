@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: s_sound.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: s_sound.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -626,7 +626,7 @@ void S_Init(int sfxVolume, int musicVolume)
     mus_paused = false;
 
     // Note that sounds have not been cached (yet).
-    for (i = 1; i < NUMSFX_EXT; i++)
+    for (i = 1; i < NUM_SFX_EXT; i++)
     {
         sfxinfo_t * sfx = & S_sfx[i];
         sfx->usefulness = -1;    // for I_GetSfx()
@@ -650,9 +650,9 @@ void S_Init(int sfxVolume, int musicVolume)
     {
         // Initialize external data (all sounds) at start, keep static.
 //        GenPrintf(EMSG_info, "Loading sounds... ");
-        GenPrintf(EMSG_info, "Caching sound data (%d sfx)... ", NUMSFX_DEF);
+        GenPrintf(EMSG_info, "Caching sound data (%d sfx)... ", NUM_SFX_DEF);
 
-        for (i = 1; i < NUMSFX_DEF; i++)
+        for (i = 1; i < NUM_SFX_DEF; i++)
         {
             // NOTE: linked sounds use the link's data at StartSound time
             if (S_sfx[i].name && !S_sfx[i].link_id)
@@ -887,7 +887,7 @@ void S_StartSoundAtVolume(const xyz_t * origin, const mobj_t * mo,
 
 #ifdef PARANOIA
     // check for bogus sound #
-    if (sfx_id < 1 || sfx_id > NUMSFX_EXT)
+    if (sfx_id < 1 || sfx_id > NUM_SFX_EXT)
     {
         I_SoftError("Bad sfx #: %d\n", sfx_id);
         goto done;
@@ -900,7 +900,7 @@ void S_StartSoundAtVolume(const xyz_t * origin, const mobj_t * mo,
     sp1.pitch = NORM_PITCH;
     sp1.sep = 0;
 
-    if( (sfx->skinsound < NUMSKINSOUNDS) && mo && mo->skin )
+    if( (sfx->skinsound < NUM_SKINSOUNDS) && mo && mo->skin )
     {
         // redirect player sound to the sound in the skin table
         sfx_id = ((skin_t *) mo->skin)->soundsid[sfx->skinsound];
@@ -1164,7 +1164,7 @@ void S_StartXYZSoundName(const xyz_t * origin, const mobj_t * mo,
     int sfxid;
    
     //Search existing sounds...
-    for (sfxid = sfx_None + 1; sfxid < NUMSFX_EXT; sfxid++)
+    for (sfxid = sfx_None + 1; sfxid < NUM_SFX_EXT; sfxid++)
     {
         if (!S_sfx[sfxid].name)
             continue;
@@ -1379,7 +1379,7 @@ void S_UpdateSounds(void)
        Clean up unused data.
        if (gametic > nextcleanup)
        {
-       for (i=1 ; i<NUMSFX ; i++)
+       for (i=1 ; i<NUM_SFX ; i++)
        {
        if (S_sfx[i].usefulness==0)
        {
@@ -1564,7 +1564,7 @@ void S_ChangeMusicName( const char * name, byte looping )
     }
 #endif
 
-    if (music_id > mus_None && music_id < NUMMUSIC)
+    if (music_id > mus_None && music_id < NUM_MUSIC)
     {
         S_ChangeMusic(music_id, looping);
     }
@@ -1631,7 +1631,7 @@ void S_ChangeMusic(int music_num, byte looping)
     if (nomusic)
         return;
 
-    if ((music_num <= mus_None) || (music_num >= NUMMUSIC))
+    if ((music_num <= mus_None) || (music_num >= NUM_MUSIC))
     {
         GenPrintf(EMSG_error, "Bad music number %d\n", music_num);
         return;

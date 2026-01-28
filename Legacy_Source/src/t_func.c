@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //---------------------------------------------------------------------------
 //
-// $Id: t_func.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: t_func.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 2000 Simon Howard
 // Copyright (C) 2001-2016 by DooM Legacy Team.
@@ -804,9 +804,9 @@ void SF_SkinColor(void)
         // set skincolor
         int colour = intvalue(t_argv[1]);
 
-        if(colour > NUMSKINCOLORS-1)  // [WDJ] was NUMSKINCOLORS
+        if(colour > NUM_SKINCOLORS-1)  // [WDJ] was NUM_SKINCOLORS
         {
-            script_error("SkinColor: skin colour %i > %i\n", colour, NUMSKINCOLORS-1);
+            script_error("SkinColor: skin colour %i > %i\n", colour, NUM_SKINCOLORS-1);
             goto done;
         }
 
@@ -988,7 +988,7 @@ void SF_PlayerAmmo(void)
     player = & players[playernum];
 
     ammonum = intvalue(t_argv[1]);
-    if (ammonum >= NUMAMMO || ammonum < 0)  goto bad_ammo;
+    if (ammonum >= NUM_AMMO || ammonum < 0)  goto bad_ammo;
 
     if (t_argc == 3)
     {
@@ -1029,7 +1029,7 @@ void SF_MaxPlayerAmmo(void)
     player = & players[playernum];
 
     ammonum = intvalue(t_argv[1]);
-    if (ammonum >= NUMAMMO || ammonum < 0)  goto bad_ammo;
+    if (ammonum >= NUM_AMMO || ammonum < 0)  goto bad_ammo;
 
     if (t_argc == 3)
     {
@@ -1068,7 +1068,7 @@ void SF_PlayerWeapon(void)
     player = & players[playernum];
 
     weaponnum = intvalue(t_argv[1]);
-    if (weaponnum >= NUMWEAPONS || weaponnum < 0)  goto bad_weapon;
+    if (weaponnum >= NUM_WEAPONS || weaponnum < 0)  goto bad_weapon;
 
     if (t_argc == 3)
     {
@@ -1113,7 +1113,7 @@ void SF_PlayerSelectedWeapon(void)
     if(t_argc == 2)
     {
         weaponnum = intvalue(t_argv[1]);
-        if (weaponnum >= NUMWEAPONS || weaponnum < 0)  goto bad_weapon;
+        if (weaponnum >= NUM_WEAPONS || weaponnum < 0)  goto bad_weapon;
         player->pendingweapon = weaponnum;
     }
     t_return.value.i = player->readyweapon;  // test weapon
@@ -4391,7 +4391,7 @@ void SF_SetCorona(void)
     if (t_argc != 3 && t_argc != 7)   goto err_numarg;
 
     num = t_argv[0].value.i;    // which corona we want to modify
-    if( num >= NUMLIGHTS )
+    if( num >= NUM_LIGHTS )
         return;
    
     sl = & sprite_light[num];

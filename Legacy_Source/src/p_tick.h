@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_tick.h 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: p_tick.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -60,7 +60,7 @@ typedef enum {
 // The only lists that are actually searched.
   TH_friends,  // live friends
   TH_enemies,  // live enemies
-  NUMTHCLASS,
+  NUM_TH_CLASS,
 // Conceptual lists, not actually kept.
   TH_misc,
   TH_delete,

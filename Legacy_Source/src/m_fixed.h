@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: m_fixed.h 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: m_fixed.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -62,7 +62,7 @@ typedef int32_t fixed_t;
 #define FIXED_MIN   INT32_MIN
 
 // Fixed literal
-#define FIXINT(x)        ((x)<<FRACBITS)
+#define FIXINT(x)        (((fixed_t)(x))<<FRACBITS)
 // Float literal to fixed
 #define FIXFL(f)         ((fixed_t)((f)*FRACUNIT))
 
@@ -129,7 +129,7 @@ fixed_t FixedDiv2 (fixed_t a, fixed_t b);
 
 # if 1
           // [WDJ] Clang does not accept %cc.
-	  // Gcc would accept with and without.
+          // Gcc would accept with and without.
           asm("  imull %3 ;"
               "  shrdl $16,%1,%0 ;"
               : "=a" (ret),          /* eax is always the result */

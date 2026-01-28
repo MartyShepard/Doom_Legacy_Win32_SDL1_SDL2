@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: d_clisrv.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: d_clisrv.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -167,7 +167,7 @@
 #include "s_sound.h"
   // StartSound
 #include "d_items.h"
-  // NUMINVENTORYSLOTS, NUMAMMO
+  // NUM_INVENTORYSLOTS, NUM_AMMO
 
 
 //
@@ -1029,7 +1029,7 @@ void ExtraDataTicker(void)
 // if(xd & XD_WEAPON_PREF)
 //   byte   | original weapon switch : boolean, true if use the old
 //          | weapon switch methode
-//   char[NUMWEAPONS] | the weapon switch priority
+//   char[NUM_WEAPONS] | the weapon switch priority
 //   byte   | autoaim : true if use the old autoaim system
 // endif
 
@@ -1238,9 +1238,9 @@ void ReadLmpExtraData(byte **demo_pointer, int playernum)
         if(ex & 2)
         {
             *(bufp++) = XD_WEAPONPREF;
-            memcpy( bufp, p, NUMWEAPONS+2);
-            p+=NUMWEAPONS+2;
-            textlen += NUMWEAPONS+2;
+            memcpy( bufp, p, NUM_WEAPONS+2);
+            p+=NUM_WEAPONS+2;
+            textlen += NUM_WEAPONS+2;
         }
         ip->textbuf.len = textlen;
         buflen += textlen + 2;
@@ -2155,11 +2155,11 @@ static void SV_Send_player_desc( player_desc_t * pdesc, byte desc_flags, byte pn
         SV_get_mobj( pp->mo, &pdp->pos );
 
         uint32_t wo = 0;
-        for( i=0; i<NUMWEAPONS; i++)  // 19
+        for( i=0; i<NUM_WEAPONS; i++)  // 19
             if( pp->weaponowned[i] )  wo |= 1<<i;
         pdp->weaponowned = LE_SWAP32( wo );
        
-        for( i=0; i<NUMAMMO; i++ )
+        for( i=0; i<NUM_AMMO; i++ )
         {
             pdp->ammo[i] = LE_SWAP16( pp->ammo[i] );
             pdp->maxammo[i] = LE_SWAP16( pp->maxammo[i] );
@@ -2175,7 +2175,7 @@ static void SV_Send_player_desc( player_desc_t * pdesc, byte desc_flags, byte pn
             pdip->inventoryslotnum = pp->inventorySlotNum;
 
             // Because it is a structure it might be aligned on some machines
-            for( i=0; i<NUMINVENTORYSLOTS; i++ )
+            for( i=0; i<NUM_INVENTORYSLOTS; i++ )
             {
                 pdip->inventory[i].type = pp->inventory[i].type;
                 pdip->inventory[i].count = pp->inventory[i].count;
@@ -2281,7 +2281,7 @@ void  CL_player_desc_handler( player_desc_t * pdesc, const char * msg )
 
         uint32_t wo = LE_SWAP32( pdp->weaponowned );
         uint32_t cwo = 0;
-        for( i=0; i<NUMWEAPONS; i++)  // 19
+        for( i=0; i<NUM_WEAPONS; i++)  // 19
         {
             if( pp->weaponowned[i] )  cwo |= 1<<i;
             pp->weaponowned[i] = ( wo & (1<<i) )? 1:0;
@@ -2291,7 +2291,7 @@ void  CL_player_desc_handler( player_desc_t * pdesc, const char * msg )
             check_output( cwo, wo, "WEAPONOWNED", msg );
         }
 
-        for( i=0; i<NUMAMMO; i++ )
+        for( i=0; i<NUM_AMMO; i++ )
         {
             uint16_t r_ammo = LE_SWAP16( pdp->ammo[i] );
             uint16_t r_maxammo = LE_SWAP16( pdp->maxammo[i] );
@@ -2316,7 +2316,7 @@ void  CL_player_desc_handler( player_desc_t * pdesc, const char * msg )
             pp->inventorySlotNum = pdip->inventoryslotnum;
 
             // Because it is a structure it might be aligned on some machines
-            for( i=0; i<NUMINVENTORYSLOTS; i++ )
+            for( i=0; i<NUM_INVENTORYSLOTS; i++ )
             {
                 if( msg )
                 {

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: d_netcmd.c 1699 2024-11-27 07:20:27Z wesleyjohnson $
+// $Id: d_netcmd.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -260,7 +260,7 @@ void D_Register_ClientCommands(void)
 {
     int i;
 
-    for (i = 0; i < NUMSKINCOLORS; i++)
+    for (i = 0; i < NUM_SKINCOLORS; i++)
         Color_cons_t[i].strvalue = Color_Names[i];
 
     //
@@ -534,36 +534,36 @@ done:
 //  pind : player index, [0]=main player, [1]=splitscreen player
 void Send_WeaponPref_pind( byte pind )
 {
-    char buf[NUMWEAPONS + 4];  // need NUMWEAPONS+2
+    char buf[NUM_WEAPONS + 4];  // need NUM_WEAPONS+2
 
     // Format: original_weapon_switch  byte,
-    //         weapon_pref  char[NUMWEAPONS],
+    //         weapon_pref  char[NUM_WEAPONS],
     //         autoaim  byte.
     buf[0] = cv_originalweaponswitch[pind].value;
    
     int wplen = strlen(cv_weaponpref[pind].string);
     memcpy(buf + 1, cv_weaponpref[pind].string, wplen);
-    if( wplen != NUMWEAPONS)
+    if( wplen != NUM_WEAPONS)
     {
-        CONS_Printf("weaponpref invalid length: %d, should be %d, player pind=%d\n", wplen, NUMWEAPONS, pind);
+        CONS_Printf("weaponpref invalid length: %d, should be %d, player pind=%d\n", wplen, NUM_WEAPONS, pind);
         // pad with 0
-        for( ; wplen < NUMWEAPONS; wplen++ )  buf[wplen+1] = '0';
+        for( ; wplen < NUM_WEAPONS; wplen++ )  buf[wplen+1] = '0';
     }
-    buf[1 + NUMWEAPONS] = cv_autoaim[pind].value;
+    buf[1 + NUM_WEAPONS] = cv_autoaim[pind].value;
 
-    Send_NetXCmd_pind(XD_WEAPONPREF, buf, NUMWEAPONS + 2, pind);
+    Send_NetXCmd_pind(XD_WEAPONPREF, buf, NUM_WEAPONS + 2, pind);
 }
 
 void Got_NetXCmd_WeaponPref(xcmd_t * xc)
 {
     player_t * p = &players[xc->playernum];
     // Format: original_weapon_switch  byte,
-    //         weapon_pref  char[NUMWEAPONS],
+    //         weapon_pref  char[NUM_WEAPONS],
     //         autoaim  byte.
     p->GF_flags &= ~(GF_original_weapon|GF_autoaim);
     if( *(xc->curpos++) )  p->GF_flags |= GF_original_weapon;
-    memcpy(p->favoritweapon, xc->curpos, NUMWEAPONS);
-    xc->curpos += NUMWEAPONS;
+    memcpy(p->favoritweapon, xc->curpos, NUM_WEAPONS);
+    xc->curpos += NUM_WEAPONS;
     if( *(xc->curpos++) )  p->GF_flags |= GF_autoaim;
 }
 

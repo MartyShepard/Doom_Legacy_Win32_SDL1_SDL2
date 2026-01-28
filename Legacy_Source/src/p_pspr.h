@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_pspr.h 1714 2025-01-25 05:45:33Z wesleyjohnson $
+// $Id: p_pspr.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -84,8 +84,8 @@ typedef enum
 {
     PS_weapon,
     PS_flash,
-    NUMPSPRITES
 
+    NUM_PSPRITES
 } psprnum_t;
 
 typedef struct

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_pspr.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_pspr.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -120,7 +120,7 @@ void P_SetPsprite_psp ( player_t*   player,
             if( sep->parm2 )  // misc2
               psp->sy = INT_TO_FIXED(sep->parm2);
         }
-	else
+        else
 #endif
         if( sep->parm1 )  // misc1
         {
@@ -207,7 +207,7 @@ void P_SetPsprite ( player_t*     player,
             if( sep->parm2 )  // misc2
               psp->sy = INT_TO_FIXED(sep->parm2);  // misc2
         }
-	else
+        else
 #endif
         if( sep->parm1 )  // parm1
         {
@@ -288,7 +288,7 @@ void P_BringUpWeapon (player_t* player)
         S_StartAttackSound(player->mo, sfx_sawup);
 
 #ifdef PARANOIA
-    if(player->pendingweapon>=NUMWEAPONS)
+    if(player->pendingweapon>=NUM_WEAPONS)
     {
          I_Error("P_BringUpWeapon : pendingweapon %d\n",player->pendingweapon);
     }
@@ -1290,7 +1290,7 @@ void A_WeaponProjectile_MBF21( player_t* player, pspdef_t* psp )
         if( p_type < 0 )
           return;
 
-	// 64bit: p_angle = INT_TO_FIXED( sep->parm_args[1] ) / 360;
+        // 64bit: p_angle = INT_TO_FIXED( sep->parm_args[1] ) / 360;
         signed_angle_t  p_angle = (((int64_t)sep->parm_args[1]) << FRACBITS) / 360;
         int p_pitch = sep->parm_args[2];
         int p_spawn_ofs_xy = sep->parm_args[3];
@@ -1602,7 +1602,7 @@ void P_SetupPsprites (player_t* player)
     int i;
 
     // remove all psprites
-    for (i=0 ; i<NUMPSPRITES ; i++)
+    for (i=0 ; i<NUM_PSPRITES ; i++)
         player->psprites[i].state = NULL;
 
     // spawn the gun
@@ -1623,7 +1623,7 @@ void P_MovePsprites (player_t* player)
     pspdef_t*   psp;
 
     psp = &player->psprites[0];
-    for (i=0 ; i<NUMPSPRITES ; i++, psp++)
+    for (i=0 ; i<NUM_PSPRITES ; i++, psp++)
     {
         // a null state means not active
         state_t * state = psp->state;

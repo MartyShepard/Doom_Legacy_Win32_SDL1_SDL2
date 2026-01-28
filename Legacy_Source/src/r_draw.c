@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_draw.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_draw.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -162,7 +162,7 @@ byte                    dc_translucent_index;
 // skin translation stuff
 // ----------------------
 
-// [WDJ] player skin translation, skintranstables[NUMSKINCOLORS-1][256]
+// [WDJ] player skin translation, skintranstables[NUM_SKINCOLORS-1][256]
 // Does not translate color 0
 byte*                   skintranstables;  // player skin translation tables
 
@@ -247,7 +247,7 @@ void R_RecalcFuzzOffsets (void)
 //                   TRANSLATION COLORMAP CODE
 // =========================================================================
 
-char *Color_Names[NUMSKINCOLORS]={
+char *Color_Names[NUM_SKINCOLORS]={
    "Green",
    "Gray" ,
    "Brown",
@@ -275,7 +275,7 @@ typedef struct {
   
 typedef struct {
    byte      range_start, range_end; // translate in this range
-   skin_trans_entry_t  skin[NUMSKINCOLORS];  // skin translation
+   skin_trans_entry_t  skin[NUM_SKINCOLORS];  // skin translation
 } skin_trans_desc_t;
 
 skin_trans_desc_t  doom_skins = 
@@ -350,11 +350,11 @@ void R_Init_TranslationTables (void)
     }
 
     // no translate table for color 0
-    skintranstables = Z_MallocAlign (256*(NUMSKINCOLORS-1), PU_STATIC, 0, 8);
+    skintranstables = Z_MallocAlign (256*(NUM_SKINCOLORS-1), PU_STATIC, 0, 8);
 
     // [WDJ] skin desc based skin translation generation
     int sk;
-    for (sk = 1; sk<NUMSKINCOLORS; sk++)
+    for (sk = 1; sk<NUM_SKINCOLORS; sk++)
     {
         // sk=0 is original skin, and does not appear in translation tables
         byte * trantab = SKIN_TO_SKINMAP( sk );

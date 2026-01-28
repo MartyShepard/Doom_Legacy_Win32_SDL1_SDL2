@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_enemy.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
+// $Id: p_enemy.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -796,7 +796,7 @@ static boolean P_CheckMissileRange (mobj_t* actor)
         // so fight back!
         actor->flags &= ~MF_JUSTHIT;
 
-        if( EN_heretic || (demoversion < 147) )
+        if( EN_heretic_hexen || (demoversion < 147) )
             goto ret_true;  // Old Legacy, Old Doom
 
         // [WDJ] MBF, from MBF, PrBoom
@@ -1214,6 +1214,7 @@ static boolean P_MoveActor (mobj_t* actor, byte dropoff)
             actor->momx = FixedMul(actor->momx, FRICTION_DROPOFF);
             actor->momy = FixedMul(actor->momx, FRICTION_DROPOFF);
         }
+
         actor->flags &= ~MF_INFLOAT;
     }
 
@@ -1798,12 +1799,12 @@ boolean PIT_FindTarget(mobj_t* mo)
 static boolean P_LookForPlayers ( mobj_t*       actor,
                                   boolean       allaround )
 {
+    player_t*   player;
     int  c;
     int  stop, stopc;
     int  lastlook = actor->lastlook;
-    player_t*   player;
 
-    if( EN_heretic
+    if( EN_heretic_hexen
         && !multiplayer && players[0].health <= 0 )
     { // Single player game and player is dead, look for monsters
         return(PH_LookForMonsters(actor));  // Heretic version
@@ -1911,7 +1912,7 @@ static boolean P_LookForPlayers ( mobj_t*       actor,
 
         // Player found.
 
-        if( EN_heretic && (pmo->flags & MF_SHADOW) )
+        if( EN_heretic_hexen && (pmo->flags & MF_SHADOW) )
         { // Player is invisible
             if((P_AproxDistance_mobj( pmo, actor ) > 2*MELEERANGE)
                 && ( P_AproxDistance(pmo->momx, pmo->momy) < FIXINT(5)) )
@@ -1989,7 +1990,7 @@ boolean P_LookForMonsters(mobj_t* actor, boolean allaround)
     if( ! EN_mbf )
         GenPrintf(EMSG_debug, "COME HERE ignored by EN_mbf\n" );
 #endif
-    
+
     if( ! EN_boom )
         return false;
 
@@ -3929,10 +3930,29 @@ void A_Explode (mobj_t* actor)
 {
     int damage = 128;
 
+    switch(actor->type)
+    {
+     // Heretic and Hexen
+     case MT_FIREBOMB: // Time Bombs
+        actor->z += FIXINT(32);
+        actor->flags &= ~MF_SHADOW;
+        break;
+     case MT_MNTRFX2: // Minotaur floor fire
+        damage = 24;
+        break;
+     // Heretic
+     case MT_SOR2FX1: // D'Sparil missile
+        damage = 80+(PP_Random(ph_soratkdam)&31);
+        break;
+     default:
+        break;
+    }
+
 #ifdef HEXEN
-    boolean can_damage_self = true;  // default
     if( EN_hexen )
     {
+        boolean can_damage_self = true;  // default
+        int distance = 128;
         switch(actor->type)
         {
          case MT_HEXEN_MNTRFX2:  // Minotaur floor fire
@@ -3987,8 +4007,7 @@ void A_Explode (mobj_t* actor)
             damage = 4;
             distance = 40;
             break;
-// ARE THESE REALLY HEXEN  ????
-         case MT_HEXEN_ZXMAS_TREE:
+         case MT_HEXEN_ZXMAS_TREE:  // YES, These are really from hexen.
          case MT_HEXEN_ZSHRUB2:
             damage = 30;
             distance = 64;
@@ -3996,29 +4015,14 @@ void A_Explode (mobj_t* actor)
          default:
             break;
         }
-        P_RadiusAttack_MBF21 ( actor, actor->target, damage, distance, can_damage_self );
+        P_RadiusAttack_VDD ( actor, actor->target, damage, distance, can_damage_self );
         if( (actor->type != MT_POISONCLOUD)
             && (actor->z <= (actor->floorz + INT_TO_FIXED(distance)) )
             P_HitFloor(actor);
+
         return;
     }
 #endif
-
-    switch(actor->type)
-    {
-    case MT_FIREBOMB: // Time Bombs
-        actor->z += FIXINT(32);
-        actor->flags &= ~MF_SHADOW;
-        break;
-    case MT_MNTRFX2: // Minotaur floor fire
-        damage = 24;
-        break;
-    case MT_SOR2FX1: // D'Sparil missile
-        damage = 80+(PP_Random(ph_soratkdam)&31);
-        break;
-    default:
-        break;
-    }
 
     P_RadiusAttack ( actor, actor->target, damage );
     P_HitFloor(actor);
@@ -5291,7 +5295,7 @@ void A_RadiusDamage_MBF21( mobj_t * actor )
 //        return;
 
     // damage, distance, can_damage_source
-    P_RadiusAttack_MBF21( actor, actor->target, sep->parm_args[0], sep->parm_args[1], true );
+    P_RadiusAttack_VDD( actor, actor->target, sep->parm_args[0], sep->parm_args[1], true );
 }
 
 // These comments are from DSDA-Doom

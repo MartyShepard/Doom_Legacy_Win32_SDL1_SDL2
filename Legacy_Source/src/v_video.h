@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: v_video.h 1656 2023-12-08 14:54:47Z wesleyjohnson $
+// $Id: v_video.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -68,9 +68,9 @@
 // Screen 1 is an extra buffer, background, status bar.
 // Screen 2,3 are used for wipes.
 
-#define NUMSCREENS    4
+#define NUM_SCREENS    4
 // someone stuck in an extra screen ptr
-extern  byte*   screens[NUMSCREENS+1];
+extern  byte*   screens[NUM_SCREENS+1];
 
 #ifdef DIRTY_RECT
 extern  int     dirtybox[4];

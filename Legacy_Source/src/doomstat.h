@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: doomstat.h 1757 2025-11-20 11:44:00Z wesleyjohnson $
+// $Id: doomstat.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -350,7 +350,7 @@ extern  wb_start_t      wminfo;
 #if 0
 // LUT of ammunition limits for each kind.
 // This doubles with BackPack powerup item.
-extern  uint16_t        maxammo[NUMAMMO];
+extern  uint16_t        maxammo[NUM_AMMO];
 #endif
 
 

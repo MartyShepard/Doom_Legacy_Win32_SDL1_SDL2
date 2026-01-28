@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_map.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
+// $Id: p_map.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -3672,7 +3672,7 @@ boolean         bomb_can_damage_source;
 #if defined( MBF21 ) || defined( HEXEN )
 // [WDJ] MBF21, From DSDA-Doom, to handle MBF21 splash damage.
 static inline
-boolean MBF21_splash_immune( int target_type, int spot_type )
+boolean group_splash_immune( int target_type, int spot_type )
 {
     // not default behaviour and same group
     return
@@ -3721,7 +3721,7 @@ boolean PIT_RadiusAttack (mobj_t* thing)
         return true;
 
 #if defined( MBF21 ) || defined( HEXEN )
-    if( MBF21_splash_immune( thing->type, bomb_spot->type ) )
+    if( group_splash_immune( thing->type, bomb_spot->type ) )
         return true;
 #endif
 
@@ -3828,7 +3828,7 @@ boolean PIT_RadiusAttack (mobj_t* thing)
 // Source is the creature that caused the explosion at spot.
 //
 #ifdef MBF21
-void P_RadiusAttack_MBF21 ( mobj_t* spot, mobj_t* source, int damage, int distance, boolean can_damage_source )
+void P_RadiusAttack_VDD ( mobj_t* spot, mobj_t* source, int damage, int distance, boolean can_damage_source )
 {
     int  x, y;
     int  xl, xh;
@@ -3867,7 +3867,7 @@ void P_RadiusAttack ( mobj_t* spot, mobj_t* source, int damage )
 {
     // vanilla: distance = damage
     // damage, distance, can_damage_source
-    P_RadiusAttack_MBF21( spot, source, damage, damage, true );
+    P_RadiusAttack_VDD( spot, source, damage, damage, true );
 }
 
 #else

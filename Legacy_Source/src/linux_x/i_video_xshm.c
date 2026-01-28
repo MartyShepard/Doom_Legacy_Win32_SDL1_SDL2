@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: i_video_xshm.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: i_video_xshm.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -1978,7 +1978,7 @@ static int createWindow(boolean set_fullscreen, modenum_t modenum)
 
       // [WDJ] Draw 8pp and translate to other bpp in FinishUpdate
       // unless -bpp or -native
-      vid.buffer = (unsigned char *) malloc (vid.screen_size * NUMSCREENS);
+      vid.buffer = (unsigned char *) malloc (vid.screen_size * NUM_SCREENS);
       vid.display = vid.buffer;
       vid.screen1 = vid.buffer + vid.screen_size;
 #ifdef TILTVIEW

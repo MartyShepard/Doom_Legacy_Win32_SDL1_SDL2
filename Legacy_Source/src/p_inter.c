@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_inter.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
+// $Id: p_inter.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -237,8 +237,8 @@ void DemoAdapt_p_inter( void )
 // a weapon is found with two clip loads,
 // a big item has five clip loads
 // clip, shell, cell, missile
-uint16_t   maxammo[NUMAMMO] = {200, 50, 300, 50};
-uint16_t   clipammo[NUMAMMO] = {10, 4, 20, 1};
+uint16_t   maxammo[NUM_AMMO] = {200, 50, 300, 50};
+uint16_t   clipammo[NUM_AMMO] = {10, 4, 20, 1};
 
 consvar_t cv_fragsweaponfalling
   = {"fragsweaponfalling"   ,"0", CV_NETVAR, CV_YesNo};
@@ -332,7 +332,7 @@ int FindBestWeapon(player_t* player)
 
     actualprior = -1;
 
-    for (i = 0; i < NUMWEAPONS; i++)
+    for (i = 0; i < NUM_WEAPONS; i++)
     {
         // skip super shotgun for non-Doom2
         if (gamemode != GM_doom2_commercial && (i==wp_supershotgun))
@@ -376,7 +376,7 @@ boolean P_GiveAmmo_autoswitch( player_t* player, ammotype_t ammo_type, uint16_t 
     {
         // Check weapons, high to low order, higher index than current, that can switch to.
         int i;
-        for ( i = NUMWEAPONS-1; i > plwpn; --i )
+        for ( i = NUM_WEAPONS-1; i > plwpn; --i )
         {
             if( player->weaponowned[i] )  // player has weapon
             {
@@ -416,7 +416,7 @@ boolean P_GiveAmmo ( player_t* player, ammotype_t ammo_type, uint16_t count )
     if (ammo_type == am_noammo)
         return false;
 
-    if ( (unsigned)ammo_type > NUMAMMO)
+    if ( (unsigned)ammo_type > NUM_AMMO)
     {
         GenPrintf(EMSG_warn, "\2P_GiveAmmo: bad type %i", ammo_type);
         return false;
@@ -549,7 +549,7 @@ boolean P_GiveAmmo ( player_t* player, ammotype_t ammo_type, uint16_t count )
 }
 
 // ammo get with the weapon
-uint16_t WeaponAmmo_pickup[NUMWEAPONS] =
+uint16_t WeaponAmmo_pickup[NUM_WEAPONS] =
 {
     0,  // staff       fist
    20,  // gold wand   pistol
@@ -1477,11 +1477,11 @@ get_armor:
       case SPR_BPAK:
         if(! (player->GF_flags & GF_backpack) )
         {
-            for (i=0 ; i<NUMAMMO ; i++)
+            for (i=0 ; i<NUM_AMMO ; i++)
                 player->maxammo[i] *= 2;
             player->GF_flags |= GF_backpack;
         }
-        for (i=0 ; i<NUMAMMO ; i++)
+        for (i=0 ; i<NUM_AMMO ; i++)
             P_GiveAmmo (player, i, clipammo[i]);
         msg = GOTBACKPACK;
         msglevel = 27;
@@ -1490,7 +1490,7 @@ get_armor:
       case SPR_BAGH: // Item_BagOfHolding
         if(! (player->GF_flags & GF_backpack) )
         {
-            for(i = 0; i < NUMAMMO; i++)
+            for(i = 0; i < NUM_AMMO; i++)
                 player->maxammo[i] *= 2;
             player->GF_flags |= GF_backpack;
         }

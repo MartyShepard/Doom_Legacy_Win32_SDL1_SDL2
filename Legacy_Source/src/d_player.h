@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_player.h 1699 2024-11-27 07:20:27Z wesleyjohnson $
+// $Id: d_player.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -165,7 +165,7 @@ typedef struct player_s
     byte                armortype;
 
     // Power ups. invinc and invis are tic counters.
-    int                 powers[NUMPOWERS];
+    int                 powers[NUM_POWERS];
     byte                cards; // bit field see declaration of card_t
 //    boolean             backpack;
     byte                GB_flags; // attackdown, etc.
@@ -179,12 +179,12 @@ typedef struct player_s
     // Is wp_nochange if not changing.
     weapontype_t        pendingweapon;
 
-    boolean             weaponowned[NUMWEAPONS];
+    boolean             weaponowned[NUM_WEAPONS];
     // These would be uint16_t, but have to be int because of the status bar pointing to them.
-    int                 ammo[NUMAMMO];
-    int                 maxammo[NUMAMMO];
+    int                 ammo[NUM_AMMO];
+    int                 maxammo[NUM_AMMO];
     // added by Boris : preferred weapons order stuff
-    char                favoritweapon[NUMWEAPONS];
+    char                favoritweapon[NUM_WEAPONS];
 //    boolean             originalweaponswitch;
     //added:28-02-98:
 //    boolean             autoaim_toggle;
@@ -236,7 +236,7 @@ typedef struct player_s
     int                 skin;
 
     // Overlay view sprites (gun, etc).
-    pspdef_t            psprites[NUMPSPRITES];
+    pspdef_t            psprites[NUM_PSPRITES];
 
     // True if secret level has been done.
 //    boolean             didsecret;
@@ -248,7 +248,7 @@ typedef struct player_s
     mobj_t *        rain2;         // active rain maker 2
     int             flamecount;
     int             flyheight;
-    inventory_t     inventory[NUMINVENTORYSLOTS];
+    inventory_t     inventory[NUM_INVENTORYSLOTS];
     int             inventorySlotNum;
 
     int             inv_ptr;

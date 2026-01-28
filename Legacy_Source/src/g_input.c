@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: g_input.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: g_input.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -149,8 +149,8 @@ int  mousex, mousey;
 int  mouse2x, mouse2y;
 
 // [WDJ] When boolean, the compiler uses 4 bytes for one bit of information.
-byte  gamekeydown[NUMINPUTS]; // Current state of the keys: true if the key is currently down.
-byte  gamekeytapped[NUMINPUTS]; // True if the key has been pressed since the last G_BuildTiccmd. Useful for impulse-style controls.
+byte  gamekeydown[NUM_INPUTS]; // Current state of the keys: true if the key is currently down.
+byte  gamekeytapped[NUM_INPUTS]; // True if the key has been pressed since the last G_BuildTiccmd. Useful for impulse-style controls.
 
 
 // two key codes (or virtual key) per game control
@@ -232,7 +232,7 @@ void  G_MapEventsToControls (event_t* ev)
     switch (ev->type)
     {
       case ev_keydown:
-        if (ev->data1 < NUMINPUTS)
+        if (ev->data1 < NUM_INPUTS)
         {
             gamekeydown[ev->data1] = true;
             gamekeytapped[ev->data1] = true; // reset in G_BuildTiccmd
@@ -240,7 +240,7 @@ void  G_MapEventsToControls (event_t* ev)
         break;
 
       case ev_keyup:
-        if (ev->data1 < NUMINPUTS)
+        if (ev->data1 < NUM_INPUTS)
           gamekeydown[ev->data1] = false;
         break;
 

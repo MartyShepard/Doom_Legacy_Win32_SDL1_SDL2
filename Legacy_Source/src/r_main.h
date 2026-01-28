@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_main.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: r_main.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -149,7 +149,7 @@ void BoomColormap_detect( void );
 
 // Number of diminishing brightness levels.
 // There a 0-31, i.e. 32 LUT in the COLORMAP lump.
-#define NUMCOLORMAPS            32
+#define NUM_COLORMAPS            32
 
 
 // Blocky/low detail mode.

@@ -324,7 +324,7 @@ int      InitDIVEBuffer( PWINDATA pwinData)
                              &(pwinData->ulImage),
                              pwinData->fccColorFormat,
                              pwinData->ulWidth,
-                             pwinData->ulHeight * (NUMSCREENS+1),
+                             pwinData->ulHeight * (NUM_SCREENS+1),
                              0, 0) ) {
       pwinData->hDive = 0;
       return 1;

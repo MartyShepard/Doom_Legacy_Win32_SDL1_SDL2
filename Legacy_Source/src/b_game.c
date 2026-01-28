@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_game.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
+// $Id: b_game.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 2002 by DooM Legacy Team.
 //
@@ -219,7 +219,7 @@ char* botnames[NUM_BOT_NAMES] = {
   "TonyD-bot", // Team member
 };
 
-int botcolors[NUMSKINCOLORS] = 
+int botcolors[NUM_SKINCOLORS] = 
 {
    0, // = Green
    1, // = Indigo
@@ -300,11 +300,11 @@ void B_Init_Names()
         botinfo[i].name_index = br;
 
         // Assign a skin color.  Make them unique until have used all colors.
-        j = NUMSKINCOLORS;
+        j = NUM_SKINCOLORS;
         br = B_Gen_Random();
         for(;;)
         {
-            br = br % NUMSKINCOLORS;
+            br = br % NUM_SKINCOLORS;
             if( ((1<<br) & color_used) == 0 )  break;
             br++;
             if( --j < 0 )  color_used = 0;
@@ -471,12 +471,12 @@ static
 void B_ChangeWeapon (player_t* p)
 {
     bot_t * pbot = p->bot;
-    boolean  usable_weapon[NUMWEAPONS]; // weapons with ammo
+    boolean  usable_weapon[NUM_WEAPONS]; // weapons with ammo
     byte  num_weapons = 0;
     byte  weaponChance;
     byte  i;
 
-    for (i=0; i<NUMWEAPONS; i++)
+    for (i=0; i<NUM_WEAPONS; i++)
     {
         byte hw = false;
         switch (i)

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_doors.c 1762 2025-11-20 11:48:53Z wesleyjohnson $
+// $Id: p_doors.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -891,7 +891,7 @@ void T_SlidingDoor (slidedoor_t*        door)
       case sd_opening:
         if (!door->timer--)
         {
-            if (++door->frame == SNUMFRAMES)
+            if (++door->frame == S_NUM_FRAMES)
             {
                 // IF DOOR IS DONE OPENING...
                 sides[door->line->sidenum[0]].midtexture = 0;
@@ -935,7 +935,7 @@ void T_SlidingDoor (slidedoor_t*        door)
                 break;
             }
 
-            //door->frame = SNUMFRAMES-1;
+            //door->frame = S_NUM_FRAMES-1;
             door->status = sd_closing;
             door->timer = SWAITTICS;
         }

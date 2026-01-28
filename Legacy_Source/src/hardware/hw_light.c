@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hw_light.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: hw_light.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2015 by DooM Legacy Team.
 //
@@ -669,7 +669,7 @@ void HWR_Init_Light( void )
     int i;
 
     // precalculate sqr radius
-    for(i=0;i<NUMLIGHTS;i++)
+    for(i=0;i<NUM_LIGHTS;i++)
     {
         spr_light_t *  h = & sprite_light[i];
         h->dynamic_sqrradius = h->dynamic_radius * h->dynamic_radius;

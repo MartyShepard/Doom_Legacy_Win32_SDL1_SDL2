@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_local.h 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_local.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -344,7 +344,7 @@ void P_LineAttack ( mobj_t* t1, angle_t angle, fixed_t distance,
 
 void P_RadiusAttack ( mobj_t* spot, mobj_t* source, int damage );
 #ifdef MBF21
-void P_RadiusAttack_MBF21 ( mobj_t* spot, mobj_t* source, int damage, int distance, boolean can_damage_source );
+void P_RadiusAttack_VDD ( mobj_t* spot, mobj_t* source, int damage, int distance, boolean can_damage_source );
 #endif
 
 // MBF
@@ -373,8 +373,8 @@ extern consvar_t cv_blockmap_gen;
 //
 // P_INTER
 //
-extern uint16_t  maxammo[NUMAMMO];
-extern uint16_t  clipammo[NUMAMMO];
+extern uint16_t  maxammo[NUM_AMMO];
+extern uint16_t  clipammo[NUM_AMMO];
 
 void P_TouchSpecialThing ( mobj_t* special, mobj_t* toucher );
 
@@ -541,8 +541,8 @@ boolean P_SeekerMissile_MBF21( mobj_t* actor, mobj_t ** seek_target, angle_t thr
 #endif
 mobj_t* P_SpawnMissileAngle(mobj_t* source, mobjtype_t type,
         angle_t angle, fixed_t momz);
+mobj_t* P_CheckMissileSpawn (mobj_t* th);
 boolean P_SetMobjStateNF(mobj_t* mobj, statenum_t state);
-boolean P_CheckMissileSpawn (mobj_t* th);
 void P_ThrustMobj(mobj_t* mo, angle_t angle, fixed_t move);
 void P_Thrust(player_t* player, angle_t angle, fixed_t move);
 void P_ExplodeMissile (mobj_t* mo);
@@ -553,7 +553,7 @@ void P_AddBossSpot(fixed_t x, fixed_t y, angle_t angle);
 
 statenum_t  DEH_frame_to_state( int deh_frame );
 
-extern spr_light_t  sprite_light[NUMLIGHTS];
+extern spr_light_t  sprite_light[NUM_LIGHTS];
 extern byte  sprite_light_ind[NUMSPRITES_DEF];
 void  Setup_sprite_light( byte  mons_ball_light );
 

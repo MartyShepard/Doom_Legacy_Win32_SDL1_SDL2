@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: d_items.h 1716 2025-01-25 05:48:50Z wesleyjohnson $
+// $Id: d_items.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -128,27 +128,27 @@ typedef enum
     it_yellowskull= 0x10,
     it_redskull   = 0x20,
     it_allkeys    = 0x3f,
-    NUMCARDS      = 6
+    NUM_CARDS      = 6
 
 } card_t;
 
 typedef enum
 {
-        arti_none,
-        arti_invulnerability,
-        arti_invisibility,
-        arti_health,
-        arti_superhealth,
-        arti_tomeofpower,
-        arti_torch,
-        arti_firebomb,
-        arti_egg,
-        arti_fly,
-        arti_teleport,
-        NUMARTIFACTS
+    arti_none,
+    arti_invulnerability,
+    arti_invisibility,
+    arti_health,
+    arti_superhealth,
+    arti_tomeofpower,
+    arti_torch,
+    arti_firebomb,
+    arti_egg,
+    arti_fly,
+    arti_teleport,
+    NUM_ARTIFACTS
 } artitype_t;
 
-#define NUMINVENTORYSLOTS  14
+#define NUM_INVENTORYSLOTS  14
 #define MAXARTECONT        16 
 typedef struct
 {
@@ -157,6 +157,7 @@ typedef struct
 } inventory_t;
 
 // Power up artifacts.
+// Index to powers[].
 typedef enum
 {
     pw_invulnerability,
@@ -170,7 +171,7 @@ typedef enum
     pw_weaponlevel2,
     pw_flight,
 
-    NUMPOWERS
+    NUM_POWERS
 
 } powertype_t;
 
@@ -184,7 +185,18 @@ typedef enum
     INVULNTICS  = (30*TICRATE),
     INVISTICS   = (60*TICRATE),
     INFRATICS   = (120*TICRATE),
-    IRONTICS    = (60*TICRATE)
+    IRONTICS    = (60*TICRATE),
+#ifdef HEXEN
+//    INVULNTICS  = (30*TICRATE),
+//    INVISTICS   = (60*TICRATE),
+//    INFRATICS   = (120*TICRATE),
+//    IRONTICS    = (60*TICRATE),
+    WPNLEV2TICS = (40*TICRATE),
+    FLIGHTTICS  = (60*TICRATE),
+    SPEEDTICS   = (45*TICRATE),
+    MORPHTICS   = (40*TICRATE),
+    MAULATORTICS = (25*TICRATE),
+#endif
 
 } powerduration_t;
 
@@ -215,7 +227,7 @@ typedef enum
     wp_gauntlets,
     wp_beak,
 
-    NUMWEAPONS,
+    NUM_WEAPONS,
 
     // No pending weapon change.
     wp_nochange
@@ -239,7 +251,7 @@ typedef enum
     am_phoenixrod,
     am_mace,
 
-    NUMAMMO,
+    NUM_AMMO,
     am_noammo   // Unlimited for chainsaw / fist.
 
 } ammotype_t;
@@ -281,13 +293,13 @@ typedef struct
 } weaponinfo_t;
 
 // Doom
-extern weaponinfo_t doomweaponinfo[NUMWEAPONS];
+extern weaponinfo_t doomweaponinfo[NUM_WEAPONS];
 // Heretic
-extern weaponinfo_t wpnlev1info[NUMWEAPONS];
-extern weaponinfo_t wpnlev2info[NUMWEAPONS];
+extern weaponinfo_t wpnlev1info[NUM_WEAPONS];
+extern weaponinfo_t wpnlev2info[NUM_WEAPONS];
 
 #ifdef HEXEN
-extern weaponinfo_t hexen_weaponinfo[HEXEN_NUMWEAPONS][NUM_CLASSES];
+extern weaponinfo_t hexen_weaponinfo[HEXEN_NUM_WEAPONS][NUM_CLASSES];
 #endif
 
 #endif

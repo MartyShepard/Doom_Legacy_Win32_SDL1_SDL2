@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_tick.c 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: p_tick.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -66,7 +66,7 @@ tic_t     leveltime;
 thinker_t  thinkercap;
 // MBF, class-lists.
 // Linked by cnext, cprev.
-thinker_t  thinkerclasscap[NUMTHCLASS];
+thinker_t  thinkerclasscap[NUM_TH_CLASS];
 
 #ifdef THINKER_INTERPOLATIONS
 static byte  newthinkerpresent = true;
@@ -82,7 +82,7 @@ void P_Init_Thinkers (void)
 
     // [WDJ] MBF, from MBF, PrBoom.
     // Init all class-list.
-    for( i=0; i<NUMTHCLASS; i++ )
+    for( i=0; i<NUM_TH_CLASS; i++ )
       thinkerclasscap[i].cprev = thinkerclasscap[i].cnext = &thinkerclasscap[i];
 
     thinkercap.prev = thinkercap.next  = &thinkercap;
@@ -211,7 +211,7 @@ void P_UpdateClassThink(thinker_t* thinker, int tclass )
 
     // Prevent linking dead mobj.
     if( thinker->function == TFI_RemoveThinker
-        || tclass >= NUMTHCLASS )  // TH_none, etc.
+        || tclass >= NUM_TH_CLASS )  // TH_none, etc.
     {
         // Not in any class-list.
         // Prevent unlinking again.

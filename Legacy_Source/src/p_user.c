@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_user.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
+// $Id: p_user.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -919,7 +919,7 @@ void P_MoveChaseCamera (player_t * player)
 }
 
 
-byte weapontobutton[NUMWEAPONS]=
+byte weapontobutton[NUM_WEAPONS]=
   {wp_fist    <<BT_WEAPONSHIFT,
    wp_pistol  <<BT_WEAPONSHIFT,
    wp_shotgun <<BT_WEAPONSHIFT,
@@ -1575,7 +1575,7 @@ void P_ArtiTele( player_t* player )
     if( deathmatch )
     {
         // Heretic use of P_Random
-        i = PP_Random(ph_telearti) % numdmstarts;
+        i = PP_Random(ph_telearti) % num_dm_starts;
         mtp = deathmatchstarts[i];
     }
     else
@@ -1693,7 +1693,7 @@ ret_fail:
 
 void P_SetPlayer_color( player_t * player, byte color )
 {
-    color = color % NUMSKINCOLORS;
+    color = color % NUM_SKINCOLORS;
     player->skincolor = color;
 
     // a copy of color, in proper position for use with color tables

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: i_video_ggi.c 1570 2021-01-28 09:24:16Z wesleyjohnson $
+// $Id: i_video_ggi.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -732,7 +732,7 @@ int VID_SetMode(modenum_t modenum)
   vid.screen_size = vid.ybytes * vid.height;
 
   if(vid.buffer) free(vid.buffer);
-  vid.buffer = (unsigned char *) malloc (vid.screen_size * NUMSCREENS);
+  vid.buffer = (unsigned char *) malloc (vid.screen_size * NUM_SCREENS);
   vid.display = vid.buffer;
   vid.screen1 = vid.buffer + vid.screen_size;
   // direct buffer drawing

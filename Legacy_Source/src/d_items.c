@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_items.c 1673 2024-03-03 04:40:47Z wesleyjohnson $
+// $Id: d_items.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -49,7 +49,7 @@
 //  atkstate, i.e. attack/fire/hit frame
 //  flashstate, muzzle flash
 //
-weaponinfo_t doomweaponinfo[NUMWEAPONS] =
+weaponinfo_t doomweaponinfo[NUM_WEAPONS] =
 {
     {
         // fist

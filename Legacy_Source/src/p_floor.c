@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_floor.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: p_floor.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -86,8 +86,8 @@ void DemoAdapt_p_floor( void )
 
 
 // [WDJ] Other doom code does not have 3D floors and does not have floor
-// floor stopping dependent upon numattached.  To keep compatible
-// behavior, the floor movement must always stop and recheck.
+// stopping dependent upon numattached.  To keep compatible behavior,
+// the floor movement must always stop and recheck.
 // I have found no reason for the && numattached test.  It may have been
 // thought that only 3D floors could obstruct in those directions, but it is
 // also possible because of dest in wrong direction (insta-move).  Doom2 Map5.

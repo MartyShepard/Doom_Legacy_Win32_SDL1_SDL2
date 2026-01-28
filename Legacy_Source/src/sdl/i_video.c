@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: i_video.c 1656 2023-12-08 14:54:47Z wesleyjohnson $
+// $Id: i_video.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1191,7 +1191,7 @@ void  VID_SetMode_vid( int req_width, int req_height, int req_fullscreen )
     vid.screen_size = vid.ybytes * vid.height;
 #endif
     // display is buffer
-    vid.buffer = malloc(vid.screen_size * NUMSCREENS);
+    vid.buffer = malloc(vid.screen_size * NUM_SCREENS);
     vid.display = vid.buffer;
     vid.screen1 = vid.buffer + vid.screen_size;
     vid.recalc = true;

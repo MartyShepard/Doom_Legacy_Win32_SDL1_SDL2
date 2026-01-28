@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_node.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: b_node.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 2002 by DooM Legacy Team.
 //
@@ -51,7 +51,7 @@ typedef enum
     BDI_SOUTH,
     BDI_SOUTHEAST,
     BDI_TELEPORT,
-    NUMBOTDIRS
+    NUM_BOTDIRS
 
 } botdirtype_t;
 
@@ -60,7 +60,7 @@ typedef struct SearchNode_s
 {
     boolean  visited;
 
-    fixed_t  costDir[NUMBOTDIRS];	//the cost of going from this node in a particular dest
+    fixed_t  costDir[NUM_BOTDIRS];	//the cost of going from this node in a particular dest
 
     fixed_t  cost,
              f,
@@ -71,7 +71,7 @@ typedef struct SearchNode_s
                  * pnext,
                  * vnext,
                  * vprevious,
-                 * dir[NUMBOTDIRS];
+                 * dir[NUM_BOTDIRS];
 
 #ifdef SHOWBOTPATH
     mobj_t * mo;

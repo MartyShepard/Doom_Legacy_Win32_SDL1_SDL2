@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_net.c 1650 2023-10-25 02:25:41Z wesleyjohnson $
+// $Id: d_net.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1190,7 +1190,7 @@ static void DF_Print_PlayerDesc( player_desc_t * pdsp )
       pdp->pid, pdp->playerstate, pdp->flags, LE_SWAP16(pdp->health), pdp->armortype, LE_SWAP16(pdp->armor), pdp->readyweapon );
     DF_Print_MobjPos(& pdp->pos );
     fprintf(debugfile, "    ammo:");
-    for( i=0; i<NUMAMMO; i++ )
+    for( i=0; i<NUM_AMMO; i++ )
     {
       fprintf(debugfile, " %d/%d", LE_SWAP16( pdp->ammo[i] ), LE_SWAP16( pdp->maxammo[i] ) );
     }
@@ -1200,7 +1200,7 @@ static void DF_Print_PlayerDesc( player_desc_t * pdsp )
     {
        pd_inventory_t * pi = (pd_inventory_t*) bp;
        fprintf(debugfile, "    inventory: slot %d  ", pi->inventoryslotnum );
-       for( i=0; i<NUMINVENTORYSLOTS; i++ )
+       for( i=0; i<NUM_INVENTORYSLOTS; i++ )
        {
          fprintf(debugfile, " (%d,%d)", pi->inventory[i].type, pi->inventory[i].count );
        }

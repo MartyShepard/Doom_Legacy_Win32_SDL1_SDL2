@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: dstrings.c 1141 2015-04-03 13:41:01Z wesleyjohnson $
+// $Id: dstrings.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -55,7 +55,7 @@
 
 #include "dstrings.h"
 
-char *text[NUMTEXT] = {
+char *text[NUM_TEXT] = {
   // D_DEVSTR
     "Development mode ON.\n",
   // D_CDROM

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_spec.h 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: p_spec.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -658,7 +658,7 @@ typedef struct
 
 
 // how many frames of animation
-#define SNUMFRAMES              4
+#define S_NUM_FRAMES              4
 
 #define SDOORWAIT               (35*3)
 #define SWAITTICS               4

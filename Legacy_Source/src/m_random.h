@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: m_random.h 1727 2025-02-07 05:03:05Z wesleyjohnson $
+// $Id: m_random.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -235,7 +235,7 @@ typedef enum {
   pL_slowreact,
 
   // End of new entries
-  NUMPRCLASS               // MUST be last item in list
+  NUM_PR_CLASS               // MUST be last item in list
 } pr_class_t;
 
 byte  PP_Random( byte pr );

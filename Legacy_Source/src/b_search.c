@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_search.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: b_search.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 2002-2016 by DooM Legacy Team.
 //
@@ -181,7 +181,7 @@ void B_NodePushSuccessors(PriorityQ_t* open, SearchNode_t* parent_node, SearchNo
 
     SearchNode_t* node;
 
-    for (angle=0; angle<NUMBOTDIRS; angle++)
+    for (angle=0; angle<NUM_BOTDIRS; angle++)
     {
         if (parent_node->dir[angle])
         {

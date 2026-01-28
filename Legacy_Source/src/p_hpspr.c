@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_hpspr.c 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: p_hpspr.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by Raven Software, Corp.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -61,7 +61,7 @@ static struct
 fixed_t bulletslope;
 
 
-weaponinfo_t wpnlev1info[NUMWEAPONS] =
+weaponinfo_t wpnlev1info[NUM_WEAPONS] =
 {
         { // Staff
                 am_noammo,              // ammo
@@ -155,7 +155,7 @@ weaponinfo_t wpnlev1info[NUMWEAPONS] =
         }
 };
 
-weaponinfo_t wpnlev2info[NUMWEAPONS] =
+weaponinfo_t wpnlev2info[NUM_WEAPONS] =
 {
         { // Staff
                 am_noammo,              // ammo

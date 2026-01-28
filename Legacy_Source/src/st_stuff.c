@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: st_stuff.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: st_stuff.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -344,7 +344,7 @@ static patch_t*         tallnum[12];
 static patch_t*         shortnum[12];
 
 // 3 key-cards, 3 skulls
-static patch_t*         keys[NUMCARDS];
+static patch_t*         keys[NUM_CARDS];
 
 // face status patches
 static patch_t*         faces[ST_NUMFACES];
@@ -406,7 +406,7 @@ static int      st_oldhealth = -1;
 
 // Doom only, but has room for Heretic weapons.
 // used for evil grin
-static boolean  oldweaponsowned[NUMWEAPONS];
+static boolean  oldweaponsowned[NUM_WEAPONS];
 
  // count until face changes
 static int      st_facecount = 0;
@@ -430,7 +430,7 @@ static int      st_randomnumber;
 // Doom only.
 // Icons for status bar.
 static lumpnum_t  sbo_health, sbo_frags, sbo_armor;
-static lumpnum_t  sbo_ammo[NUMWEAPONS];
+static lumpnum_t  sbo_ammo[NUM_WEAPONS];
 
 
 // ------------------------------------------
@@ -550,7 +550,7 @@ static void ST_updateFaceWidget(void)
             doevilgrin = false;
 
             // Doom only.
-            for (i=0;i<NUMWEAPONS;i++)
+            for (i=0;i<NUM_WEAPONS;i++)
             {
                 if (oldweaponsowned[i] != plyr->weaponowned[i])
                 {
@@ -1162,7 +1162,7 @@ void ST_Load_Graphics(void)
 
     // key cards
     // FreeDoom and DoomII have STKEYS 0..5.
-    for (i=0;i<NUMCARDS;i++)
+    for (i=0;i<NUM_CARDS;i++)
     {
         sprintf(namebuf, "STKEYS%d", i);
         keys[i] = W_CachePatchName(namebuf, PU_LOCK_SB);
@@ -1271,7 +1271,7 @@ void ST_Release_Graphics(void)
             W_release_patch( arms[i][0] );
 
         // unload the key cards
-        release_patch_array( keys, NUMCARDS );
+        release_patch_array( keys, NUM_CARDS );
     }
 
     ST_Release_FaceGraphics ();
@@ -1326,7 +1326,7 @@ static void ST_init_stbar(void)
     st_oldhealth = -1;
 
     // Doom only.
-    for (i=0;i<NUMWEAPONS;i++)
+    for (i=0;i<NUM_WEAPONS;i++)
         oldweaponsowned[i] = st_plyr->weaponowned[i];
 
     st_card = 0;  // no keys
@@ -1566,9 +1566,9 @@ void ST_Init (void)
     sbo_frags  = W_GetNumForName ("SBOFRAGS");
     sbo_armor  = W_GetNumForName ("SBOARMOR");
 
-    // With Heretic, NUMWEAPONS = 18.
+    // With Heretic, NUM_WEAPONS = 18.
     // Doom weapons are 0..8, chainsaw = 7.
-    for (i=0;i<NUMWEAPONS;i++)
+    for (i=0;i<NUM_WEAPONS;i++)
     {
         sbo_ammo[i] = (i>0 && i!=7 && i<=8)?
             W_GetNumForName (va("SBOAMMO%c",'0'+i))

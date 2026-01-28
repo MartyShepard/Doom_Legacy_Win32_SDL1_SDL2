@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: sounds.h 1737 2025-03-14 08:17:22Z wesleyjohnson $
+// $Id: sounds.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -62,15 +62,15 @@ typedef enum {
     SKS_radio,
     SKS_jump,
     SKS_ouch,
-    NUMSKINSOUNDS,
-    SKS_none = 255,  // or any value > NUMSKINSOUNDS
+    NUM_SKINSOUNDS,
+    SKS_none = 255,  // or any value > NUM_SKINSOUNDS
 } skinsound_e;
 
 
 // free sfx for S_AddSoundFx()
 // MAXSKINS
-#define NUMSFXFREESLOTS    ((32*NUMSKINSOUNDS)+10)
-#define NUMMUSICFREESLOTS  64
+#define NUM_SFXFREESLOTS    ((32*NUM_SKINSOUNDS)+10)
+#define NUM_MUSICFREESLOTS  64
 
 // [WDJ] Convert singularity, multiplicity, and Saw tests to flags.
 // Modified similar to Hexen, and Edge.
@@ -112,7 +112,7 @@ struct sfxinfo_struct
     byte        limit_channels;  // number of channels allowed
 
     // sound that can be remapped for a skin, indexes skins[].skinsounds
-    // 0 up to (NUMSKINSOUNDS-1), -1 or 255 = not skin specifc
+    // 0 up to (NUM_SKINSOUNDS-1), -1 or 255 = not skin specifc
     byte        skinsound;  // there are only 10 of them
 
     uint16_t    flags;  // sfxflag_e
@@ -304,13 +304,13 @@ typedef enum
             
   mus_htitl,
   mus_hcptd,
-    NUMMUSIC_DEF,
+    NUM_MUSIC_DEF,
 
-  mus_firstfreeslot = NUMMUSIC_DEF,
+  mus_firstfreeslot = NUM_MUSIC_DEF,
     // 64 free slots here
-  mus_lastfreeslot = mus_firstfreeslot + NUMMUSICFREESLOTS - 1,
+  mus_lastfreeslot = mus_firstfreeslot + NUM_MUSICFREESLOTS - 1,
 
-    NUMMUSIC
+    NUM_MUSIC
 } musicenum_e;
 
 
@@ -608,15 +608,15 @@ typedef enum
     sfx_menuac,  // menu action
         sfx_menu_end = sfx_menuac,  // 258
 
-        NUMSFX_DEF,
+        NUM_SFX_DEF,
 
 #ifdef ENABLE_DEHEXTRA
-    sfx_dehextra_free_start = NUMSFX_DEF,
+    sfx_dehextra_free_start = NUM_SFX_DEF,
 # if DEHEXTRA_MAX_SOUNDS > 270
     // free slots 259 to  699 (or as set in doomdef.h)
     sfx_dehextra_free_last = DEHEXTRA_MAX_SOUNDS,
 # else    
-    sfx_dehextra_free_last = NUMSFX_DEF + 20,
+    sfx_dehextra_free_last = NUM_SFX_DEF + 20,
 # endif
 #endif
 
@@ -626,10 +626,10 @@ typedef enum
     // ... 60 free sounds here ...
     //
     // Use the defined free slots
-    sfx_freeslot_last = (sfx_freeslot0+NUMSFXFREESLOTS-1),
+    sfx_freeslot_last = (sfx_freeslot0+NUM_SFXFREESLOTS-1),
     // end of freeslots ---------------------------------------------
 
-        NUMSFX_EXT,
+        NUM_SFX_EXT,
 } sfxenum_e;
 
 // typedef uint16_t   sfxid_t;  // defined in doomtype.h

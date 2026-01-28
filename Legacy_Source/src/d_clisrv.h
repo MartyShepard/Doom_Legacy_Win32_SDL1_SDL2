@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: d_clisrv.h 1582 2021-08-10 20:41:33Z wesleyjohnson $
+// $Id: d_clisrv.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -74,7 +74,7 @@
 #include "d_netcmd.h"
 #include "tables.h"
 #include "d_items.h"
-  // NUMINVENTORYSLOTS, NUMAMMO
+  // NUM_INVENTORYSLOTS, NUM_AMMO
 
 //
 // Network play related stuff.
@@ -282,7 +282,7 @@ typedef struct {
 // unaligned
 typedef struct {
     byte  inventoryslotnum;
-    ps_inventory_t  inventory[NUMINVENTORYSLOTS];
+    ps_inventory_t  inventory[NUM_INVENTORYSLOTS];
 } pd_inventory_t;
 
 // aligned to 4 bytes
@@ -296,8 +296,8 @@ typedef struct {
     uint16_t  health;
     uint16_t  armor;
     uint32_t  weaponowned;
-    uint16_t  ammo[NUMAMMO];
-    uint16_t  maxammo[NUMAMMO];
+    uint16_t  ammo[NUM_AMMO];
+    uint16_t  maxammo[NUM_AMMO];
 // unaligned
     byte  armortype;
     // optional parts determined by desc_flags, should be unaligned

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_lights.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: p_lights.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -508,7 +508,7 @@ int EV_LightTurnOnPartway(line_t * line, fixed_t level)
 //Hurdler: now we can change those values via FS :)
 // RGBA( r, g, b, a )
 // Indexed by sprite_light_ind_e
-spr_light_t  sprite_light[NUMLIGHTS] = {
+spr_light_t  sprite_light[NUM_LIGHTS] = {
     // type       offset x, y  coronas color, c_size,light color,l_radius, sqr radius computed at init
    // LT_NOLIGHT  
 //    { SPLGT_none,     0.0f,   0.0f,        0x0,  24.0f,        0x0,   0.0f },
@@ -966,7 +966,7 @@ void CV_corona_OnChange( void )
 {
     unsigned int i;
     // Force light setup, without another test.
-    for( i=0; i<NUMLIGHTS; i++ )
+    for( i=0; i<NUM_LIGHTS; i++ )
     {
         sprite_light[i].impl_flags |= SLI_changed;
     }

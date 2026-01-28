@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_setup.c 1757 2025-11-20 11:44:00Z wesleyjohnson $
+// $Id: p_setup.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -287,7 +287,7 @@ uint32_t        num_rejectmatrix = 0;
 
 // Maintain single and multi player starting spots.
 mapthing_t  *   deathmatchstarts[MAX_DM_STARTS];
-byte            numdmstarts;  // MAX_DM_STARTS is < 255
+byte            num_dm_starts;  // MAX_DM_STARTS is < 255
 mapthing_t  *   playerstarts[MAXPLAYERS];
 
 
@@ -2437,7 +2437,7 @@ boolean P_SetupLevel (int      to_episode,
 
     bodyqueslot = 0;
 
-    numdmstarts = 0;
+    num_dm_starts = 0;
     // added 25-4-98 : reset the players starts
     //SoM: Set pointers to NULL
     for(i=0;i<MAXPLAYERS;i++)
@@ -2593,7 +2593,7 @@ void  P_process_wadfile( int wadfilenum, /*OUT*/ level_id_t * firstmap_out )
         name = lumpinfo->name;
         if (name[0]=='D' && name[1]=='S')
         {
-            for (j=1 ; j < NUMSFX_EXT ; j++)
+            for (j=1 ; j < NUM_SFX_EXT ; j++)
             {
                 if ( S_sfx[j].name
                     && !S_sfx[j].link_id

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: g_game.c 1763 2025-11-20 11:49:30Z wesleyjohnson $
+// $Id: g_game.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -809,7 +809,7 @@ void TeamPlay_OnChange(void)
     if(cv_teamplay.EV == 1)
     {
         // color
-        for(i=0; i<NUMSKINCOLORS; i++)
+        for(i=0; i<NUM_SKINCOLORS; i++)
             set_team_name( i, Color_Names[i]);
     }
     else
@@ -953,7 +953,7 @@ static fixed_t angleturn[3]   = {640, 1280, 320};        // + slow turn
 
 // for change this table change also nextweapon func in g_game and P_PlayerThink
 char extraweapons[8]={wp_chainsaw,-1,wp_supershotgun,-1,-1,-1,-1,-1};
-byte nextweaponorder[NUMWEAPONS]={wp_fist,wp_chainsaw,wp_pistol,
+byte nextweaponorder[NUM_WEAPONS]={wp_fist,wp_chainsaw,wp_pistol,
      wp_shotgun,wp_supershotgun,wp_chaingun,wp_missile,wp_plasma,wp_bfg};
 
 static
@@ -963,16 +963,16 @@ byte NextWeapon( player_t * player, int step )
     int    plwpn = player->readyweapon;
     int    i;
 
-    for (i=0;i<NUMWEAPONS;i++)
+    for (i=0;i<NUM_WEAPONS;i++)
     {
         if( plwpn == nextweaponorder[i] )
         {
-            i = (i+NUMWEAPONS+step)%NUMWEAPONS;
+            i = (i+NUM_WEAPONS+step)%NUM_WEAPONS;
             break;
         }
     }
 
-    for ( ; nextweaponorder[i] != plwpn; i = (i+NUMWEAPONS+step)%NUMWEAPONS )
+    for ( ; nextweaponorder[i] != plwpn; i = (i+NUM_WEAPONS+step)%NUM_WEAPONS )
     {
         w = nextweaponorder[i];
         
@@ -1225,7 +1225,7 @@ void G_BuildTiccmd(ticcmd_t* cmd, int realtics, byte pind)
     else
     {
         int ki;
-        for (ki=gc_weapon1; ki<gc_weapon1+NUMWEAPONS-1; ki++)
+        for (ki=gc_weapon1; ki<gc_weapon1+NUM_WEAPONS-1; ki++)
         {
             if (G_KEY_PRESSED(ki))
             {
@@ -1598,7 +1598,7 @@ boolean G_Responder (event_t* ev)
         if (devparm && ev->type == ev_keydown && ev->data1 == ';')
         {
             // added Boris : test different player colors
-            consoleplayer_ptr->skincolor = (consoleplayer_ptr->skincolor+1) % NUMSKINCOLORS;
+            consoleplayer_ptr->skincolor = (consoleplayer_ptr->skincolor+1) % NUM_SKINCOLORS;
             consoleplayer_ptr->mo->flags |= (consoleplayer_ptr->skincolor)<<MF_TRANSSHIFT;
             G_DeathMatchSpawnPlayer (0);
             goto handled;
@@ -2101,7 +2101,7 @@ void G_PlayerReborn (int player)
 
     //from Boris
     int         skincolor;
-    char        favoritweapon[NUMWEAPONS];
+    char        favoritweapon[NUM_WEAPONS];
     uint16_t    gf; // originalweaponswitch, autoaim
     int         skin;   //Fab: keep same skin
 #ifdef CLIENTPREDICTION2
@@ -2118,7 +2118,7 @@ void G_PlayerReborn (int player)
 
     //from Boris
     skincolor = p->skincolor;
-    memcpy (favoritweapon, p->favoritweapon, NUMWEAPONS);
+    memcpy (favoritweapon, p->favoritweapon, NUM_WEAPONS);
     gf = p->GF_flags; // originalweaponswitch, autoaim
     skin = p->skin;
 #ifdef CLIENTPREDICTION2
@@ -2137,7 +2137,7 @@ void G_PlayerReborn (int player)
     // save player config truth reborn
     p->skincolor = skincolor;
     p->GF_flags = gf & (GF_autoaim|GF_original_weapon);
-    memcpy (p->favoritweapon,favoritweapon,NUMWEAPONS);
+    memcpy (p->favoritweapon,favoritweapon,NUM_WEAPONS);
     p->skin = skin;
 #ifdef CLIENTPREDICTION2
     p->spirit = spirit;
@@ -2171,7 +2171,7 @@ void G_PlayerReborn (int player)
         VerifFavoritWeapon(p);
     //eof Boris
 
-    for (i=0 ; i<NUMAMMO ; i++)
+    for (i=0 ; i<NUM_AMMO ; i++)
         p->maxammo[i] = maxammo[i];
 }
 
@@ -2308,7 +2308,7 @@ boolean G_DeathMatchSpawnPlayer (int playernum)
 {
     int  i,j,n;
 
-    if( !numdmstarts )
+    if( !num_dm_starts )
     {
         I_SoftError("No deathmatch start in this map!");
         return false;
@@ -2322,7 +2322,7 @@ boolean G_DeathMatchSpawnPlayer (int playernum)
     // Random select a deathmatch spot.  Try n times for an unoccupied one.
     for (j=0 ; j<n ; j++)
     {
-        i = PP_Random(pr_dmspawn) % numdmstarts;
+        i = PP_Random(pr_dmspawn) % num_dm_starts;
         if( G_Player_SpawnSpot( playernum, deathmatchstarts[i]) )
             return true;
     }
@@ -2383,7 +2383,7 @@ void G_CoopSpawnPlayer (int playernum)
 
     // Try to use a deathmatch spot.
     // No message about deathmatch starts in coop mode.
-    if( numdmstarts && ( ! deathmatch ) )
+    if( num_dm_starts && ( ! deathmatch ) )
     {
         if( G_DeathMatchSpawnPlayer( playernum )  )
             return;
@@ -3466,7 +3466,7 @@ boolean G_Downgrade(int version)
         //         also disable the new preferred weapons order.
         for(i=0;i<4;i++)
         {
-            players[i].skincolor = i % NUMSKINCOLORS;
+            players[i].skincolor = i % NUM_SKINCOLORS;
             players[i].GF_flags |= GF_original_weapon;
         }//eof Boris
     }

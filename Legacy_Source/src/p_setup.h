@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_setup.h 1756 2025-11-20 11:41:32Z wesleyjohnson $
+// $Id: p_setup.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -51,10 +51,10 @@
   // m_fixed.h, subsector_t
 
 // Player spawn spots for deathmatch.
-// Limited to 255, see numdmstarts.
+// Limited to 255, see num_dm_starts.
 #define MAX_DM_STARTS   64
 extern  mapthing_t *    deathmatchstarts[MAX_DM_STARTS];
-extern  byte            numdmstarts;
+extern  byte            num_dm_starts;
 //extern  mapthing_t**    deathmatch_p;
 
 // Animate flats using anim structure instead of using levelflat fields.

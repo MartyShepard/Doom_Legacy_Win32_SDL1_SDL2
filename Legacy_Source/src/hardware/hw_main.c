@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: hw_main.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: hw_main.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -3915,7 +3915,7 @@ void HWR_DrawPSprite(pspdef_t * psp,  byte lightlum)
 
     vxtx[3].x = vxtx[0].x = tx;
 
-    tx += FIXED_TO_FLOAT( sprlump->width);  
+    tx += FIXED_TO_FLOAT( sprlump->width );
 
 #ifdef WIDESCREEN_WEAPONSPRITE 
     if (WS_ScaledWidth > 0)    
@@ -4057,7 +4057,7 @@ static void HWR_DrawPlayerSprites(void)
     lightlum = LightLevelToLum(sll);
 
     // add all active psprites
-    for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
+    for (i = 0, psp = viewplayer->psprites; i < NUM_PSPRITES; i++, psp++)
     {
         if (psp->state)
             HWR_DrawPSprite(psp, lightlum);

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_things.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_things.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -2068,7 +2068,7 @@ void R_AddSprites (sector_t* sec, int lightlevel)
 }
 
 
-const fixed_t  PSpriteSY[NUMWEAPONS] =
+const fixed_t  PSpriteSY[NUM_WEAPONS] =
 {
      0,             // staff
     FIXINT( 5),     // goldwand
@@ -2315,7 +2315,7 @@ void R_DrawPlayerSprites (void)
     // add all active psprites
     int i;
     for (i=0, psp=viewplayer->psprites;
-         i<NUMPSPRITES;
+         i<NUM_PSPRITES;
          i++,psp++)
     {
         if (psp->state)
@@ -2361,7 +2361,7 @@ typedef struct {
     patch_t * colored_patch;  // Z_Malloc
 } corona_image_t;
 
-static corona_image_t  corona_image[NUMLIGHTS];
+static corona_image_t  corona_image[NUM_LIGHTS];
 #endif
    
 // Also does release, after corona_patch_size is set.
@@ -2373,7 +2373,7 @@ void init_corona_data( void )
 
 #ifdef ENABLE_COLORED_PATCH
     unsigned int i;
-    for( i = 0; i< NUMLIGHTS; i++ )
+    for( i = 0; i< NUM_LIGHTS; i++ )
     {
         if( corona_patch_size )
         {
@@ -4449,11 +4449,11 @@ void Skin_SetDefaultValue(skin_t* skin)
     memset (skin, 0, sizeof(skin_t));
     strcpy (skin->name, DEFAULTSKIN);
     strcpy (skin->faceprefix, "STF");
-    for (i=0;i<NUMSFX_DEF;i++)  // not sfx_free, nor DEHEXTRA slots
+    for (i=0;i<NUM_SFX_DEF;i++)  // not sfx_free, nor DEHEXTRA slots
     {
         // SKS_NONE = none
         byte skinsnd_id = S_sfx[i].skinsound;
-        if( skinsnd_id < NUMSKINSOUNDS )
+        if( skinsnd_id < NUM_SKINSOUNDS )
         {
             // change the skin sound for this skin	    
             skin->soundsid[skinsnd_id] = i;
@@ -4700,12 +4700,12 @@ void R_AddSkins (int wadnum)
             {
                 int found=false;
                 // copy name of sounds that are remapped for this skin
-                for (i=0;i<NUMSFX_DEF;i++)  // not sfx_free nor DEHEXTRA
+                for (i=0;i<NUM_SFX_DEF;i++)  // not sfx_free nor DEHEXTRA
                 {
                     if (!S_sfx[i].name)
                       continue;
 
-                    if( (S_sfx[i].skinsound < NUMSKINSOUNDS)
+                    if( (S_sfx[i].skinsound < NUM_SKINSOUNDS)
                         && strcasecmp(S_sfx[i].name, token+2) == 0 )
                     {
                         sk->soundsid[S_sfx[i].skinsound]=

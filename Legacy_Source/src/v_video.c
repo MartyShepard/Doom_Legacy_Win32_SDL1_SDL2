@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: v_video.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: v_video.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -160,7 +160,7 @@
 // Each screen is vid.screen_size (which may be larger than width * height)
 // width*height is wrong for the Mac, which pads buffer to power of 2
 // someone stuck in an extra screen ptr
-byte * screens[NUMSCREENS+1];
+byte * screens[NUM_SCREENS+1];
 
 rendermode_e   rendermode = render_init;
 byte  rendermode_recalc = false;  // signal a change
@@ -3416,7 +3416,7 @@ void V_Setup_VideoDraw(void)
     {
         // Hardware draw only.
         // be sure to cause a NULL read/write error so we detect it, in case of..
-        for (i = 0; i < NUMSCREENS; i++)
+        for (i = 0; i < NUM_SCREENS; i++)
             screens[i] = NULL;
 
         vid.drawmode = DRAWGL;
@@ -3444,20 +3444,20 @@ void V_Setup_VideoDraw(void)
     // [2] = wipe start screen, screenshot, (? Horz. draw)
     // [3] = wipe end screen
     screens[0] = vid.display;  // buffer or direct video
-    // buffers allocated by port video control, 0..(NUMSCREENS-1)
-    for (i = 1; i < NUMSCREENS; i++)
+    // buffers allocated by port video control, 0..(NUM_SCREENS-1)
+    for (i = 1; i < NUM_SCREENS; i++)
         screens[i] = vid.screen1 + ((i-1) * vid.screen_size);
 
     // [WDJ] statusbar buffer was not within driver allocated memory
     // and is not used.
     //added:26-01-98: statusbar buffer
-//    screens[4] = base + NUMSCREENS * screensize;
+//    screens[4] = base + NUM_SCREENS * screensize;
     screens[4] = NULL;
 
     //!debug
 #ifdef DEBUG
     CONS_Printf("V_Setup_VideoDraw:\n");
-    for (i = 0; i < NUMSCREENS + 1; i++)
+    for (i = 0; i < NUM_SCREENS + 1; i++)
         CONS_Printf(" screens[%d] = %x\n", i, screens[i]);
 #endif
 

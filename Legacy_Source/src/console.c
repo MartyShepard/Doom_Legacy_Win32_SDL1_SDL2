@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: console.c 1757 2025-11-20 11:44:00Z wesleyjohnson $
+// $Id: console.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -233,7 +233,7 @@ static void CONS_Clear_f (void)
 }
 
 // Keys defined by the BIND command.
-static char * bindtable[NUMINPUTS];
+static char * bindtable[NUM_INPUTS];
 
 static void CONS_Bind_f(void)
 {
@@ -247,7 +247,7 @@ static void CONS_Bind_f(void)
         int nb = 0;
         CONS_Printf("bind <keyname> [<command>]\n");
         CONS_Printf("\2bind table :\n");
-        for(key=0;key<NUMINPUTS;key++)
+        for(key=0;key<NUM_INPUTS;key++)
         {
             if(bindtable[key])
             {
@@ -373,7 +373,7 @@ void CON_Init_Setup(void)
     // setup console input filtering
     CON_Init_Input ();
 
-    for(i=0;i<NUMINPUTS;i++)
+    for(i=0;i<NUM_INPUTS;i++)
         bindtable[i]=NULL;
 
     consoletoggle = false;
@@ -723,7 +723,7 @@ static int     comskips,varskips;
         // Console prompt not active.  This is the path during game play.
         // Check game playing keys defined by BIND command.
         // metzgermeister: boundary check !!
-        if((key < NUMINPUTS) && bindtable[key])
+        if((key < NUM_INPUTS) && bindtable[key])
         {
             // [WDJ] Must be done as one string, it could try to execute a partial string.
             COM_BufAddText ( va( "%s\n", bindtable[key] ) );

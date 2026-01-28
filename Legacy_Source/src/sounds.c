@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: sounds.c 1767 2026-01-13 15:57:43Z wesleyjohnson $
+// $Id: sounds.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -71,7 +71,7 @@
 // Information about all the music
 //
 
-musicinfo_t S_music[NUMMUSIC] =
+musicinfo_t S_music[NUM_MUSIC] =
 {
     { 0 },
     { "e1m1\0\0", 0 },
@@ -208,7 +208,7 @@ musicinfo_t S_music[NUMMUSIC] =
 // Same as 0
 #define NOL    sfx_None
 
-sfxinfo_t S_sfx[ NUMSFX_EXT ] =
+sfxinfo_t S_sfx[ NUM_SFX_EXT ] =
 {
   // Volume is diff (+-), so should be 0, but no entry uses it
   // BEX can set name, priority, and flags (SFX_single).
@@ -1041,7 +1041,7 @@ int S_AddMusic( const char * name, const char * prefix )
 int S_FindMusic( const char * name )
 {
   int   i;
-  for(i = 1; i < NUMMUSIC; i++)  // skip mus_None
+  for(i = 1; i < NUM_MUSIC; i++)  // skip mus_None
   {
     if(!S_music[i].name)
       continue;

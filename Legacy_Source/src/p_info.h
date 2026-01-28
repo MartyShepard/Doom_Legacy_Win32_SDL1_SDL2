@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //---------------------------------------------------------------------------
 //
-// $Id: p_info.h 1654 2023-11-14 09:19:26Z wesleyjohnson $
+// $Id: p_info.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
 //
 // Copyright(C) 2000 Simon Howard
 //
@@ -43,7 +43,7 @@
 
 #include "doomtype.h"
 #include "d_items.h"
-  // NUMWEAPONS
+  // NUM_WEAPONS
 #include "command.h"
 
 void P_Load_LevelInfo(void);
@@ -73,7 +73,7 @@ extern char * info_levelcmd[128];
 extern int info_partime;
 extern int info_scripts;        // whether the current level has scripts
 
-extern boolean default_weaponowned[NUMWEAPONS];
+extern boolean default_weaponowned[NUM_WEAPONS];
 
 // level menu
 // level authors can include a menu in their level to
