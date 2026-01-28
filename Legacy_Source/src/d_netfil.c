@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: d_netfil.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
 //
@@ -1334,7 +1335,7 @@ filestatus_e  findfile( const char * filename, const byte * wantedmd5sum,
     }
 
     // Search doomwaddir for simple filename.
-#ifndef SEARCH_DEPTH_USER
+#if defined(GAME_SEARCH_DEPTH)
     ret_val = FullSearch_doomwaddir( filename, GAME_SEARCH_DEPTH, wantedmd5sum,
                     /* OUT */  completepath );
 #else

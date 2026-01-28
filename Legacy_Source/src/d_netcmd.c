@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: d_netcmd.c 1699 2024-11-27 07:20:27Z wesleyjohnson $
 //
@@ -300,7 +301,7 @@ void D_Register_ClientCommands(void)
     COM_AddCommand("saveconfig", Command_SaveConfig_f, CC_config);
     COM_AddCommand("loadconfig", Command_LoadConfig_f, CC_config);
     COM_AddCommand("changeconfig", Command_ChangeConfig_f, CC_config);
-#ifdef SEARCH_DEPTH_USER
+#if !defined(GAME_SEARCH_DEPTH)  && !defined(IWAD_SEARCH_DEPTH)
     CV_RegisterVar(&cv_game_search_depth);
     CV_RegisterVar(&cv_iwad_search_depth);
     CV_RegisterVar(&cv_fwad_search_depth);

@@ -1677,8 +1677,8 @@ hardware/*/*.h :
 hardware/*/*/*.h :
 	@:
 
-$(O)/%.rc.o:	$(SD)win32/winres.rc $(SD)win32/wLegacy.ico
-	$(WINDRES) -o $@ $<
+$(O)/%.rc.o:	$(SD)win32/winres.rc $(SD)win32/wLegacy.ico $(SD)doomdef.h
+	$(WINDRES) $(OPTS) -i $< -o $@
 
 # Do not remake makefile
 

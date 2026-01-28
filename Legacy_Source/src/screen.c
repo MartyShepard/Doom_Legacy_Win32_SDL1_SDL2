@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: screen.c 1569 2021-01-28 09:23:45Z wesleyjohnson $
 //
@@ -131,9 +132,11 @@ CV_PossibleValue_t scr_depth_cons_t[]={{8,"8 bits"}, {15,"15 bits"}, {16,"16 bit
 //added:03-02-98: default screen mode, as loaded/saved in config
 consvar_t   cv_scr_width  = {"scr_width",  "800", CV_VALUE|CV_SAVE, CV_uint16};
 consvar_t   cv_scr_height = {"scr_height", "600", CV_VALUE|CV_SAVE, CV_uint16};
-consvar_t   cv_scr_depth =  {"scr_depth",  "8 bits",   CV_SAVE, scr_depth_cons_t};
+consvar_t   cv_scr_depth =  {"scr_depth",  "32 bits",   CV_SAVE, scr_depth_cons_t};
 consvar_t   cv_fullscreen = {"fullscreen",  "no",CV_SAVE | CV_CALL, CV_YesNo, SCR_ChangeFullscreen};
-consvar_t   cv_borderless = {"borderless",  "yes",CV_SAVE | CV_CALL, CV_YesNo, SCR_Borderless};
+#ifdef BORDERLESS_WIN32
+consvar_t   cv_borderless = {"borderless",  "no",CV_SAVE | CV_CALL, CV_YesNo, SCR_Borderless};
+#endif
 
 // =========================================================================
 //                           SCREEN VARIABLES
@@ -669,6 +672,7 @@ void SCR_ChangeFullscreen (void)
     }
 }
 
+#ifdef BORDERLESS_WIN32
 void SCR_Borderless (void)
 {
    if (cv_borderless.value)
@@ -681,5 +685,5 @@ void SCR_Borderless (void)
     SCR_SetDefaultMode ();
     SCR_apply_video_settings( 1 );
   }
-
 }
+#endif

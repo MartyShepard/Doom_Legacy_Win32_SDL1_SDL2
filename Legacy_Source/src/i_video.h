@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: i_video.h 1721 2025-01-28 15:15:00Z wesleyjohnson $
 //
@@ -121,12 +122,6 @@ extern consvar_t cv_grgammablue;
 extern consvar_t cv_vidwait;
 
 extern consvar_t cv_fullscreen; // for fullscreen support
-extern consvar_t cv_borderless; // for Window borderless support
-
-#ifdef WIDESCREEN_WEAPONSPRITE
-extern consvar_t cv_WidescreenAspect;
-extern double WS_ScaledWidth;
-#endif
 // Return true if engine can draw using the bitpp
 boolean V_CanDraw( byte bitpp );
 
@@ -191,8 +186,18 @@ void I_LoadingScreen ( const char * msg );
 // unused
 void IO_Color( unsigned char color, unsigned char r, unsigned char g, unsigned char b );
 
-#ifndef SDL2
-	void CenterSDL1Window(void);
-#endif
+// Marty =========================
+	#ifdef BORDERLESS_WIN32 
+		extern consvar_t cv_borderless; // for Window borderless support
+	#endif
 
+	#ifdef WIDESCREEN_WEAPONSPRITE
+		extern consvar_t cv_WidescreenAspect;
+		extern double WS_ScaledWidth;
+	#endif
+
+	#ifndef SDL2
+		void CenterSDL1Window(void);
+	#endif
+// Marty ======================END
 #endif

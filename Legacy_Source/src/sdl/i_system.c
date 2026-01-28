@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: i_system.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
 //
@@ -464,14 +465,19 @@ byte MiddleMouselock = 0;; //Global variable
     { 
       Uint32 window_flags        = SDL_GetWindowFlags(sdl_window);    
       byte is_fullscreen         = (window_flags & SDL_WINDOW_FULLSCREEN) != 0;
-      byte is_fullscreen_desktop = (window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0;   
+      byte is_fullscreen_desktop = (window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0;
+      #ifdef BORDERLESS_WIN32  
       byte is_borderless         = (window_flags & SDL_WINDOW_BORDERLESS) != 0;
+      #endif
       
       GenPrintf(EMSG_ver, "[%s][%d] Fullscreen: %s (Desktop: %s, Borderless: %s)\n",
                 __FILE__,__LINE__,
                 is_fullscreen || is_fullscreen_desktop ? "Ja" : "Nein",
                 is_fullscreen_desktop ? "Ja" : "Nein",
-                is_borderless ? "Ja" : "Nein");
+      #ifdef BORDERLESS_WIN32                 
+                is_borderless ? "Ja" : "Nein"
+      #endif
+                );
             
       if (is_fullscreen)
         return 1;

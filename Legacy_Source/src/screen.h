@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: screen.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
 //
@@ -260,7 +261,6 @@ extern consvar_t cv_scr_width;
 extern consvar_t cv_scr_height;
 extern consvar_t cv_scr_depth;
 extern consvar_t cv_fullscreen;
-extern consvar_t cv_borderless;
 
 extern consvar_t cv_fuzzymode;
 
@@ -283,5 +283,11 @@ void SCR_SetDefaultMode (void);
 void SCR_Startup (void);
 
 void SCR_ChangeFullscreen (void);
-void SCR_Borderless(void);
+
+// Marty =========================
+	#ifdef BORDERLESS_WIN32 
+		extern consvar_t cv_borderless;
+		void SCR_Borderless(void);
+	#endif
+// Marty ======================END
 #endif // SCREEN_H

@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: i_video.c 1656 2023-12-08 14:54:47Z wesleyjohnson $
 //
@@ -160,7 +161,11 @@ const char * fullscreen_str[2] = {
 // indexed by fullscreen
 const static uint32_t sdl_window_flags[2] = {
   SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_SHOWN,   // windowed
-  SDL_WINDOW_FULLSCREEN | SDL_WINDOW_BORDERLESS | SDL_WINDOW_INPUT_GRABBED,  // fullscreen
+  SDL_WINDOW_FULLSCREEN |
+  #ifdef BORDERLESS_WIN32   
+  SDL_WINDOW_BORDERLESS |
+  #endif
+  SDL_WINDOW_INPUT_GRABBED,  // fullscreen
 };
 
 #else
@@ -1005,11 +1010,13 @@ void  VID_SetMode_vid( int req_width, int req_height, int req_fullscreen )
     sdl_window = SDL_CreateWindow( "Doom Legacy", 0, 0,
                                    req_width, req_height, sdl_reqflags );
 #else
+    #ifdef BORDERLESS_WIN32 
     /*
      * Marty: Borderless Mode SDL2
      */
     if (cv_borderless.EV == 1)
         sdl_reqflags |=SDL_WINDOW_BORDERLESS;
+    #endif
 
     sdl_window = SDL_CreateWindow( "Doom Legacy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                    req_width, req_height, sdl_reqflags );
@@ -1622,7 +1629,6 @@ found_modes:
      * irgendwo auf dem Bildschirm das Fenster zu zentrieren
      */
      if (vid.modenum.modetype == MODE_window)
-      //CenterSDL1Window();
     
 #endif
     
@@ -1663,54 +1669,55 @@ void I_ShutdownGraphics( void )
 
 #ifndef SDL2 // ========================================================== SDL1
   #ifdef WIN32
-  #include <SDL/SDL_syswm.h>
+  #ifdef BORDERLESS_WIN32 
+    #include <SDL/SDL_syswm.h>
 
-  #define STYLE_DO_NORMAL \
-      (WS_OVERLAPPEDWINDOW | WS_VISIBLE)  // Standard: Rahmen, Titel, Min/Max/Close
+    #define STYLE_DO_NORMAL \
+        (WS_OVERLAPPEDWINDOW | WS_VISIBLE)  // Standard: Rahmen, Titel, Min/Max/Close
 
-  #define STYLE_NO_BORDER \
-      (WS_POPUP | WS_VISIBLE)  
-      
-  void ToggleBorderless(HWND sdl_hwnd )
-  {
-      if (!sdl_hwnd) return;
+    #define STYLE_NO_BORDER \
+        (WS_POPUP | WS_VISIBLE)  
+        
+    void ToggleBorderless(HWND sdl_hwnd )
+    {
+        if (!sdl_hwnd) return;
 
-      LONG current_style = GetWindowLong(sdl_hwnd, GWL_STYLE);
-      LONG new_style;
+        LONG current_style = GetWindowLong(sdl_hwnd, GWL_STYLE);
+        LONG new_style;
 
-      if ( (current_style & WS_CAPTION) && (cv_borderless.EV == 1) ) // Aktuell mit Rahmen ? zu borderless             
-      {           
-          new_style = STYLE_NO_BORDER;
-          // Optional: Fenstergröße auf Client-Größe setzen (sonst bleibt der Rahmen-Offset)
-          RECT client;
-          GetClientRect(sdl_hwnd, &client);
-          SetWindowPos(sdl_hwnd, NULL, 0, 0, client.right, client.bottom,
-                       SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
-      }
-      
-      if ( (current_style | WS_CAPTION) && (cv_borderless.EV == 0) )// Aktuell borderless ? zurück zu normal 
-      {               
-         new_style = STYLE_DO_NORMAL;
-      }
+        if ( (current_style & WS_CAPTION) && (cv_borderless.EV == 1) ) // Aktuell mit Rahmen ? zu borderless             
+        {           
+            new_style = STYLE_NO_BORDER;
+            // Optional: Fenstergröße auf Client-Größe setzen (sonst bleibt der Rahmen-Offset)
+            RECT client;
+            GetClientRect(sdl_hwnd, &client);
+            SetWindowPos(sdl_hwnd, NULL, 0, 0, client.right, client.bottom,
+                         SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+        }
+        
+        if ( (current_style | WS_CAPTION) && (cv_borderless.EV == 0) )// Aktuell borderless ? zurück zu normal 
+        {               
+           new_style = STYLE_DO_NORMAL;
+        }
 
-      if ( current_style != new_style )
-      {
-        // Stil ändern
-        SetWindowLong(sdl_hwnd, GWL_STYLE, new_style);
-                                
-        // Fenster neu zeichnen (wichtig!)
-        SetWindowPos(sdl_hwnd, NULL, 0, 0, 0, 0,
-                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
-      }
+        if ( current_style != new_style )
+        {
+          // Stil ändern
+          SetWindowLong(sdl_hwnd, GWL_STYLE, new_style);
+                                  
+          // Fenster neu zeichnen (wichtig!)
+          SetWindowPos(sdl_hwnd, NULL, 0, 0, 0, 0,
+                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+        }
 
-      if (verbose > 1)
-      GenPrintf(EMSG_debug, "Fensterstil geändert: %s\n",
-                            (new_style == STYLE_DO_NORMAL)?"mit Rahmen" : "borderless");
-      
-      return;
-      
-  }
-
+        if (verbose > 1)
+        GenPrintf(EMSG_debug, "Fensterstil geändert: %s\n",
+                              (new_style == STYLE_DO_NORMAL)?"mit Rahmen" : "borderless");
+        
+        return;
+        
+    }
+  #endif
   void CenterSDL1Window(void)
   {    
       static HWND hwnd = NULL;
@@ -1728,9 +1735,9 @@ void I_ShutdownGraphics( void )
       {         
           if (verbose > 1)          
           GenPrintf( EMSG_debug,"[%s][%d] Surface eingefangne\n",__FILE__,__LINE__);  
-        
-          ToggleBorderless(hwnd);               
-         
+          #ifdef BORDERLESS_WIN32 
+            ToggleBorderless(hwnd);               
+          #endif
           // 1. Bildschirmgröße holen
           int screen_w = GetSystemMetrics(SM_CXSCREEN);
           int screen_h = GetSystemMetrics(SM_CYSCREEN);

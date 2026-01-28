@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: ogl_sdl.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
 //
@@ -208,7 +209,11 @@ extern const char * fullscreen_str[2];
 // indexed by fullscreen
 const static uint32_t sdl_ogl_window_flags[2] = {
   SDL_WINDOW_OPENGL | SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_SHOWN,   // windowed
-  SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_BORDERLESS | SDL_WINDOW_INPUT_GRABBED,  // fullscreen
+  SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN |
+  #ifdef BORDERLESS_WIN32   
+  SDL_WINDOW_BORDERLESS |
+  #endif
+  SDL_WINDOW_INPUT_GRABBED,  // fullscreen
 };
 #else
 // SDL 1.2
@@ -318,12 +323,13 @@ boolean OglSdl_SetMode(int w, int h, byte req_fullscreen)
     // SDL_SetHint( SDL_HINT_RENDER_DRIVER, "opengl" );  // allow opengl
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "nearest" );  // nearest, linear, best
 
+    #ifdef BORDERLESS_WIN32
     /*
      * Marty: Borderless Mode
      */
     if (cv_borderless.EV == 1) // SDL2
         window_reqflags |=SDL_WINDOW_BORDERLESS;
-
+    #endif
     /*
      * Marty: Neue einstellung werden nicht übernommen..
      * Seltsam h und x richtig?
@@ -385,12 +391,13 @@ boolean OglSdl_SetMode(int w, int h, byte req_fullscreen)
         GenPrintf( EMSG_ver,"OpenGL SDL_SetVideoMode(%i,%i,%i,0x%X)  %s\n",
 		w, h, 16, reqflags, fullscreen_str[ req_fullscreen ] );
     }
-
+    #ifdef BORDERLESS_WIN32
     /*
      * Marty: Borderless Mode
      * Borderless wird direkt bei der Wahl des Modus geändert und nicht via Flags
      * wie bei SDL2
      */
+    #endif
     vidSurface = SDL_SetVideoMode(w, h, cbpp, reqflags);
     if(vidSurface == NULL)
         return false;

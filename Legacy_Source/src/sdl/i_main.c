@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: i_main.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
 //
@@ -126,6 +127,10 @@
       {
           AllocConsole();                          // Öffnet Konsole
           freopen("CONOUT$", "w", stdout);         // stdout > Konsole
+#ifndef SDL2         
+          /* Unter SDL1 habe ich damit eine ausgabe in der CMD ... */
+          freopen("CONOUT$", "w", stderr);
+#endif
           freopen("CONIN$",  "r", stdin);          // stdin < Konsole
           /*
            * stderr verhindert die ausgabe auktuell in der cmd?

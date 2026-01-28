@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: d_main.c 1763 2025-11-20 11:49:30Z wesleyjohnson $
 //
@@ -486,8 +487,11 @@ byte    demo_ctrl;
 byte    init_sequence = 0;
 byte    fatal_error = 0;
 
-byte  DrgFile_Requested = 0;
-char *DrgFile_AutoStart = NULL;
+
+#ifdef DRAGFILE
+  byte  DrgFile_Requested = 0;
+  char *DrgFile_AutoStart = NULL;
+#endif
 
 // name buffer sizes including directory and everything
 #define FILENAME_SIZE  256
@@ -586,7 +590,10 @@ consvar_t cv_home = {"home", "", CV_HIDEN, NULL};
 consvar_t cv_doomwaddir = {"doomwaddir", "", CV_HIDEN, NULL};
 consvar_t cv_iwad = {"iwad", "", CV_HIDEN, NULL};
 #endif
-#ifdef SEARCH_DEPTH_USER
+
+#if !defined(GAME_SEARCH_DEPTH) && !defined(IWAD_SEARCH_DEPTH)
+void CFG_Read_SearchDepth(void); // Proto
+
 /*
  * cv_game_search_depth: Such tiefe für Hauptwads (iwad) (Programm Start)
  * cv_iwad_search_depth: Such Tiefe für Hauptwads (iwad) (über den Schalter -iwad)
@@ -1838,7 +1845,7 @@ boolean  Check_wad_filenames( int gmi, /*OUT*/ char * pathbuf_p )
     {
         if( gmtp->iwad_filename[w] == NULL )
             break;
-#ifndef SEARCH_DEPTH_USER
+#if defined(GAME_SEARCH_DEPTH)
         fse = Search_doomwaddir( gmtp->iwad_filename[w], GAME_SEARCH_DEPTH,
 #else
         fse = Search_doomwaddir( gmtp->iwad_filename[w], cv_game_search_depth.EV,
@@ -2070,7 +2077,7 @@ void IdentifyVersion()
         {
             // Simple filename.
             // Find the IWAD in the doomwaddir.
-#ifndef SEARCH_DEPTH_USER
+#if defined(IWAD_SEARCH_DEPTH)
             fse = Search_doomwaddir( s, IWAD_SEARCH_DEPTH, /*OUT*/ pathiwad );
 #else
             fse = Search_doomwaddir( s, cv_iwad_search_depth.EV, /*OUT*/ pathiwad );
@@ -2205,8 +2212,8 @@ void IdentifyVersion()
             "from any shareware, commercial or free version of Doom or Heretic!\n"
             "If you have one of those files, be sure its name is lowercase\n"
             "or use the -iwad command line switch.\n"
-#ifdef SEARCH_DEPTH_USER
-            "Otherwise, check the game's search depth.\n"
+#if !defined(GAME_SEARCH_DEPTH) && !defined(IWAD_SEARCH_DEPTH)
+            "Otherwise, check the game's search depth in the config.cfg.\n"
 #endif
             "==================================================================\n"
             );
@@ -2913,12 +2920,8 @@ restart_command:
         GenPrintf(EMSG_ver, "Config: %s\n", configfile_main );
         GenPrintf(EMSG_ver, "Savegames: %s\n", savegamename );
     }
-#ifdef SEARCH_DEPTH_USER
-    if (!M_CheckParm("-config") )
-    {
-      M_ClearConfig( CFG_main );
-      M_LoadConfig( CFG_main, configfile_main );
-    }
+#if !defined(AME_SEARCH_DEPTH)  && !defined(IWAD_SEARCH_DEPTH)
+    CFG_Read_SearchDepth();
 #endif
     // identify the main IWAD file to use
     IdentifyVersion();  // game, iwad
@@ -4344,7 +4347,7 @@ void Commandline_GetCompileFeatures(void)
         printf("ENGINE [ ] Game IWad Subdirectories Deeps\n");
 #endif
 
-#ifdef SEARCH_DEPTH_USER
+#if !defined(GAME_SEARCH_DEPTH)  && !defined(IWAD_SEARCH_DEPTH)
         printf("ENGINE [X] Game IWad/Levels Subdirectories Deep Search by User\n");
 #else
         printf("ENGINE [ ] Game IWad/Levels Subdirectories Deep Search by User\n");
@@ -4603,4 +4606,16 @@ byte CheckMainWad(const char *MainWadFile)
   }
   return 0;
 }
+
+ #if !defined(GAME_SEARCH_DEPTH)  && !defined(IWAD_SEARCH_DEPTH)
+ void CFG_Read_SearchDepth(void)
+ {
+   /* Marty: Damit die einstellung der Such ebenen frühzeitig geladen werden kann */
+   if (!M_CheckParm("-config") )
+   {
+    M_ClearConfig( CFG_main );
+    M_LoadConfig( CFG_main, configfile_main );
+   }
+ }
+ #endif
 #endif

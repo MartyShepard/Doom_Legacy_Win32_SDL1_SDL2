@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: m_menu.c 1763 2025-11-20 11:49:30Z wesleyjohnson $
 //
@@ -590,8 +591,10 @@ menu_t MainDef, SoundDef, EpiDef, NewDef,
   OptionsDef, EffectsOption1Def, EffectsOption2Def, AdvOption1Def, AdvOption2Def,
   GameOptionDef, MenuOptionsDef, LightingDef, BotDef,
   NetOptionDef, ConnectOptionDef, ServerOptionsDef,
+#if !defined(GAME_SEARCH_DEPTH)  && !defined(IWAD_SEARCH_DEPTH)
+  SearchDepthOptionDef,
+#endif 
   MPOptionDef;
-
 
 //===========================================================================
 //Generic Stuffs (more easy to create menus :))
@@ -2232,10 +2235,8 @@ menuitem_t MenuOptionsMenu[]=
 {
     {IT_STRING | IT_CVAR,0, "Menu Sounds"     , &cv_menusound     , 0},
     {IT_STRING | IT_CVAR,0, "Screens Link"     , &cv_screenslink   , 0},
-#ifdef SEARCH_DEPTH_USER
-    {IT_STRING | IT_CVAR,0, "Search Depth Game (Auto)" , &cv_game_search_depth, 0},
-    {IT_STRING | IT_CVAR,0, "Search Depth iWad (User)" , &cv_iwad_search_depth, 0},
-    {IT_STRING | IT_CVAR,0, "Search Depth Level Wads" , &cv_fwad_search_depth, 0},
+#if !defined(GAME_SEARCH_DEPTH) && !defined(IWAD_SEARCH_DEPTH)
+    {IT_SUBMENU | IT_WHITESTRING,0,"Search Files Depth >>",&SearchDepthOptionDef,0},
 #endif
 };
 menu_t  MenuOptionsDef =
@@ -2323,7 +2324,9 @@ menuitem_t VideoOptionsMenu[]=
     {IT_STRING | IT_WHITESTRING | IT_SUBMENU,0, "Video Modes >>"   , &VideoModeDef       , 0},
 #ifndef __DJGPP__
     {IT_STRING | IT_CVAR,0,    "Fullscreen"       , &cv_fullscreen    , 0},
+    #ifdef BORDERLESS_WIN32
     {IT_STRING | IT_CVAR,0,    "Borderless"       , &cv_borderless    , 0},
+    #endif
 #endif
 // if these are moved then fix MenuGammaFunc_dependencies
     {IT_STRING | IT_CVAR,0,    "Gamma Function"   , &cv_gammafunc     , 0},
@@ -7606,4 +7609,31 @@ void M_LaunchMenu( void )
     }
 }
 
+#endif
+
+#if !defined(GAME_SEARCH_DEPTH)  && !defined(IWAD_SEARCH_DEPTH)
+// Marty. ich habe dieses menu nach unten verlagert damit der Vetgleich mit
+// Source nicht zu heftig unterschiedlich wird.
+
+//===========================================================================
+//                        Search Depth MENU
+//===========================================================================
+
+menuitem_t SearchDepthOptionsMenu[]=
+{
+      {IT_STRING | IT_CVAR,0, "Depth Game (Programstart)" , &cv_game_search_depth, 0},
+      {IT_STRING | IT_CVAR,0, "Depth iWad (User -iwad)" , &cv_iwad_search_depth, 0},
+      {IT_STRING | IT_CVAR,0, "Depth Level Wads & Other" , &cv_fwad_search_depth, 0},
+};
+menu_t  SearchDepthOptionDef =
+{
+    "M_OPTTTL",
+    "Effects",
+    SearchDepthOptionsMenu,
+    M_DrawGenericMenu,
+    NULL,
+    sizeof(SearchDepthOptionsMenu)/sizeof(menuitem_t),
+    60,40,
+    0
+};
 #endif

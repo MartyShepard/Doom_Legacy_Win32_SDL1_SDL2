@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: v_video.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
 //
@@ -981,7 +982,9 @@ consvar_t * video_cvar_list[] =
   &cv_scr_width,
   &cv_scr_height,
   &cv_fuzzymode,
+#ifdef BORDERLESS_WIN32
   &cv_borderless,
+#endif
   NULL
 };
 

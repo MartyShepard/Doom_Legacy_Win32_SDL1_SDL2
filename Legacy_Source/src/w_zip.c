@@ -1,5 +1,6 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
+// Include: Win32 Fixes/ Win32 Compile Fixes
 //
 // $Id: w_zip.c 1456 2019-09-11 12:26:00Z wesleyjohnson $
 //
@@ -40,11 +41,13 @@
 
 // Check for libzip_ver >= 1.2 which has zip_fseek.
 // A loaded libzip may not have zip_fseek.
-//#if ((LIBZIP_VERSION_MAJOR < 1) || (LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR < 2)) || defined(OPT_LIBZIP)
+#if ((LIBZIP_VERSION_MAJOR < 1) || (LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR < 2)) || defined(OPT_LIBZIP)
 // Generate WZ_zip_fseek.
 # define GEN_ZIP_SEEK
-//#endif
-
+#endif
+#if defined (__WIN32__) && (LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR >= 2)
+# define GEN_ZIP_SEEK
+#endif
 #ifdef OPT_LIBZIP
 #include <dlfcn.h>
   // dlopen

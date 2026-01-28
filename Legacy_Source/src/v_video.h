@@ -173,7 +173,6 @@ typedef enum {
 // effects
   V_EFFECTMASK =        0xFF00000,
   V_WHITEMAP =           0x100000,   // draw white (for v_drawstring)
-  V_WHITEX =           0x120000,   // draw white (for v_drawstring)
   V_FLIPPEDPATCH =       0x200000,   // flipped in y
     // finale
   V_TRANSLUCENTPATCH =   0x400000,   // draw patch translucent
