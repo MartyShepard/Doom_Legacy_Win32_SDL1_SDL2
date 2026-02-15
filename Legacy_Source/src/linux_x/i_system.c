@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: i_system.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: i_system.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2015 by DooM Legacy Team.
@@ -144,7 +144,7 @@
 
 extern void D_PostEvent(event_t*);
 
-extern event_t         events[MAXEVENTS];
+extern event_t         events[MAX_EVENTS];
 extern int             eventhead;
 extern int             eventtail;
 
@@ -236,7 +236,7 @@ int I_GetKey (void)
         }
 
         eventtail++;
-        eventtail = eventtail & (MAXEVENTS-1);
+        eventtail = eventtail & (MAX_EVENTS-1);
     }
     
     return rc; 
@@ -1065,7 +1065,7 @@ uint64_t I_GetDiskFreeSpace(void)
 
 char *I_GetUserName(void)
 {
-  static char username[MAXPLAYERNAME];
+  static char username[MAX_PLAYERNAME];
 
   char  *p;
   if((p=getenv("USER"))==NULL)
@@ -1074,8 +1074,8 @@ char *I_GetUserName(void)
         if((p=getenv("username"))==NULL)
           return NULL;
 
-  strncpy(username, p, MAXPLAYERNAME-1);
-  username[MAXPLAYERNAME-1] = 0;
+  strncpy(username, p, MAX_PLAYERNAME-1);
+  username[MAX_PLAYERNAME-1] = 0;
 
   if( strcmp(username,"")==0 )
     return NULL;

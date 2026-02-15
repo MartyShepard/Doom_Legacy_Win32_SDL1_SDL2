@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: I_net.c 1650 2023-10-25 02:25:41Z wesleyjohnson $
+// $Id: I_net.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -148,10 +148,10 @@ boolean I_InitNetwork (void)
     if( doomatic )
     {
         doomcom->episode = VERSION;
-        hardware_MAXPACKETLENGTH=1350;
+        hardware_MAX_PACKETLENGTH=1350;
     }
     else
-        hardware_MAXPACKETLENGTH=512;
+        hardware_MAX_PACKETLENGTH=512;
     
     I_NetOpenSocket = External_Driver_OpenSocket;
     return true;

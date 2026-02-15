@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_mobj.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_mobj.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -269,7 +269,7 @@ consvar_t cv_gravity = { "gravity", "1", CV_NETVAR | CV_FLOAT | CV_SHOWMODIF };
 // Changed cv_splats from ON/OFF, to values in 1.49.
 CV_PossibleValue_t splats_cons_t[] = { {0, "OFF"}, {1, "ON"}, {2, "Vanilla"}, {7, "Auto"}, {0, NULL} };
 consvar_t cv_splats = { "splats", "1", CV_SAVE | CV_CALL, CV_OnOff, DemoAdapt_p_mobj };
-CV_PossibleValue_t maxsplats_cons_t[] = { {1, "MIN"}, {MAXLEVELSPLATS, "MAX"}, {0, NULL} };
+CV_PossibleValue_t maxsplats_cons_t[] = { {1, "MIN"}, {MAX_LEVELSPLATS, "MAX"}, {0, NULL} };
 consvar_t cv_maxsplats = { "maxsplats", "512", CV_SAVE, maxsplats_cons_t, NULL };
 
 static const fixed_t FloatBobOffsets[64] = {
@@ -298,7 +298,7 @@ static const fixed_t FloatBobOffsets[64] = {
 //SoM: 4/7/2000: Boom code...
 boolean P_SetMobjState(mobj_t * mobj, statenum_t state)
 {
-    static statenum_t seenstate_tab[NUMSTATES_EXT]; // fast transition table
+    static statenum_t seenstate_tab[NUM_STATES_EXT]; // fast transition table
     static int recursion = 0;  // detects recursion
 
     boolean ret = true;         // return value
@@ -308,7 +308,7 @@ boolean P_SetMobjState(mobj_t * mobj, statenum_t state)
 
     statenum_t * seenstate = seenstate_tab;      // pointer to table
     statenum_t st1 = state;       // initial state
-    statenum_t tempstate[NUMSTATES_EXT];    // for use with recursion
+    statenum_t tempstate[NUM_STATES_EXT];    // for use with recursion
 
     if (recursion++)    // if recursion detected,
     {
@@ -776,15 +776,15 @@ void P_XYMovement(mobj_t * mo)
     if( player && (player->mo != mo))
         player = NULL;  // player cheats not for voodoo dolls 
 
-    if (mo->momx > MAXMOVE)
-        mo->momx = MAXMOVE;
-    else if (mo->momx < -MAXMOVE)
-        mo->momx = -MAXMOVE;
+    if (mo->momx > MAX_MOVE)
+        mo->momx = MAX_MOVE;
+    else if (mo->momx < -MAX_MOVE)
+        mo->momx = -MAX_MOVE;
 
-    if (mo->momy > MAXMOVE)
-        mo->momy = MAXMOVE;
-    else if (mo->momy < -MAXMOVE)
-        mo->momy = -MAXMOVE;
+    if (mo->momy > MAX_MOVE)
+        mo->momy = MAX_MOVE;
+    else if (mo->momy < -MAX_MOVE)
+        mo->momy = -MAX_MOVE;
 
     xmove_rep = xmove = mo->momx;
     ymove_rep = ymove = mo->momy;
@@ -802,8 +802,8 @@ void P_XYMovement(mobj_t * mo)
         // Fixes mancubus fireballs which were too fast for collision tests,
         // makes steps equal in size, and makes loop test faster and predictable.
         // Boom bug had only the positive tests.  (fixes comp_moveblock)
-        if (xmove > MAXMOVE/2 || xmove < -MAXMOVE/2
-           || ymove > MAXMOVE/2 || ymove < -MAXMOVE/2 )
+        if (xmove > MAX_MOVE/2 || xmove < -MAX_MOVE/2
+           || ymove > MAX_MOVE/2 || ymove < -MAX_MOVE/2 )
         {
            xmove >>= 1;
            ymove >>= 1;
@@ -861,9 +861,9 @@ void P_XYMovement(mobj_t * mo)
             // to pass through walls.
             // CPhipps - compatibility optioned
       
-            if (xmove > MAXMOVE/2 || ymove > MAXMOVE/2
+            if (xmove > MAX_MOVE/2 || ymove > MAX_MOVE/2
                 || ( ! EN_doom_movestep_bug
-                     && (xmove < -MAXMOVE/2 || ymove < -MAXMOVE/2))
+                     && (xmove < -MAX_MOVE/2 || ymove < -MAX_MOVE/2))
                )
             {
                 ptryx = mo->x + xmove/2;
@@ -897,7 +897,7 @@ void P_XYMovement(mobj_t * mo)
             if (player)
             {
                 // tmr_floorz returned by P_TryMove
-                if (tmr_floorz - mo->z > MAXSTEPMOVE)
+                if (tmr_floorz - mo->z > MAX_STEPMOVE)
                 {
                     if (mo->momz > 0)
                         player->cheats |= CF_JUMPOVER;
@@ -2597,7 +2597,7 @@ mobj_t * P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
         mobj->lastlook = -1;    // stuff moved in P_enemy.P_LookForPlayer
     else
     {
-        // Boom, MBF demo assumes MAXPLAYERS=4, but Legacy MAXPLAYERS=32.
+        // Boom, MBF demo assumes MAX_PLAYERS=4, but Legacy MAX_PLAYERS=32.
         mobj->lastlook = PP_Random(pr_lastlook) % max_num_players;  // Boom, MBF
     }
 
@@ -2827,7 +2827,7 @@ boolean P_MorphMobj( mobj_t * mo, mobjtype_t type, int mmflags, int keepflags )
         )
     {
         // Heretic use of P_Random
-        mo->lastlook = PP_Random(ph_morphlast) % MAXPLAYERS;
+        mo->lastlook = PP_Random(ph_morphlast) % MAX_PLAYERS;
     }
     else
         mo->lastlook = -1;    // stuff moved in P_enemy.P_LookForPlayer
@@ -3202,7 +3202,7 @@ void P_SpawnPlayer( mapthing_t * mthing, int playernum )
         return;
 
 #ifdef PARANOIA
-    if (playernum < 0 && playernum >= MAXPLAYERS)
+    if (playernum < 0 && playernum >= MAX_PLAYERS)
         I_Error("P_SpawnPlayer : bad playernum (%d)", playernum);
 #endif
 
@@ -3469,7 +3469,7 @@ void P_Spawn_Mapthing( mapthing_t * mthing )
        mthing->options &= MTF_EASY|MTF_NORMAL|MTF_HARD|MTF_AMBUSH|MTF_MPSPAWN;
    }
 #endif
-   
+
     // count deathmatch start positions
     if (mapthg_type == 11)
     {
@@ -3644,7 +3644,7 @@ void P_Spawn_Mapthing( mapthing_t * mthing )
             // PROBLEM: spawn changes with players, late join will not have spawn objects  // FIXME
             uint16_t spawn_mask = 0;  // collective player types
             unsigned int i;
-            for(i = 0; i < MAXPLAYERS; i++)
+            for(i = 0; i < MAX_PLAYERS; i++)
             {
                 if(playeringame[i])
                   spawn_mask |= class_flags[ PlayerClass[i] ];

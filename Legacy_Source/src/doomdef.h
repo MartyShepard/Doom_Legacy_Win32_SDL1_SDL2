@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: doomdef.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: doomdef.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2024 by DooM Legacy Team.
@@ -40,12 +40,11 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define SVN_REVISION 1773
+#define SVN_REVISION 1774
 // Versioning
 #ifndef SVN_REV
 #define SVN_REV STR(SVN_REVISION)
 #endif
-
 
 // =========================================================================
 // Compile settings, configuration, tuning, and options
@@ -457,14 +456,14 @@
 // The maximum number of players, multiplayer/networking.
 // NOTE: it needs more than this to increase the number of players...
 
-// Limit MAXPLAYERS (and others) to 250.
+// Limit MAX_PLAYERS (and others) to 250.
 // TODO: ... more!!!
-#define MAXPLAYERS              32
-#define MAXSKINS                128
-#define PLAYERSMASK             (MAXPLAYERS-1)
-#define MAXPLAYERNAME           21
-// Limit MAXTEAMS to 250.
-#define MAXTEAMS		32
+#define MAX_PLAYERS             32
+#define MAX_SKINS               128
+#define PLAYERSMASK             (MAX_PLAYERS-1)
+#define MAX_PLAYERNAME          21
+// Limit MAX_TEAMS to 250.
+#define MAX_TEAMS		32
 
 // Determined by skin color tables
 #define NUM_SKINCOLORS           11

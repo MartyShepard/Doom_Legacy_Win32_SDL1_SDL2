@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: st_stuff.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: st_stuff.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -713,7 +713,7 @@ int ST_PlayerFrags (int playernum)
     int    i,frags;
 
     frags = player->addfrags;
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         if( ((cv_teamplay.EV == 0) && i != playernum)
             || (cv_teamplay.EV && !ST_SameTeam(&players[i], player)) )

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_mobj.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_mobj.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -667,8 +667,8 @@ mapthing_t * P_Traverse_Extra_Mapthing( mapthing_t * prev );
 
 // killough 11/98:
 // For torque simulation:
-// MBF, PrBoom  TIPSHIFT=OVERDRIVE, MAXTIPCOUNT=MAXGEAR
+// MBF, PrBoom  TIPSHIFT=OVERDRIVE, MAX_TIPCOUNT=MAXGEAR
 #define TIPSHIFT     6
-#define MAXTIPCOUNT  22
+#define MAX_TIPCOUNT  22
 
 #endif

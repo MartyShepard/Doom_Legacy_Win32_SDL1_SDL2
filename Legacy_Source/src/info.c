@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-f
 //-----------------------------------------------------------------------------
 //
-// $Id: info.c 1757 2025-11-20 11:44:00Z wesleyjohnson $
+// $Id: info.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -67,7 +67,8 @@
 
 
 
-char *sprnames[NUMSPRITES_DEF+1] = {
+// indexed by spritenum_e
+char* sprnames[NUM_SPRITES_DEF+1] = {
 // Doom
     "TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
     "MISF","SAWG","PLSG","PLSF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
@@ -534,7 +535,7 @@ actionf_p2  action_acp2_table[ AP_acp2_end - AP_acp2_start ] =
 #define FFB   FF_FULLBRIGHT
 
 //  sprite,   frame,tics, action,         next,          ext_id
-state_t states[NUMSTATES_EXT] =
+state_t states[NUM_STATES_EXT] =
 {
 // The S_NULL state is hardcoded as dead, used to stop.
   {SPR_TROO,    0, -1,AI_NULL,         S_NULL         }, // S_NULL
@@ -3446,7 +3447,7 @@ MFLAGS( MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL,   // flags
         0,              // damage
 MFLAGS( MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,  // flags
         0,
-	MBF21FLAGS( MF3_E1M8_BOSS )  // flags3
+        MBF21FLAGS( MF3_E1M8_BOSS )  // flags3
       ),
         0,
     },
@@ -3602,7 +3603,7 @@ MFLAGS( MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,  // flags
         0,              // damage
 MFLAGS( MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,  // flags
         0,
-	MBF21FLAGS( MF3_MAP07_BOSS2 )  // flags3
+        MBF21FLAGS( MF3_MAP07_BOSS2 )  // flags3
       ),
         0,
     },
@@ -3635,7 +3636,7 @@ MFLAGS( MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,  // flags
         0,
         MBF21FLAGS( MF3_E2M8_BOSS | MF3_E4M6_BOSS | MF3_RANGEHALF | MF3_HIGHERMPROB | MF3_FULLVOLSOUNDS )  // flags3
       ),
-	0,
+        0,
     },
 
     {           // MT_PAIN
@@ -7613,7 +7614,7 @@ MFLAGS( MF_NOBLOCKMAP|MF_NOCLIP|MF_NOSECTOR|MF_NOGRAVITY,  // flags
      100,                       // mass
      0,                         // damage
 MFLAGS( MF_SPECIAL,  // flags
-	MF2_FLOATBOB,  // flags2
+        MF2_FLOATBOB,  // flags2
         0
       ),
       0,

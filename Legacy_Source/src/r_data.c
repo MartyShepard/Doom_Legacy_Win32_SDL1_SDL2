@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_data.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: r_data.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -2447,7 +2447,7 @@ void R_Load_Colormaps (void)
 }
 
 
-static lumpnum_t  extra_colormap_lumpnum[MAXCOLORMAPS];  // lump number
+static lumpnum_t  extra_colormap_lumpnum[MAX_COLORMAPS];  // lump number
 
 //SoM: Clears out extra colormaps between levels.
 // called by P_SetupLevel after ZFree(PU_LEVEL,..)
@@ -2460,9 +2460,9 @@ void R_Clear_Colormaps()
      GenPrintf(EMSG_warn, "Number of colormaps: %i\n", num_extra_colormaps );
 #endif
 
-  // extra_colormaps are always present [MAXCOLORMAPS]
+  // extra_colormaps are always present [MAX_COLORMAPS]
   num_extra_colormaps = 0;
-  for(i = 0; i < MAXCOLORMAPS; i++)
+  for(i = 0; i < MAX_COLORMAPS; i++)
   {
     extra_colormap_lumpnum[i] = NO_LUMP;
     // [WDJ] The ZMalloc colormap used to be PU_LEVEL, releasing memory without setting the ptrs NULL.
@@ -2697,7 +2697,7 @@ int R_ColormapNumForName(const char *name)
   }
 
   // Add another colormap
-  if(num_extra_colormaps == MAXCOLORMAPS)
+  if(num_extra_colormaps == MAX_COLORMAPS)
   {
     I_SoftError("R_ColormapNumForName: Too many colormaps!\n");
     return 0;
@@ -2830,7 +2830,7 @@ int R_Create_Colormap_str(char * colorstr, char * ctrlstr, char * fadestr)
           fog );
 #endif
 
-  if(num_extra_colormaps == MAXCOLORMAPS)
+  if(num_extra_colormaps == MAX_COLORMAPS)
   {
     I_SoftError("R_Create_Colormap: Too many colormaps!\n");
     return 0;
@@ -3078,7 +3078,7 @@ char * R_ColormapNameForNum(int num)
   if(num == -1)
     return "NONE";
 
-  if(num < 0 || num > MAXCOLORMAPS)
+  if(num < 0 || num > MAX_COLORMAPS)
   {
     I_SoftError("R_ColormapNameForNum: num is invalid!\n");
     return "NONE";
@@ -3873,7 +3873,7 @@ void R_Init_rdata(void)
     // clear for easier debugging
     memset(extra_colormaps, 0, sizeof(extra_colormaps));
 
-    for(i = 0; i < MAXCOLORMAPS; i++)
+    for(i = 0; i < MAX_COLORMAPS; i++)
     {
         extra_colormap_lumpnum[i] = NO_LUMP;
         extra_colormaps[i].colormap = NULL;

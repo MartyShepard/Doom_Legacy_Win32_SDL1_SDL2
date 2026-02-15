@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_bsp.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: r_bsp.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -70,7 +70,7 @@ extern byte             doorclosed;
 // extern drawseg_t*       drawsegs;
 //SoM: 3/26/2000: Use boom code.
 extern drawseg_t*       drawsegs;
-extern uint16_t         maxdrawsegs;
+extern uint16_t         max_drawsegs;
 extern drawseg_t*       ds_p;
 extern drawseg_t*       firstnewseg;
 

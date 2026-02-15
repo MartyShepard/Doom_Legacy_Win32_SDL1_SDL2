@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_spec.c 1770 2026-01-13 16:00:35Z wesleyjohnson $
+// $Id: p_spec.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -2685,7 +2685,7 @@ byte  P_MBF21_PlayerSpecialSector( player_t* player, sector_t* sector )
          case 3: // Kills all players, then exits the map via secret exit.
             {
                 int j;
-                for (j = 0; j < MAXPLAYERS; j++)
+                for (j = 0; j < MAX_PLAYERS; j++)
                 {
                     if( playeringame[j] )
                       P_DamageMobj( players[j].mo, NULL, NULL, 10000 );
@@ -3021,7 +3021,7 @@ void P_UpdateSpecials (void)
     }
 
     //  DO BUTTONS
-    for (i = 0; i < MAXBUTTONS; i++)
+    for (i = 0; i < MAX_BUTTONS; i++)
     {
         button_t *  bu = & buttonlist[i];
         if (bu->btimer > 0)  // [WDJ] would break if ever got negative.
@@ -3333,7 +3333,7 @@ void P_SpawnSpecials (void)
     P_Remove_AllActiveCeilings();
     P_Remove_AllActivePlats();
     uint32_t bi;
-    for (bi = 0; bi < MAXBUTTONS; bi++)
+    for (bi = 0; bi < MAX_BUTTONS; bi++)
       memset(&buttonlist[bi], 0, sizeof(button_t));
 
     P_Init_TagLists();   //Create xref tables for tags
@@ -4383,10 +4383,10 @@ void T_Pusher(pusher_t * p)
         tm_bbox[BOXRIGHT]  = p->x_src + radius;
         tm_bbox[BOXLEFT]   = p->x_src - radius;
 
-        xl = (tm_bbox[BOXLEFT] - bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
-        xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
-        yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
-        yh = (tm_bbox[BOXTOP] - bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
+        xl = (tm_bbox[BOXLEFT] - bmaporgx - MAX_RADIUS)>>MAPBLOCKSHIFT;
+        xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAX_RADIUS)>>MAPBLOCKSHIFT;
+        yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAX_RADIUS)>>MAPBLOCKSHIFT;
+        yh = (tm_bbox[BOXTOP] - bmaporgy + MAX_RADIUS)>>MAPBLOCKSHIFT;
         for (bx=xl ; bx<=xh ; bx++)
         {
             for (by=yl ; by<=yh ; by++)

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: sounds.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: sounds.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -68,7 +68,7 @@ typedef enum {
 
 
 // free sfx for S_AddSoundFx()
-// MAXSKINS
+// MAX_SKINS
 #define NUM_SFXFREESLOTS    ((32*NUM_SKINSOUNDS)+10)
 #define NUM_MUSICFREESLOTS  64
 

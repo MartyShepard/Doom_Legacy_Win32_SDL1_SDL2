@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_tick.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_tick.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -458,7 +458,7 @@ void P_Ticker (void)
     // Not if this is an intermission screen.
     if( gamestate == GS_LEVEL || gamestate == GS_DEDICATEDSERVER )
     {
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i=0 ; i<MAX_PLAYERS ; i++)
         {
             if (playeringame[i])
                 P_PlayerThink (&players[i]);

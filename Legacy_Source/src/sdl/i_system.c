@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: i_system.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: i_system.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2022 by DooM Legacy Team.
@@ -192,7 +192,7 @@ int  I_GetKey(void)
         }
 
         eventtail++;
-        eventtail = eventtail & (MAXEVENTS-1);
+        eventtail = eventtail & (MAX_EVENTS-1);
     }
 
     return rc;
@@ -326,8 +326,8 @@ static uint16_t  xlatekey(uint32_t keycode)
 //! Translates a SDL joystick button to a doom key_input_e number.
 static int Translate_Joybutton(Uint8 which, Uint8 button)
 {
-  if (which >= MAXJOYSTICKS) 
-    which = MAXJOYSTICKS-1;
+  if (which >= MAX_JOYSTICKS) 
+    which = MAX_JOYSTICKS-1;
 
   if (button >= JOYBUTTONS)
     button = JOYBUTTONS-1;
@@ -337,8 +337,8 @@ static int Translate_Joybutton(Uint8 which, Uint8 button)
 
 static int Translate_Joyhat(Uint8 which, Uint8 value)
 {
-  if (which >= MAXJOYSTICKS) 
-    which = MAXJOYSTICKS-1;
+  if (which >= MAX_JOYSTICKS) 
+    which = MAX_JOYSTICKS-1;
 
   if(value == SDL_HAT_UP)
   {
@@ -367,8 +367,8 @@ static int Translate_Joyhat(Uint8 which, Uint8 value)
 #ifdef XBOX_CONTROLLER
 static int Translate_Xbox_controller_Trigger(Uint8 which, Uint8 axis)
 {
-  if (which >= MAXJOYSTICKS) 
-    which = MAXJOYSTICKS-1;
+  if (which >= MAX_JOYSTICKS) 
+    which = MAX_JOYSTICKS-1;
     
   if(axis == 2)
   {
@@ -1871,11 +1871,11 @@ guess:
 
 char *I_GetUserName(void)
 {
-  static char username[MAXPLAYERNAME];
+  static char username[MAX_PLAYERNAME];
   char  *p;
 
 #ifdef WIN32
-  DWORD i = MAXPLAYERNAME;
+  DWORD i = MAX_PLAYERNAME;
   int ret = GetUserName(username, &i);
   if(!ret)
   {
@@ -1887,7 +1887,7 @@ char *I_GetUserName(void)
         if ((p = getenv("username")) == NULL)
           return NULL;
 
-  dl_strncpy(username, p, MAXPLAYERNAME);
+  dl_strncpy(username, p, MAX_PLAYERNAME);
 
 #ifdef WIN32
   }

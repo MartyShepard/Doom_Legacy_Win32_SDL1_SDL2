@@ -239,7 +239,7 @@ void  P_clear_all_state_ext( void )
     num_state_ext_used = 1;  // 0 is always dummy
 
     // Init all states to dummy.
-    for( s = states; s < &states[NUMSTATES_EXT]; s++ )
+    for( s = states; s < &states[NUM_STATES_EXT]; s++ )
        s->state_ext_id = 0;
 
     // Size differs, too hard to init in declaration.
@@ -402,7 +402,7 @@ static
 static
 const range_t  sprite_free_table_doom[2] =
 {
-  { SPR_LEGACY_MAX + 1, NUMSPRITES_EXT - 1 },
+  { SPR_LEGACY_MAX + 1, NUM_SPRITES_EXT - 1 },
   { SPR_HERETIC_START, SPR_AMC2 },  // protect SPR_AMS1 to SPR_AMB2 for odd sprite remapping
 };
 #define NUM_sprite_free_table_doom (sizeof(sprite_free_table_doom)/sizeof(range_t))
@@ -420,7 +420,7 @@ static
 static
 const range_t  sprite_free_table_heretic[4] =
 {
-  { SPR_LEGACY_MAX + 1, NUMSPRITES_EXT - 1 },
+  { SPR_LEGACY_MAX + 1, NUM_SPRITES_EXT - 1 },
   { SPR_DOOM_START, SPR_BLUD-1 },  // SPR_BLUD is used for SPR_BLOD
   { SPR_BLUD+1, SPR_PLAY-1 },      // SPR_PLAY is used for SPR_PLAY
   { SPR_PLAY+1, SPR_DOOM_MAX },
@@ -690,7 +690,7 @@ static range_t  nomap_state = {0, 0};
 // This is not in the MBF21 spec.
 void  dsda_zero_state( uint16_t stnum )
 {
-    if( stnum < NUMSTATES_EXT )
+    if( stnum < NUM_STATES_EXT )
     {
         // Do not know what effect these dummy values have upon any wad.
         // The problem shows up as undefined behavior when wads depend upon them.
@@ -718,8 +718,8 @@ void  zero_states( uint16_t s1, uint16_t s2 )
 
     // [WDJ] sleepwalking.wad requires default state to have SPR_TNT1, and nextstate=sj,
     // which is typical of MBF21 wads developed on DSDA.
-//    if( s1 >= NUMSTATES_EXT )  s1 = NUMSTATES_EXT - 1;
-    if( s2 >= NUMSTATES_EXT )  s2 = NUMSTATES_EXT - 1;
+//    if( s1 >= NUM_STATES_EXT )  s1 = NUM_STATES_EXT - 1;
+    if( s2 >= NUM_STATES_EXT )  s2 = NUM_STATES_EXT - 1;
     for( sj = s1; sj <= s2; sj++ )
     {
         state_t *  st = & states[sj];
@@ -769,7 +769,7 @@ static
 const range_t  state_free_table_doom[2] =
 {
   // Use the usual free space first.
-  { NUMSTATES_DEF, NUMSTATES_EXT - 1 },
+  { NUM_STATES_DEF, NUM_STATES_EXT - 1 },
   { S_HERETIC_START, S_HERETIC_MAX },
 };
 #define NUM_state_free_table_doom (sizeof(state_free_table_doom)/sizeof(range_t))
@@ -779,7 +779,7 @@ static
 const range_t  state_free_table_heretic[5] =
 {
   // Use the usual free space first.
-  { NUMSTATES_DEF, NUMSTATES_EXT - 1 },
+  { NUM_STATES_DEF, NUM_STATES_EXT - 1 },
   { S_DOOM_START, S_BLOOD1-1 },
   { S_BLOOD3+1, S_PLAY-1 },
   { S_PLAY+1, S_BLOODSPLATTER1-1 },
@@ -1076,11 +1076,11 @@ void init_tables_deh( void )
     }
 
     // Leave something for remap and DEHEXTRA.
-    if( nomap_sprite.last >= NUMSPRITES_EXT-4 )
-        nomap_sprite.last = NUMSPRITES_EXT-4;
+    if( nomap_sprite.last >= NUM_SPRITES_EXT-4 )
+        nomap_sprite.last = NUM_SPRITES_EXT-4;
     // There are 4 spare states.
-    if( nomap_state.last >= NUMSTATES_EXT-4 )
-        nomap_state.last = NUMSTATES_EXT-4;
+    if( nomap_state.last >= NUM_STATES_EXT-4 )
+        nomap_state.last = NUM_STATES_EXT-4;
 #endif
 
     // initialize free sfx slots for skin sounds, and dehacked.
@@ -1272,10 +1272,10 @@ void P_PatchInfoTables( void )
 #endif
     }
 #if defined DEBUG_WINDOWED || defined PARANOIA
-    if( NUMSTATES_EXT >= 0xFFFE )
-        I_Error( "NUMSTATES exceeds 16 bits\n" );
+    if( NUM_STATES_EXT >= 0xFFFE )
+        I_Error( "NUM_STATES exceeds 16 bits\n" );
 #endif
-    for (i=0;i<NUMSTATES_EXT;i++)
+    for (i=0;i<NUM_STATES_EXT;i++)
     {
         states[i].tics *= NEWTICRATERATIO;
     }

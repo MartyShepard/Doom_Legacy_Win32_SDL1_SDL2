@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_plane.h 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_plane.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -51,7 +51,7 @@
 
 #include "doomtype.h"
 #include "screen.h"
-  // MAXVIDWIDTH, MAXVIDHEIGHT
+  // MAX_VIDWIDTH, MAX_VIDHEIGHT
 #include "r_data.h"
 #include "m_fixed.h"
 #include "d_player.h"
@@ -118,10 +118,10 @@ typedef struct visplane_s
   //faB: words sucks .. should get rid of that.. but eats memory
   //added:08-02-98: THIS IS UNSIGNED! VERY IMPORTANT!!
   uint16_t              pad1;   // leave pads for [minx-1] and [maxx+1]
-  uint16_t              top[MAXVIDWIDTH];  // screen coord of top edge
+  uint16_t              top[MAX_VIDWIDTH];  // screen coord of top edge
   uint16_t              pad2;
   uint16_t              pad3;
-  uint16_t              bottom[MAXVIDWIDTH];  // screen coord of bottom edge
+  uint16_t              bottom[MAX_VIDWIDTH];  // screen coord of bottom edge
   uint16_t              pad4;
 #endif
 } visplane_t;
@@ -142,14 +142,14 @@ extern planefunction_t  ceilingfunc_t;
 // [WDJ] Clip values are inside the drawable area.
 // This makes it easier to do limit tests, without needing +1 and -1.
 // In original doom, the clip values were outside the drawable area.
-extern int16_t          floorclip[MAXVIDWIDTH];
-extern int16_t          ceilingclip[MAXVIDWIDTH];
-//extern short            waterclip[MAXVIDWIDTH];   //added:18-02-98:WATER!
-extern fixed_t          backscale[MAXVIDWIDTH];
-extern fixed_t          yslopetab[MAXVIDHEIGHT*4];
+extern int16_t          floorclip[MAX_VIDWIDTH];
+extern int16_t          ceilingclip[MAX_VIDWIDTH];
+//extern short            waterclip[MAX_VIDWIDTH];   //added:18-02-98:WATER!
+extern fixed_t          backscale[MAX_VIDWIDTH];
+extern fixed_t          yslopetab[MAX_VIDHEIGHT*4];
 
 extern fixed_t*         yslope;
-extern fixed_t          distscale[MAXVIDWIDTH];
+extern fixed_t          distscale[MAX_VIDWIDTH];
 
 void R_Init_Planes (void);
 void R_Clear_Planes (player_t* player);
@@ -195,8 +195,8 @@ typedef struct ff_planemgr_s
   fixed_t      back_frac;	// from back_pos and scale
   fixed_t      back_step;
   // [WDJ] Draw clip for draw of this plane, top and bottom row inside drawable area.
-  int16_t  front_clip_bot[MAXVIDWIDTH];
-  int16_t  plane_clip_top[MAXVIDWIDTH];	// and console clipping
+  int16_t  front_clip_bot[MAX_VIDWIDTH];
+  int16_t  plane_clip_top[MAX_VIDWIDTH];	// and console clipping
 
   ffloor_t  *  ffloor;
 } ff_planemgr_t;

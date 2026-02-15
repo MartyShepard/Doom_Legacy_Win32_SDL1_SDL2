@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: win_vid.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: win_vid.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -451,11 +451,11 @@ static BOOL VID_DDModes_callback (int width, int height, int bpp)
     if( bpp != mode_bitpp )  goto skip
 
 #if 1
-    if( (width > MAXVIDWIDTH) || (height > MAXVIDHEIGHT) )
+    if( (width > MAX_VIDWIDTH) || (height > MAX_VIDHEIGHT) )
 #else
     if ((bpp > 16) ||
-        (width > MAXVIDWIDTH) ||
-        (height > MAXVIDHEIGHT))
+        (width > MAX_VIDWIDTH) ||
+        (height > MAX_VIDHEIGHT))
 #endif
     {
         goto skip;

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_segs.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_segs.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -470,7 +470,7 @@ draw_ffside_t *  create_draw_ffside( unsigned int num_req )
 // On average, there is 1/2 block left over allocation,
 // but there is 1/2 vid.width wastage on each block (for odd size vidwidths).
 // Starts at 64 firstsegs, and increases only when there are more firstsegs.
-#define  BSR_ALLOC  (MAXVIDWIDTH*64)
+#define  BSR_ALLOC  (MAX_VIDWIDTH*64)
 
 typedef struct  bsr_mem_s {
     struct bsr_mem_s *  next;
@@ -643,8 +643,8 @@ void expand_drawsegs( void )
 #ifdef WALLSPLATS
 #define BORIS_FIX
 #ifdef BORIS_FIX
-static short last_ceilingclip[MAXVIDWIDTH];
-static short last_floorclip[MAXVIDWIDTH];
+static short last_ceilingclip[MAX_VIDWIDTH];
+static short last_floorclip[MAX_VIDWIDTH];
 #endif
 
 // Called by R_DrawWallSplats
@@ -764,8 +764,8 @@ static void R_DrawWallSplats (void)
     // draw all splats from the line that touches the range of the seg
     for ( ; splat ; splat=splat->next)
     {
-        angle1 = R_PointToAngle (splat->v1.x, splat->v1.y);
-        angle2 = R_PointToAngle (splat->v2.x, splat->v2.y);
+        angle1 = R_ViewPointToAngle (splat->v1.x, splat->v1.y);
+        angle2 = R_ViewPointToAngle (splat->v2.x, splat->v2.y);
 #if 0
         if (angle1>clipangle)
             angle1=clipangle;
@@ -867,8 +867,8 @@ static void R_DrawWallSplats (void)
             {
                 // distance effect on light, yscale is smaller at distance.
                 unsigned  dlit = dm_yscale>>LIGHTSCALESHIFT;
-                if (dlit >=  MAXLIGHTSCALE )
-                   dlit = MAXLIGHTSCALE-1;
+                if (dlit >=  MAX_LIGHTSCALE )
+                   dlit = MAX_LIGHTSCALE-1;
 
                 dc_colormap = walllights[dlit];
                 if( ro_colormap )
@@ -940,10 +940,10 @@ void  expand_lightlist( void )
 // This allows uses of pool16 from outside the drawsegs.
 
 // All pool16 memory allocations are of the same size.
-#if MAXVIDWIDTH < 1030
-# define POOL16_ALLOC  (MAXVIDWIDTH * 64)
+#if MAX_VIDWIDTH < 1030
+# define POOL16_ALLOC  (MAX_VIDWIDTH * 64)
 #else
-# define POOL16_ALLOC  (MAXVIDWIDTH * 128)
+# define POOL16_ALLOC  (MAX_VIDWIDTH * 128)
 #endif
 
 typedef struct pool16_s pool16_t;
@@ -1519,8 +1519,8 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
               {
                  // distance effect on light, yscale is smaller at distance.
                  unsigned dlit = dm_yscale>>LIGHTSCALESHIFT;
-                 if (dlit >=  MAXLIGHTSCALE )
-                     dlit = MAXLIGHTSCALE-1;
+                 if (dlit >=  MAX_LIGHTSCALE )
+                     dlit = MAX_LIGHTSCALE-1;
 
                  // light table for the distance
                  rlight->rcolormap = rlight->vlightmap[dlit];
@@ -1583,8 +1583,8 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
           {
               // distance effect on light, yscale is smaller at distance.
               unsigned dlit = dm_yscale>>LIGHTSCALESHIFT;
-              if (dlit >=  MAXLIGHTSCALE )
-                 dlit = MAXLIGHTSCALE-1;
+              if (dlit >=  MAX_LIGHTSCALE )
+                 dlit = MAX_LIGHTSCALE-1;
 
               // light table for the distance
               dc_colormap = walllights[dlit];
@@ -1935,8 +1935,8 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
               {
                 // distance effect on light, yscale is smaller at distance.
                 unsigned  dlit = dm_yscale>>LIGHTSCALESHIFT;
-                if (dlit >=  MAXLIGHTSCALE )
-                  dlit = MAXLIGHTSCALE-1;
+                if (dlit >=  MAX_LIGHTSCALE )
+                  dlit = MAX_LIGHTSCALE-1;
 
                 // light table for the distance
                 rlight->rcolormap = rlight->vlightmap[dlit];
@@ -2038,8 +2038,8 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
         {
             // distance effect on light, yscale is smaller at distance.
             unsigned  dlit = dm_yscale>>LIGHTSCALESHIFT;
-            if (dlit >=  MAXLIGHTSCALE )
-                dlit = MAXLIGHTSCALE-1;
+            if (dlit >=  MAX_LIGHTSCALE )
+                dlit = MAX_LIGHTSCALE-1;
 
             // light table for the distance
             dc_colormap = walllights[dlit];
@@ -2208,8 +2208,8 @@ void R_RenderFog( ffloor_t* fff, sector_t * intosec, lightlev_t foglight,
             {
                 // distance effect on light, yscale is smaller at distance.
                 unsigned dlit = dm_yscale>>LIGHTSCALESHIFT;
-                if (dlit >=  MAXLIGHTSCALE )
-                    dlit = MAXLIGHTSCALE-1;
+                if (dlit >=  MAX_LIGHTSCALE )
+                    dlit = MAX_LIGHTSCALE-1;
 
                 // light table for the distance
                 dc_colormap = xwalllights[dlit];
@@ -2481,8 +2481,8 @@ void R_RenderSegLoop (void)
             {
                 // distance effect on light, rw_scale is smaller at distance.
                 unsigned  dlit = rw_scale>>LIGHTSCALESHIFT;
-                if (dlit >=  MAXLIGHTSCALE )
-                    dlit = MAXLIGHTSCALE-1;
+                if (dlit >=  MAX_LIGHTSCALE )
+                    dlit = MAX_LIGHTSCALE-1;
 
                 // light table for the distance
                 dc_colormap = walllights[dlit];
@@ -2510,8 +2510,8 @@ void R_RenderSegLoop (void)
             {
               // distance effect on light, rw_scale is smaller at distance.
               unsigned  dlit = rw_scale>>LIGHTSCALESHIFT;
-              if (dlit >=  MAXLIGHTSCALE )
-                dlit = MAXLIGHTSCALE-1;
+              if (dlit >=  MAX_LIGHTSCALE )
+                dlit = MAX_LIGHTSCALE-1;
 
               // light table for the distance
               rlight->rcolormap = rlight->vlightmap[dlit];

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_splats.h 1626 2022-08-11 05:02:25Z wesleyjohnson $
+// $Id: r_splats.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -40,7 +40,7 @@
 #define WALLSPLATS      // comment this out to compile without splat effects
 //#define FLOORSPLATS
 
-#define MAXLEVELSPLATS      1024
+#define MAX_LEVELSPLATS      1024
 
 // splat flags
 #define SPLATDRAWMODE_MASK   0x03       // mask to get drawmode from flags

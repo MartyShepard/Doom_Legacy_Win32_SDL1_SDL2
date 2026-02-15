@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_doors.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_doors.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -78,7 +78,7 @@ int  delay_ticks_per_sec = 35;
 //
 // Sliding door frame information
 //
-slidename_t     slideFrameNames[MAXSLIDEDOORS] =
+slidename_t     slideFrameNames[MAX_SLIDEDOORS] =
 {
     {"GDOORF1", "GDOORF2", "GDOORF3", "GDOORF4",        // front
      "GDOORB1", "GDOORB2", "GDOORB3", "GDOORB4"},       // back
@@ -824,7 +824,7 @@ P_SpawnDoorRaiseIn5Mins ( sector_t* sec, int secnum )
 // (animate midtexture, then set noblocking line)
 //
 
-/*slideframe_t slideFrames[MAXSLIDEDOORS];
+/*slideframe_t slideFrames[MAX_SLIDEDOORS];
 
 void P_InitSlidingDoorFrames(void)
 {
@@ -838,7 +838,7 @@ void P_InitSlidingDoorFrames(void)
     if ( gamemode != commercial)
         return;
 
-    for (i = 0;i < MAXSLIDEDOORS; i++)
+    for (i = 0;i < MAX_SLIDEDOORS; i++)
     {
         if (!slideFrameNames[i].frontFrame1[0])
             break;
@@ -874,7 +874,7 @@ int P_FindSlidingDoorType(line_t*       line)
     int         i;
     int         val;
 
-    for (i = 0;i < MAXSLIDEDOORS;i++)
+    for (i = 0;i < MAX_SLIDEDOORS;i++)
     {
         val = sides[line->sidenum[0]].midtexture;
         if (val == slideFrames[i].frontFrames[0])

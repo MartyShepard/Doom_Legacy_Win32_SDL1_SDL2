@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hu_stuff.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: hu_stuff.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -299,9 +299,9 @@ void Command_Sayto_f (void)
         return;
     }
 
-    // Players 0..(MAXPLAYERS-1) are known as Player 1 to MAXPLAYERS to user.
+    // Players 0..(MAX_PLAYERS-1) are known as Player 1 to MAX_PLAYERS to user.
     playernum = player_name_to_num(COM_Argv(1));
-    if(playernum > MAXPLAYERS)
+    if(playernum > MAX_PLAYERS)
         return;  // not found
 
     buf[0] = (unsigned char)playernum;    // 0..127
@@ -327,7 +327,7 @@ void Command_Sayteam_f (void)
         return;
     }
 
-    // Players 0..(MAXPLAYERS-1) are known as Player 1 to MAXPLAYERS to user.
+    // Players 0..(MAX_PLAYERS-1) are known as Player 1 to MAX_PLAYERS to user.
     buf[0] = (unsigned char)( consoleplayer & 0x80 );  // 128..254
     strcpy(&buf[1],COM_Argv(1));
     for(i=2; i<j; i++)
@@ -356,7 +356,7 @@ void Got_NetXCmd_Saycmd( xcmd_t * xc )
     byte to = *(p++);
     byte pn = (to & 0x7F); // to player num 0..126
 
-    if( xc->playernum >= MAXPLAYERS )  goto done;  // cannot index player_names
+    if( xc->playernum >= MAX_PLAYERS )  goto done;  // cannot index player_names
     fromstr = player_names[xc->playernum];  // never NULL
 
     if( to==255 )
@@ -366,7 +366,7 @@ void Got_NetXCmd_Saycmd( xcmd_t * xc )
     }
     else
     {
-        if( pn >= MAXPLAYERS )  goto done;  // cannot index tables
+        if( pn >= MAX_PLAYERS )  goto done;  // cannot index tables
         if( to & 0x80 )
         {
             // To Team
@@ -376,7 +376,7 @@ void Got_NetXCmd_Saycmd( xcmd_t * xc )
 
     if(xc->playernum == consoleplayer
        || to==255 // broadcast
-       || ( (to < MAXPLAYERS) && pn==consoleplayer )
+       || ( (to < MAX_PLAYERS) && pn==consoleplayer )
        || ( (to & 0x80) // Team broadcast from pn
             && ST_SameTeam(consoleplayer_ptr,&players[pn])) )
     {
@@ -388,7 +388,7 @@ void Got_NetXCmd_Saycmd( xcmd_t * xc )
         // Splitscreen
         if(xc->playernum == displayplayer2
            || to==255 // broadcast
-           || ( (to < MAXPLAYERS) && pn==displayplayer2 )
+           || ( (to < MAX_PLAYERS) && pn==displayplayer2 )
            || ( (to & 0x80) // Team broadcast from pn
                 && ST_SameTeam(displayplayer2_ptr,&players[pn])) )
         {
@@ -456,13 +456,13 @@ void HU_Ticker(void)
 
 
 // [smite] there's no reason to use a queue here, a normal buffer will do
-static char     w_chat[HU_MAXMSGLEN+1]; // always NUL-terminated
+static char     w_chat[HU_MAX_MSG_LEN+1]; // always NUL-terminated
 static unsigned tail = 0; // first free cell, should contain NUL
 
 // simplified stl::vector implementation
 static boolean HU_Chat_push_back(char c)
 {
-  if (tail >= HU_MAXMSGLEN)
+  if (tail >= HU_MAX_MSG_LEN)
     return false;
 
   w_chat[tail++] = c;
@@ -551,7 +551,7 @@ boolean HU_Responder (event_t* ev)
           // is incoming.  If not intercepted it will be entered as the first
           // char of the chat.  This is because SDL2 posts the key event,
           // and the translated text char of that key, as separate events.
-	  block_hu_ch = key;
+          block_hu_ch = key;
 #endif
           chat_on = true;
           HU_Chat_clear();
@@ -685,8 +685,8 @@ void HU_Drawer(void)
 //======================================================================
 //                          PLAYER TIPS
 //======================================================================
-#define MAXTIPLINES 20
-char    *tiplines[MAXTIPLINES];
+#define MAX_TIPLINES 20
+char    *tiplines[MAX_TIPLINES];
 int     numtiplines = 0;
 int     tiptime = 0;
 int     largestline = 0;
@@ -714,7 +714,7 @@ void HU_SetTip(char *tip, int displaytics)
   {
     if(*rover == '\n' || strlen(ctipline) + 2 >= 128 || V_StringWidth(ctipline) + 16 >= BASEVIDWIDTH)
     {
-      if(numtiplines > MAXTIPLINES)
+      if(numtiplines > MAX_TIPLINES)
         break;
       if(V_StringWidth(ctipline) > largestline)
         largestline = V_StringWidth(ctipline);
@@ -1028,12 +1028,12 @@ void HU_Erase (void)
 
 // count frags for each team
 int HU_Create_TeamFragTbl(fragsort_t* fragtab,
-                         int dmtotals[], int fragtbl[MAXPLAYERS][MAXPLAYERS])
+                         int dmtotals[], int fragtbl[MAX_PLAYERS][MAX_PLAYERS])
 {
     int i,j,k,scorelines,team;
 
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (playeringame[i])
         {
@@ -1046,7 +1046,7 @@ int HU_Create_TeamFragTbl(fragsort_t* fragtab,
                 { // found there team
                      if(fragtbl)
                      {
-                         for(k=0; k<MAXPLAYERS; k++)
+                         for(k=0; k<MAX_PLAYERS; k++)
                          {
                              if(playeringame[k])
                              {
@@ -1069,7 +1069,7 @@ int HU_Create_TeamFragTbl(fragsort_t* fragtab,
 
                 if(fragtbl)
                 {
-                    for(k=0; k<MAXPLAYERS; k++)
+                    for(k=0; k<MAX_PLAYERS; k++)
                         fragtbl[team][k] = 0;
                 }
 
@@ -1080,7 +1080,7 @@ int HU_Create_TeamFragTbl(fragsort_t* fragtab,
 
                 if(fragtbl)
                 {
-                    for(k=0; k<MAXPLAYERS; k++)
+                    for(k=0; k<MAX_PLAYERS; k++)
                     {
                         if(playeringame[k])
                         {
@@ -1108,7 +1108,7 @@ int HU_Create_TeamFragTbl(fragsort_t* fragtab,
 static
 void HU_Draw_DeathmatchRankings (void)
 {
-    fragsort_t   fragtab[MAXPLAYERS];
+    fragsort_t   fragtab[MAX_PLAYERS];
     int          i;
     int          scorelines;
     int          whiteplayer;
@@ -1128,7 +1128,7 @@ void HU_Draw_DeathmatchRankings (void)
 
     // count frags for each present player
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (playeringame[i])
         {

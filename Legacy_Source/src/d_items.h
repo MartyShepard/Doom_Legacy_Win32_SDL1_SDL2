@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: d_items.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: d_items.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -149,7 +149,7 @@ typedef enum
 } artitype_t;
 
 #define NUM_INVENTORYSLOTS  14
-#define MAXARTECONT        16 
+#define MAX_ARTIFACT_COUNT  16 
 typedef struct
 {
     byte type;

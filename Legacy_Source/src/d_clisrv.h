@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: d_clisrv.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: d_clisrv.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -174,16 +174,16 @@ typedef struct {
 //#pragma pack(1)
 
 
-#define MAXTEXTCMD           255
-#if MAXTEXTCMD > 255
-# error  Textcmd len is a byte, cannot hold MAXTEXTCMD
+#define MAX_TEXTCMD           255
+#if MAX_TEXTCMD > 255
+# error  Textcmd len is a byte, cannot hold MAX_TEXTCMD
 #endif
 // One extra byte at end for 0 termination, to protect against malicious use.
 // Compatible format with DoomLegacy demo version 1.13 ..
 // Actual transmission and saved copies are limited to the actual used length.
 typedef struct {
-    byte     len;  // 0..MAXTEXTCMD
-    byte     text[MAXTEXTCMD+1];
+    byte     len;  // 0..MAX_TEXTCMD
+    byte     text[MAX_TEXTCMD+1];
 } textbuf_t;
 #define sizeof_textbuf_t(len)   (1+(len))
 
@@ -240,7 +240,7 @@ typedef enum {
 
 // Server to client packet
 // [WDJ] Ver 1.48, servertic can be sent using multiple packets.
-// Will adapt to MAXPACKETSIZE.
+// Will adapt to MAX_PACKETSIZE.
 #define NUM_SERVERTIC_CMD   45
 typedef struct {
    byte        starttic; // low byte of gametic
@@ -258,7 +258,7 @@ typedef struct {
 #endif
    ticcmd_t    cmds[NUM_SERVERTIC_CMD];
      // number of cmds used is (numtics*numplayers)
-     // normaly [BACKUPTIC][MAXPLAYERS] but too large
+     // normaly [BACKUPTIC][MAX_PLAYERS] but too large
 // unaligned
 // After variable number of ticcmd_t
 //   servertic_textcmd_t  st[1];  // variable number
@@ -327,7 +327,7 @@ typedef struct {
     byte  serverplayer;
     byte  skill;  // needed if any bots are to be made
     byte  pad3, pad4;
-    byte  playerstate[MAXPLAYERS];  // PS_
+    byte  playerstate[MAX_PLAYERS];  // PS_
 // aligned to 4 bytes
     player_desc_t  player_desc;
 } playerstate_pak_t;
@@ -439,7 +439,7 @@ typedef struct {
    uint32_t    position;
    uint16_t    size;
 // unaligned
-   byte        data[100];  // size is variable using hardare_MAXPACKETLENGTH
+   byte        data[100];  // size is variable using hardare_MAX_PACKETLENGTH
 } filetx_pak_t;
 
 // ver 1.48
@@ -588,7 +588,7 @@ extern consvar_t cv_maxplayers;
 #define FILETX_HEADER_SIZE   offsetof(filetx_pak_t, data)
 
 extern boolean   server;
-extern uint16_t  software_MAXPACKETLENGTH;
+extern uint16_t  software_MAX_PACKETLENGTH;
 
 extern byte      num_wait_game_start;  // waiting until next game
 extern boolean   cl_drone;  // is a drone client
@@ -618,7 +618,7 @@ void    Send_NetXCmd_pind(byte cmd_id, void *param, int param_len, byte pind);
 void    Send_NetXCmd_auto( byte cmd_id, void *param, int param_len, byte textcmd_pind, byte pn );
 
 // Server textcmd uses separate channel, SERVER_PID.
-// This appears in Demo 1.48, must be above MAXPLAYERS.
+// This appears in Demo 1.48, must be above MAX_PLAYERS.
 #define SERVER_PID   250
 // default, always SERVER_PID
 void    SV_Send_NetXCmd(byte cmd_id, void *param, int param_len);

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_draw.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: r_draw.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -58,15 +58,15 @@
 // -------------------------------
 // COMMON STUFF FOR 8bpp AND 16bpp
 // -------------------------------
-extern byte*            ylookup[MAXVIDHEIGHT];
-extern byte*            ylookup1[MAXVIDHEIGHT];
-extern byte*            ylookup2[MAXVIDHEIGHT];
-extern int              columnofs[MAXVIDWIDTH];
+extern byte*            ylookup[MAX_VIDHEIGHT];
+extern byte*            ylookup1[MAX_VIDHEIGHT];
+extern byte*            ylookup2[MAX_VIDHEIGHT];
+extern int              columnofs[MAX_VIDWIDTH];
 
 #ifdef HORIZONTALDRAW
 //Fab 17-06-98
-extern byte*            yhlookup[MAXVIDWIDTH];
-extern int              hcolumnofs[MAXVIDHEIGHT];
+extern byte*            yhlookup[MAX_VIDWIDTH];
+extern int              hcolumnofs[MAX_VIDHEIGHT];
 #endif
 
 extern byte             dr_alpha;  // translucent and fog alpha, 0..255
@@ -108,6 +108,7 @@ extern unsigned int flat_ymask;   // index mask, = (flatsize-1)<<flatbitsz
 extern fixed_t      flat_imask;   // index mask, = (flatsize<<flatbitsz) - 1
 
 // translation stuff here
+extern char * Color_Names[NUM_SKINCOLORS];
 
 // [WDJ] player skin translation, skintranstables[NUM_SKINCOLORS-1][256]
 // Does not translate color 0
@@ -115,7 +116,7 @@ extern fixed_t      flat_imask;   // index mask, = (flatsize<<flatbitsz) - 1
 extern byte*            skintranstables;  // player skin translation tables
 extern byte*            dc_skintran;  // ptr to selected skin table
 
-// for skin = 1..(MAXSKINNUM-1), skin=0 does not use translation
+// for skin = 1..(MAX_SKINNUM-1), skin=0 does not use translation
 #define SKIN_TO_SKINMAP( skin )  (&skintranstables[ ((skin)-1)<<8 ])
 
 // For flags containing MF_TRANSLATION bits, 0=original skin

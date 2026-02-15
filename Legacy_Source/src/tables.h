@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: tables.h 1747 2025-04-25 07:59:18Z wesleyjohnson $
+// $Id: tables.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -121,7 +121,7 @@ extern const angle_t tantoangle[SLOPERANGE+1];
 /// Encapsulation for arctangent (for the range 0 <= x <= 1)
 static inline angle_t ArcTan(fixed_t x) { return tantoangle[x >> DBITS]; }
 
-// Utility function, called by R_PointToAngle.
+// Utility function, called by R_ViewPointToAngle.
 int SlopeDiv ( unsigned num, unsigned den);
 
 

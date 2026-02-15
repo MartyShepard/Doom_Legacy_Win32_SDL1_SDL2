@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //----------------------------------------------------------------------------
 //
-// $Id: t_vari.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: t_vari.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright(C) 2000 Simon Howard
 // Copyright (C) 2001-2011 by DooM Legacy Team.
@@ -433,7 +433,7 @@ fs_value_t t_return;              // returned value
 #endif
 #ifdef GLOBAL_argv
 //  #warn Enabling GLOBAL_argv 
-  fs_value_t argv[MAXARGS];
+  fs_value_t argv[MAX_FS_ARGS];
 #endif
 
 fs_value_t evaluate_function(int start, int stop)
@@ -448,7 +448,7 @@ fs_value_t evaluate_function(int start, int stop)
   int argc;
 #ifdef GLOBAL_argv
 #else
-  fs_value_t argv[MAXARGS];
+  fs_value_t argv[MAX_FS_ARGS];
 #endif
 
   if(tokentype[start] != TT_function || tokentype[stop] != TT_operator
@@ -531,7 +531,7 @@ fs_value_t OPstructure(int start, int n, int stop)
   int argc;
 #ifdef GLOBAL_argv
 #else
-  fs_value_t argv[MAXARGS];
+  fs_value_t argv[MAX_FS_ARGS];
 #endif
 
   // all the functions are stored in the global script

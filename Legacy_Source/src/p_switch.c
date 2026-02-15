@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_switch.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_switch.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -134,7 +134,7 @@ static unsigned int    max_numswitches = 0;  // allocated switch array
 static unsigned int    numswitches = 0;  // actual number of entries in switchlist
 static unsigned int    numswitch_pairs = 0;  // strangness from Doom, renamed numswitches
 
-button_t      buttonlist[MAXBUTTONS];
+button_t      buttonlist[MAX_BUTTONS];
 
 
 //
@@ -259,13 +259,13 @@ void P_StartButton ( line_t*       line,
     int         i;
 
     // See if button is already pressed
-    for (i = 0;i < MAXBUTTONS;i++)
+    for (i = 0;i < MAX_BUTTONS;i++)
     {
       if (buttonlist[i].btimer && buttonlist[i].line == line)
         return;
     }
 
-    for (i = 0;i < MAXBUTTONS;i++)
+    for (i = 0;i < MAX_BUTTONS;i++)
     {
         if (!buttonlist[i].btimer)
         {

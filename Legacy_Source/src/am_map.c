@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: am_map.c 1772 2026-01-13 16:02:20Z wesleyjohnson $
+// $Id: am_map.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -683,7 +683,7 @@ void AM_initVariables(void)
     // find player to center-on initially
     if (!playeringame[pnum = consoleplayer])
     {
-        for (pnum=0;pnum<MAXPLAYERS;pnum++)
+        for (pnum=0;pnum<MAX_PLAYERS;pnum++)
         {
             if (playeringame[pnum])
                 break;
@@ -1661,7 +1661,7 @@ void AM_drawPlayers(void)
     }
 
     // multiplayer
-    for (i=0;i<MAXPLAYERS;i++)
+    for (i=0;i<MAX_PLAYERS;i++)
     {
         if (!playeringame[i])
             continue;

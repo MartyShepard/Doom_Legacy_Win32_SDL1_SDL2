@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: win_sys.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: win_sys.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -2007,7 +2007,7 @@ int I_GetKey (void)
     {
         ev = &events[eventtail];
         eventtail++;  // MinGW needs this to be separate stmt
-        eventtail = (eventtail)&(MAXEVENTS-1);
+        eventtail = (eventtail)&(MAX_EVENTS-1);
         if (ev->type == ev_keydown)
             return ev->data1;
         else
@@ -2422,11 +2422,11 @@ static boolean testwin95 = false;
 
 char *I_GetUserName(void)
 {
-static char username[MAXPLAYERNAME];  // return to user
+static char username[MAX_PLAYERNAME];  // return to user
      char  *p;
      int   ret;
      // DWORD is required by GetUserName
-     DWORD i=MAXPLAYERNAME;
+     DWORD i=MAX_PLAYERNAME;
      ret = GetUserName(username, &i);
      if(!ret)
      {
@@ -2435,7 +2435,7 @@ static char username[MAXPLAYERNAME];  // return to user
                  if((p=getenv("USERNAME"))==NULL)
                      if((p=getenv("username"))==NULL)
                          return NULL;
-         strncpy(username,p,MAXPLAYERNAME);
+         strncpy(username,p,MAX_PLAYERNAME);
      }
      if( strcmp(username,"")==0 )
          return NULL;

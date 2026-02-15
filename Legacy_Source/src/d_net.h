@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_net.h 1499 2020-03-17 02:27:41Z wesleyjohnson $
+// $Id: d_net.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -47,13 +47,13 @@
 //
 
 // Max player computers in a game. Limited to 127 by chat.
-#define MAXNETNODES     32
+#define MAX_NETNODES     32
 // Broadcast added xx/5/99: can use broadcast now
-#define BROADCAST_NODE   MAXNETNODES
+#define BROADCAST_NODE   MAX_NETNODES
 // MasterServer Ping
-#define MS_PINGNODE     (MAXNETNODES+1)
+#define MS_PINGNODE     (MAX_NETNODES+1)
 // Node connection storage, and send. Limited to 254 (byte).
-#define MAX_CON_NETNODE (MAXNETNODES+2)
+#define MAX_CON_NETNODE (MAX_NETNODES+2)
 
 // Maximum number of players on a single computer.
 #define MAXSPLITSCREENPLAYERS   2

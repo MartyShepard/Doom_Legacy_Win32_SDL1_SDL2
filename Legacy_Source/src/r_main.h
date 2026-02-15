@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_main.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: r_main.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -113,14 +113,14 @@ extern byte	fog_init;
 #define LIGHTLEVELS             16
 #define LIGHTSEGSHIFT            4
 // Light scaled by distance
-#define MAXLIGHTSCALE           48
+#define MAX_LIGHTSCALE           48
 #define LIGHTSCALESHIFT         12
-#define MAXLIGHTZ              128
+#define MAX_LIGHTZ              128
 #define LIGHTZSHIFT             20
 
-extern lighttable_t*    scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
-extern lighttable_t*    scalelightfixed[MAXLIGHTSCALE];
-extern lighttable_t*    zlight[LIGHTLEVELS][MAXLIGHTZ];
+extern lighttable_t*    scalelight[LIGHTLEVELS][MAX_LIGHTSCALE];
+extern lighttable_t*    scalelightfixed[MAX_LIGHTSCALE];
+extern lighttable_t*    zlight[LIGHTLEVELS][MAX_LIGHTZ];
 
 extern lighttable_t*    fixedcolormap;
 
@@ -164,7 +164,7 @@ int R_PointOnSide ( fixed_t x, fixed_t y, node_t* node );
 
 int R_PointOnSegSide ( fixed_t x, fixed_t y, seg_t* line );
 
-angle_t R_PointToAngle ( fixed_t x, fixed_t y );
+angle_t R_ViewPointToAngle ( fixed_t x, fixed_t y );
 
 angle_t R_PointToAngle2 ( fixed_t x2, fixed_t y2, fixed_t x1, fixed_t y1);
 

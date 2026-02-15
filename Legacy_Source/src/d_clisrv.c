@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: d_clisrv.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: d_clisrv.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -231,8 +231,8 @@ byte     serverplayer = 255;  // 255= no server player (same as -1)
 // nnode =255 when unused
 // nnode_state[] = NOS_idle, when net node is unused
 // The netnodes are counted, 0..31
-static byte  player_to_nnode[MAXPLAYERS];
-static byte  player_pind[MAXPLAYERS];
+static byte  player_to_nnode[MAX_PLAYERS];
+static byte  player_pind[MAX_PLAYERS];
 static byte  num_player_used = 0;
 static byte  num_join_waiting_players = 0;
 #ifdef WAIT_GAME_START_INTERMISSION
@@ -283,17 +283,17 @@ typedef enum {
 // Node numbers seen by server are different than those seen by clients (determined by connection order).
 // Index by server space nnode numbers.
 #ifdef DEBUG_WINDOWED
-static nnode_state_e   nnode_state[MAXNETNODES];  // easier debugging
+static nnode_state_e   nnode_state[MAX_NETNODES];  // easier debugging
 #else
-static byte     nnode_state[MAXNETNODES];  // nnode_state_e
+static byte     nnode_state[MAX_NETNODES];  // nnode_state_e
 #endif
 // Index by pind, [0]=main player [1]=splitscreen player
-static byte     nnode_to_player[2][MAXNETNODES];  // 255= unused
-static byte     playerpernode[MAXNETNODES]; // used specialy for splitscreen
-static byte     join_waiting[MAXNETNODES];  // num of players waiting to join
-static byte     consistency_faults[MAXNETNODES];
-static tic_t    nettics[MAXNETNODES];     // what tic the client have received
-static tic_t    nextsend_tic[MAXNETNODES]; // what server sent to client
+static byte     nnode_to_player[2][MAX_NETNODES];  // 255= unused
+static byte     playerpernode[MAX_NETNODES]; // used specialy for splitscreen
+static byte     join_waiting[MAX_NETNODES];  // num of players waiting to join
+static byte     consistency_faults[MAX_NETNODES];
+static tic_t    nettics[MAX_NETNODES];     // what tic the client have received
+static tic_t    nextsend_tic[MAX_NETNODES]; // what server sent to client
 
 static tic_t    next_tic_send;     // min of the nettics
 static tic_t    next_tic_clear=0;  // clear next_tic_clear to next_tic_send
@@ -353,7 +353,7 @@ static textbuf_t  localtextcmd[2];
 // Server packet state
 static uint32_t ticcmd_player_mask = 0;  // one bit for each player that sends ticcmd, no bots
 static byte     num_ticcmd_per_tic = 0;  // num in ticcmd_pid
-static byte     ticcmd_pid[MAXPLAYERS];  // pid in order of ticcmd in packet
+static byte     ticcmd_pid[MAX_PLAYERS];  // pid in order of ticcmd in packet
 static byte     update_player_count_request = 0;  // for XNetCmd, as the list is in use during execution
 
 // NetCmd and TextCmd store
@@ -362,7 +362,7 @@ static byte     update_player_count_request = 0;  // for XNetCmd, as the list is
 // Index using BTIC_INDEX
 static byte     netcmd_tic_hash[BACKUPTICS];  // tic hash for the BACKUPTIC
 static byte     netseq[BACKUPTICS];   // bit per tic packet seq, ready=0xFF
-ticcmd_t        netcmds[BACKUPTICS][MAXPLAYERS];
+ticcmd_t        netcmds[BACKUPTICS][MAX_PLAYERS];
 
 // [WDJ] Combined textcmd buffer for all players, and server.
 // No apparant reason to keep separate buffers at this point.
@@ -378,7 +378,7 @@ ticcmd_t        netcmds[BACKUPTICS][MAXPLAYERS];
 typedef struct {
    uint16_t  len;  // 0..MAX_TEXTCMD_BUFF
    byte      buff[MAX_TEXTCMD_BUFF+1];  // format as array of textcmd_item_t
-             // Format: pn, len, text[MAXTEXTCMD]
+             // Format: pn, len, text[MAX_TEXTCMD]
 } textcmdbuff_t;
 static textcmdbuff_t  textcmdbuff[BACKUPTICS];
 
@@ -411,7 +411,7 @@ static byte consistency_sg_bit[4]    = { 0, 0, 0x04, 0x44 };  // bit on when sho
 // some software don't support largest packet
 // (original sersetup, not exactly, but the probability of sending a packet
 // of 512 octet is like 0.1)
-uint16_t  software_MAXPACKETLENGTH;
+uint16_t  software_MAX_PACKETLENGTH;
 
 // Align to 4 byte
 #define ALIGN4(p) (byte *)(((uintptr_t)(p) + 3) & ~0x03)
@@ -518,7 +518,7 @@ static void D_Clear_ticcmd(int tic)
     netcmd_tic_hash[btic] = 0;
     netseq[btic] = 0;
 
-    for(i=0;i<MAXPLAYERS;i++)
+    for(i=0;i<MAX_PLAYERS;i++)
     {
 #ifdef TICCMD_148
         netcmds[btic][i].ticflags = 0; //  clear TC_received;
@@ -545,12 +545,12 @@ static void update_player_state( byte pn, byte new_player_state );
 static void update_player_counts(void);
 
 // NetXCmd indirection.
-static void (*netxcmd_func[MAXNETXCMD]) (xcmd_t * xc);
+static void (*netxcmd_func[MAX_NET_XCMD]) (xcmd_t * xc);
 
 void Register_NetXCmd(netxcmd_e cmd_id, void (*cmd_f) (xcmd_t * xc))
 {
 #ifdef PARANOIA
-   if(cmd_id >= MAXNETXCMD)
+   if(cmd_id >= MAX_NET_XCMD)
       I_Error("NetXCmd id %d exceeds defined range", cmd_id);
    if(netxcmd_func[cmd_id]!=0)
       I_Error("NetXCmd id %d already registered", cmd_id);
@@ -582,7 +582,7 @@ void Register_NetXCmd(netxcmd_e cmd_id, void (*cmd_f) (xcmd_t * xc))
 //  param_len : number of parameter strings
 void Send_NetXCmd(byte cmd_id, void *param, int param_len)
 {
-    byte pind = (localplayer[0] < MAXPLAYERS)? 0 : 1;  // main player default
+    byte pind = (localplayer[0] < MAX_PLAYERS)? 0 : 1;  // main player default
     Send_NetXCmd_pind( cmd_id, param, param_len, pind );
 }
 
@@ -600,7 +600,7 @@ void Send_NetXCmd_pind( byte cmd_id, void *param, int param_len, byte pind )
    // Save the NetXCmd in a localtextcmd buffer.
    textbuf_t * ltcbp = &localtextcmd[pind];
    int textlen = ltcbp->len;
-   if( (textlen + 1 + param_len) > MAXTEXTCMD)  // with XD_ and param
+   if( (textlen + 1 + param_len) > MAX_TEXTCMD)  // with XD_ and param
    {
 #ifdef PARANOIA
        I_SoftError("Net command exceeds buffer: pind=%d  netcmd=%d  netcmdlen=%d  total=%d\n",
@@ -803,7 +803,7 @@ static void net_textcmd_handler( byte nnode )
     {
         // Detect corrupt packets, limit decode to netbuffer.
         // Only 2 pind, so only 2 textcmd_item, yet.
-        if( ((byte*)ip) > (((byte*)& netbuffer->u.textcmdpak.textitem) + (2 * sizeof_textcmd_item_t(MAXTEXTCMD+1))) )
+        if( ((byte*)ip) > (((byte*)& netbuffer->u.textcmdpak.textitem) + (2 * sizeof_textcmd_item_t(MAX_TEXTCMD+1))) )
             goto drop_packet; // corrupt packet
 
         // incoming length
@@ -818,7 +818,7 @@ static void net_textcmd_handler( byte nnode )
             if( nnode != 0 )
                 goto next_textcmd; // server textcmd from non-server
         }
-        else if( pn > MAXPLAYERS )
+        else if( pn > MAX_PLAYERS )
         {
             goto next_textcmd; // bogus player
         }
@@ -838,7 +838,7 @@ static void net_textcmd_handler( byte nnode )
 
 #ifdef CHECK_TIC_SIZE
     // Check if tic that we are making isn't getting too large.
-    tc_limit = software_MAXPACKETLENGTH
+    tc_limit = software_MAX_PACKETLENGTH
          - SERVER_TIC_BASE_SIZE
          - ( num_game_players * sizeof(ticcmd_t) )
          - ( 1 + sizeof_servertic_textcmd_t(itc_len) );
@@ -923,8 +923,8 @@ void ExtraDataTicker(void)
             // bufp is advanced, so can test and continue.
 
         if( textlen == 0 )  continue;  // empty text (should never happen)
-#if MAXTEXTCMD < 255
-        if( textlen > MAXTEXTCMD )   textlen = MAXTEXTCMD;  // bad length
+#if MAX_TEXTCMD < 255
+        if( textlen > MAX_TEXTCMD )   textlen = MAX_TEXTCMD;  // bad length
 #endif
 
         pn = ip->pn;  // player pid for the textcmd
@@ -933,7 +933,7 @@ void ExtraDataTicker(void)
         // before that player is created.
         if( netgame
             && !demoplayback
-            && (pn < MAXPLAYERS) )
+            && (pn < MAX_PLAYERS) )
         {
             // Protection against fake textcmds in netgame.
             if( ! playeringame[pn] )  continue;   // only if player quit the game suddenly
@@ -958,7 +958,7 @@ void ExtraDataTicker(void)
         while(xcmd.curpos < endtxt)
         {
             xcmd.cmd = *(xcmd.curpos++);  // XD_ command
-            if(xcmd.cmd < MAXNETXCMD && netxcmd_func[xcmd.cmd])
+            if(xcmd.cmd < MAX_NET_XCMD && netxcmd_func[xcmd.cmd])
             {
                 // [WDJ] TODO: Test for server xcmd restricted to SERVER_PID,
                 // except when demoplayback.
@@ -1024,7 +1024,7 @@ void ExtraDataTicker(void)
 // LEGACY 1.12 XD bits
 // if(xd & XDNAMEANDCOLOR)
 //   byte   | color
-//   char[MAXPLAYERNAME] | name of the player
+//   char[MAX_PLAYERNAME] | name of the player
 // endif
 // if(xd & XD_WEAPON_PREF)
 //   byte   | original weapon switch : boolean, true if use the old
@@ -1230,10 +1230,10 @@ void ReadLmpExtraData(byte **demo_pointer, int playernum)
         if(ex & 1)
         {
             *(bufp++) = XD_NAMEANDCOLOR;
-            memcpy( bufp, p, MAXPLAYERNAME+1);
-            p+=MAXPLAYERNAME+1;
-            textlen += MAXPLAYERNAME+1;
-            bufp += MAXPLAYERNAME+1;
+            memcpy( bufp, p, MAX_PLAYERNAME+1);
+            p+=MAX_PLAYERNAME+1;
+            textlen += MAX_PLAYERNAME+1;
+            bufp += MAX_PLAYERNAME+1;
         }
         if(ex & 2)
         {
@@ -1288,7 +1288,7 @@ static void CL_player_desc_handler( player_desc_t * pdesc, const char * msg );
 static void SV_SendPacket_All( sendpacket_flag_e flags, size_t size_packet, const char * msg )
 {
     int nn;
-    for(nn=1; nn<MAXNETNODES; nn++)
+    for(nn=1; nn<MAX_NETNODES; nn++)
     {
         if( nnode_state[nn] >= NOS_recognized )
         {
@@ -1313,7 +1313,7 @@ static byte  SendPacket( byte nnode, byte packettype )
         return NE_success;
     }
 
-    if( nnode < MAXNETNODES )
+    if( nnode < MAX_NETNODES )
         return HSendPacket( nnode, SP_reliable|SP_queue|SP_error_handler, 0, 0 );
 
     return NE_fail;
@@ -1410,7 +1410,7 @@ static boolean SV_Send_ServerConfig( byte to_node, byte command )
 #if 1
     // Send mask for all players and bots
     int   i,playermask=0;
-    for(i=0;i<MAXPLAYERS;i++)
+    for(i=0;i<MAX_PLAYERS;i++)
     {
          if(playeringame[i])
               playermask|=1<<i;
@@ -1466,7 +1466,7 @@ static void SV_Send_PlayerState( byte to_node )
     // Easier to determine state when all player slots are present.
     // byte array of player_state
     // Identifies player and bot.
-    memcpy( &netbuffer->u.playerstate.playerstate, player_state, MAXPLAYERS );
+    memcpy( &netbuffer->u.playerstate.playerstate, player_state, MAX_PLAYERS );
    
     // Only those players that are present
     // Sends one or more packets.
@@ -1490,7 +1490,7 @@ void  server_player_handler( byte nnode )
     gameskill = netbuffer->u.playerstate.skill;  // for create bots
    
     // Add and remove players
-    for( pn=0; pn<MAXPLAYERS; pn++ )
+    for( pn=0; pn<MAX_PLAYERS; pn++ )
     {
         update_player_state( pn, netbuffer->u.playerstate.playerstate[pn] );
     }
@@ -1575,7 +1575,7 @@ static void SV_Send_control( byte nnode, byte ctrl_command, byte data1, uint16_t
     netbuffer->packettype = PT_CONTROL;
     netbuffer->u.control.command = ctrl_command;
     netbuffer->u.control.player_num = player_num;
-    netbuffer->u.control.player_state = (player_num < MAXPLAYERS)? player_state[player_num] : PS_unused;
+    netbuffer->u.control.player_state = (player_num < MAX_PLAYERS)? player_state[player_num] : PS_unused;
     netbuffer->u.control.gamemap = gamemap;
     netbuffer->u.control.gameepisode = gameepisode;
     write_N32( & netbuffer->u.control.gametic, gametic );
@@ -1587,7 +1587,7 @@ static void SV_Send_control( byte nnode, byte ctrl_command, byte data1, uint16_t
         // Broadcast it
         SV_SendPacket_All( SP_reliable, sizeof(control_pak_t), NULL );
     }
-    else if( nnode < MAXNETNODES )
+    else if( nnode < MAX_NETNODES )
     {
         byte errcode = HSendPacket( nnode, SP_reliable|SP_queue, 0, sizeof(control_pak_t) );
         if( errcode >= NE_fail )
@@ -1609,7 +1609,7 @@ static void control_msg_handler( void )
     {
         // Client not on server.
         // When sent a player state, update it on client.
-        if( pn < MAXPLAYERS )
+        if( pn < MAX_PLAYERS )
             update_player_state( pn, ps );
 
         if( cl_mode < CLM_connected )
@@ -1839,7 +1839,7 @@ void  SV_network_wait_handler( void )
     byte nn, ns;
    
     // Is everybody ready.
-    for( nn=0; nn<MAXNETNODES; nn++ )
+    for( nn=0; nn<MAX_NETNODES; nn++ )
     {
         ns = nnode_state[nn];
         if((ns >= NOS_join) && (ns <= NOS_join_sg_loaded))  goto keep_waiting;
@@ -1856,7 +1856,7 @@ keep_waiting:
         
     // Timeout the wait
     network_wait_timer = 0;
-    for( nn=0; nn<MAXNETNODES; nn++ )
+    for( nn=0; nn<MAX_NETNODES; nn++ )
     {
         byte ns = nnode_state[nn];
         if( ns == NOS_idle ) continue;
@@ -2093,7 +2093,7 @@ static void SV_Send_player_desc( player_desc_t * pdesc, byte desc_flags, byte pn
    
     // Limit how many can be in one packet.
     paksize_limit = sizeof( netbuffer->u );
-    if( paksize_limit > software_MAXPACKETLENGTH )   paksize_limit = software_MAXPACKETLENGTH;
+    if( paksize_limit > software_MAX_PACKETLENGTH )   paksize_limit = software_MAX_PACKETLENGTH;
     paksize_limit -= offsetof(pd_player_t, optional) + 1;
 
     if( EN_inventory )
@@ -2110,7 +2110,7 @@ static void SV_Send_player_desc( player_desc_t * pdesc, byte desc_flags, byte pn
     paksize = 0;
     bufp = (byte*) &pdesc->pd;
 
-    if( pn < MAXPLAYERS )
+    if( pn < MAX_PLAYERS )
     {
         // one player
         pn_end = pn;
@@ -2119,7 +2119,7 @@ static void SV_Send_player_desc( player_desc_t * pdesc, byte desc_flags, byte pn
     {
         // all players
         pn = 0;
-        pn_end = MAXPLAYERS;
+        pn_end = MAX_PLAYERS;
     }
 
     for(  ; pn<pn_end; pn++ )
@@ -2229,7 +2229,7 @@ void  CL_player_desc_handler( player_desc_t * pdesc, const char * msg )
         bufp += offsetof( pd_player_t, optional );
 
         pn = pdp->pid;
-        if( pn >= MAXPLAYERS )  break;
+        if( pn >= MAX_PLAYERS )  break;
        
         pp = &players[pn];
         if( ! playeringame[pn] || ! pp )
@@ -2462,7 +2462,7 @@ static void SV_Send_player_repair( byte pn, byte severity, byte to_node )
     if( severity < 2 )  desc_flags = 0;
     if( cv_SV_netrepair.EV < 2 )  desc_flags = 0;
 
-    if( pn < MAXPLAYERS )
+    if( pn < MAX_PLAYERS )
     {
         if( ! playeringame[pn] )
         {
@@ -2483,7 +2483,7 @@ static void SV_Send_player_repair( byte pn, byte severity, byte to_node )
     SV_Send_player_desc( & netbuffer->u.repair.u.player_desc, desc_flags, pn, to_node );
 
 msg_out:
-    if( pn < MAXPLAYERS )
+    if( pn < MAX_PLAYERS )
     {
         GenPrintf( EMSG_warn, "Server Send_player_repair: player %i%s\n", pn, fail_msg );
     }
@@ -2800,7 +2800,7 @@ static boolean  D_WaitPlayer_Ticker(void)
         // Count the net nodes.
         num_netnodes=0;
         num_netplayer=0;
-        for(nn=0; nn<MAXNETNODES; nn++)
+        for(nn=0; nn<MAX_NETNODES; nn++)
         {
             // Only counting nodes with players.
             if( nnode_state[nn] >= NOS_client )
@@ -3059,7 +3059,7 @@ void CL_Update_ServerList( boolean internetsearch )
                 // insert ip (and optionaly port) in node list
                 sprintf(addr_str, "%s:%s", server_list[i].ip, server_list[i].port);
                 node = I_NetMakeNode(addr_str);
-                if( node >= MAXNETNODES )
+                if( node >= MAX_NETNODES )
                     break; // no more node free
 
                 CL_Send_AskInfo( node );
@@ -3089,7 +3089,7 @@ static void CL_ConnectToServer( void )
     cl_mode = CLM_searching;
     D_WaitPlayer_Setup();
 
-    if( cl_servernode >= MAXNETNODES )
+    if( cl_servernode >= MAX_NETNODES )
     {
         // init value and BROADCAST_NODE
         GenPrintf(EMSG_hud, "Searching for a DoomLegacy server ...\n");
@@ -3127,7 +3127,7 @@ static void CL_ConnectToServer( void )
                     // Don't be noxious on the network.
                     // Every 2 seconds is often enough.
                     askinfo_tic = I_GetTime() + (TICRATE*2);
-                    if( cl_servernode < MAXNETNODES )
+                    if( cl_servernode < MAX_NETNODES )
                     {
                         // Specific server.
                         CL_Send_AskInfo(cl_servernode);
@@ -3142,7 +3142,7 @@ static void CL_ConnectToServer( void )
             case CLM_server_files :
                 // Have a serverlist, serverlistcount > 0.
                 // This can be a response to our broadcast request
-                if( cl_servernode < MAXNETNODES )
+                if( cl_servernode < MAX_NETNODES )
                 {
                     // Have a current server.  Find it in the serverlist.
                     i = SL_Find_Server(cl_servernode);
@@ -3397,7 +3397,7 @@ void Command_connect(void)
             {
                 // Connect to server at IP addr.
                 cl_servernode = I_NetMakeNode(COM_Argv(1));
-                if( cl_servernode >= MAXNETNODES )
+                if( cl_servernode >= MAX_NETNODES )
                 {
                     // Error from I_NetMakeNode()
                     CONS_Printf("Network address error\n");
@@ -3428,7 +3428,7 @@ static void CL_RemovePlayer( byte playernum )
     int i;
 
     // Cannot trust an index from a network message.
-    if( playernum >= MAXPLAYERS )  return;
+    if( playernum >= MAX_PLAYERS )  return;
     player = & players[playernum];
    
     if( server && !demoplayback )
@@ -3454,7 +3454,7 @@ static void CL_RemovePlayer( byte playernum )
     // Count the players.
     update_player_counts();
 
-    for(i=0;i<MAXPLAYERS;i++)
+    for(i=0;i<MAX_PLAYERS;i++)
     {
         players[i].addfrags += players[i].frags[playernum];
         players[i].frags[playernum] = 0;
@@ -3482,7 +3482,7 @@ void CL_Reset (void)
     // Reset client
     DEBFILE(va("==== Client reset ====\n"));
 
-    if( cl_servernode < MAXNETNODES )
+    if( cl_servernode < MAX_NETNODES )
     {
         // Close connection to server
         // Client keeps nnode_state for server.	
@@ -3514,7 +3514,7 @@ void Command_PlayerInfo(void)
 {
     int i;
 
-    for(i=0;i<MAXPLAYERS;i++)
+    for(i=0;i<MAX_PLAYERS;i++)
     {
         if(playeringame[i])
         {
@@ -3527,26 +3527,26 @@ void Command_PlayerInfo(void)
 }
 
 // Name can be player number, or player name.
-// Players 0..(MAXPLAYERS-1) are known as Player 1 .. to the user.
-// Return player number, 0..(MAXPLAYERS-1).
+// Players 0..(MAX_PLAYERS-1) are known as Player 1 .. to the user.
+// Return player number, 0..(MAX_PLAYERS-1).
 // Return 255, and put msg to console, when name not found.
 byte  player_name_to_num( const char * name )
 {
-    // Player num can be 0..250 (limited to MAXPLAYERS).
+    // Player num can be 0..250 (limited to MAX_PLAYERS).
     int pn;  // player num
 
-    pn=atoi(name);   // test as player number 1..MAXPLAYERS
+    pn=atoi(name);   // test as player number 1..MAX_PLAYERS
     // pn=0 when not numeric
-    if((pn > 0) && (pn <= MAXPLAYERS))
+    if((pn > 0) && (pn <= MAX_PLAYERS))
     {
         // Name was numeric, and in player num range
-        pn --;  // convert to 0..MAXPLAYERS
+        pn --;  // convert to 0..MAX_PLAYERS
         if( ! playeringame[pn])  goto no_player;
         return pn;
     }
 
     // Search for player by name.
-    for(pn=0; pn<MAXPLAYERS; pn++)
+    for(pn=0; pn<MAX_PLAYERS; pn++)
     {
         if(playeringame[pn] && strcasecmp(player_names[pn],name)==0)
             return pn;
@@ -3576,7 +3576,7 @@ void Command_Kick(void)
     if(server)
     {
         int pn = player_name_to_num(COM_Argv(1));
-        if(pn < MAXPLAYERS)
+        if(pn < MAX_PLAYERS)
            SV_Send_NetXCmd_p2(XD_KICK, pn, KICK_MSG_GO_AWAY);
     }
     else
@@ -3590,7 +3590,7 @@ void Got_NetXCmd_KickCmd(xcmd_t * xc)
     byte pnum=READBYTE(xc->curpos);  // unsigned player num
     byte msg =READBYTE(xc->curpos);  // unsigned kick message
 
-    if( pnum >= MAXPLAYERS )  return;
+    if( pnum >= MAX_PLAYERS )  return;
     GenPrintf(EMSG_hud, "\2%s ", player_names[pnum]);
 
     switch(msg)
@@ -3688,7 +3688,7 @@ void D_Init_ClientServer (void)
 }
 
 // By Server
-// nnode: 0..(MAXNETNODES-1)
+// nnode: 0..(MAX_NETNODES-1)
 static void SV_Reset_NetNode(byte nnode)
 {
     nnode_state[nnode] = NOS_idle;
@@ -3716,10 +3716,10 @@ void SV_ResetServer( void )
 #endif
     next_tic_clear=maketic;
 
-    for (i=0 ; i<MAXNETNODES ; i++)
+    for (i=0 ; i<MAX_NETNODES ; i++)
         SV_Reset_NetNode(i);
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         playeringame[i]=false;
         player_state[i] = PS_unused;
@@ -3784,7 +3784,7 @@ void D_Quit_NetGame (void)
              MS_UnregisterServer(); 
     }
     else  // Client not server
-    if( (cl_servernode < MAXNETNODES)
+    if( (cl_servernode < MAX_NETNODES)
        && (cl_server_state >= NOS_server) )  // client connected to server
     {
         // Client sends quit to server.
@@ -3831,7 +3831,7 @@ byte  SV_get_player_num( void )
     while( player_state[pn] )  // find free player slot
     {
        pn++;
-       if( pn >= MAXPLAYERS )  return  251;
+       if( pn >= MAX_PLAYERS )  return  251;
     }
     
     player_state[pn] = PS_added; // pending
@@ -3856,10 +3856,10 @@ byte SV_commit_player( byte nnode, byte new_state )
             
     // Should never happen because we check the number of players
     // before accepting the join.
-    if(newplayernum >= MAXPLAYERS)
+    if(newplayernum >= MAX_PLAYERS)
     {
 #ifdef PARANOIA
-        I_SoftError("SV_commit_player: Reached MAXPLAYERS\n");
+        I_SoftError("SV_commit_player: Reached MAX_PLAYERS\n");
 #endif
         return 255;
     }
@@ -3920,13 +3920,13 @@ static void  update_player_counts( void )
         num_wait_game_start = 0;
 #endif
         num_join_waiting_players = 0;
-        for(nn=0; nn<MAXNETNODES; nn++)
+        for(nn=0; nn<MAX_NETNODES; nn++)
         {
             num_join_waiting_players += join_waiting[nn];
         }
     }
 
-    for(pn=0; pn<MAXPLAYERS; pn++)
+    for(pn=0; pn<MAX_PLAYERS; pn++)
     {
         byte ps = player_state[pn];
         if( ps == PS_unused )  continue;
@@ -3987,7 +3987,7 @@ void  CL_player_mask_error_detection( uint32_t playerdet )
     // Client only uses ticcmd_player_mask for this check.
     // Player_mask should match playeringame.
     // Does not affect players or bot set by client.
-    for(pn=0; pn<MAXPLAYERS; pn++)
+    for(pn=0; pn<MAX_PLAYERS; pn++)
     {
         uint32_t pnb = 1<<pn;
         if( (playerdet & pnb) != (ticcmd_player_mask & pnb) )
@@ -4078,7 +4078,7 @@ void Got_NetXCmd_AddPlayer(xcmd_t * xc)
     player_state[newplayernum]= PS_player;
     update_player_count_request = 1;  // cannot call update_player_counts() direct, as it is in use
 
-    // [WDJ] Players are 1..MAXPLAYERS to the user.
+    // [WDJ] Players are 1..MAX_PLAYERS to the user.
     GenPrintf(EMSG_hud, "Player %d is in the game (node %d)\n", (newplayernum+1), nnode);
 
     if(nnode==cl_nnode)
@@ -4184,10 +4184,10 @@ void Got_NetXCmd_AddBot(xcmd_t * xc)  //added by AC for acbot
     // and it is desirable to set those attributes correctly for the first draw.
     // Update bot name and color.
     P_SetPlayer_color( pl, colour );
-    if( name_len > MAXPLAYERNAME-1 ) // dest protection
-        name_len = MAXPLAYERNAME-1;  // sizeof player_names
-    memcpy( & player_names[newplayernum], botname, (name_len + 1));  // [MAXPLAYERNAME]
-    player_names[newplayernum][MAXPLAYERNAME-1] = '\0';  // safe
+    if( name_len > MAX_PLAYERNAME-1 ) // dest protection
+        name_len = MAX_PLAYERNAME-1;  // sizeof player_names
+    memcpy( & player_names[newplayernum], botname, (name_len + 1));  // [MAX_PLAYERNAME]
+    player_names[newplayernum][MAX_PLAYERNAME-1] = '\0';  // safe
 
     playeringame[newplayernum]=true;  // enable this player
     player_state[newplayernum]= PS_bot;
@@ -4219,7 +4219,7 @@ boolean SV_Add_Join_Waiting(void)
     // The code below usually clears the join_waiting queues.
     num_join_waiting_players = 0;
    
-    for(nnode=0; nnode<MAXNETNODES; nnode++)
+    for(nnode=0; nnode<MAX_NETNODES; nnode++)
     {
         ns = nnode_state[nnode];
         if( (ns >= NOS_join_file) && (ns <= NOS_join_savegame) )
@@ -4235,7 +4235,7 @@ boolean SV_Add_Join_Waiting(void)
             // Search for a free playernum.
             // New players will have playeringame set as a result of XCmd AddPlayer.
             newplayernum = SV_commit_player( nnode, PS_added_commit );
-            if( newplayernum >= MAXPLAYERS )  continue;
+            if( newplayernum >= MAX_PLAYERS )  continue;
 
             // Message from server to everyone, to add the player.
             SV_Send_AddPlayer( nnode, newplayernum, 0 );  // PS_added_commit
@@ -4265,7 +4265,7 @@ void SV_Add_game_start_waiting_players( byte mode )
     int wait_timer = (mode == 0)? TICRATE*GAME_START_WAIT : 1 ;
 
     // This seems to only work using GS_INTERMISSION
-    for( pn=0; pn<MAXPLAYERS; pn++)
+    for( pn=0; pn<MAX_PLAYERS; pn++)
     {
         if( player_state[pn] == PS_join_wait_game_start )
         {
@@ -4583,7 +4583,7 @@ static void client_quit_handler( byte nnode, byte client_pn )
     // This allows the sending of some packets to the quiting client
     // and to have them ack back.
     join_waiting[nnode]= 0;
-    if( (client_pn < MAXPLAYERS) && playeringame[client_pn])
+    if( (client_pn < MAX_PLAYERS) && playeringame[client_pn])
     {
         byte reason = (netbuffer->packettype == PT_NODE_TIMEOUT) ?
            KICK_MSG_TIMEOUT : KICK_MSG_PLAYER_QUIT;
@@ -4592,7 +4592,7 @@ static void client_quit_handler( byte nnode, byte client_pn )
         nnode_to_player[0][nnode] = 255;
 
         byte pn2 = nnode_to_player[1][nnode];  // splitscreen player at the nnode
-        if( pn2 < MAXPLAYERS )
+        if( pn2 < MAX_PLAYERS )
         {
             if( playeringame[pn2] )
             {
@@ -4654,7 +4654,7 @@ static void server_cfg_handler( byte nnode )
     }
 
     // Client keeps server state, even on the server.
-    if( cl_servernode < MAXNETNODES )
+    if( cl_servernode < MAX_NETNODES )
         cl_server_state = NOS_server;  // connected
 
 #ifdef CLIENTPREDICTION2
@@ -4664,7 +4664,7 @@ static void server_cfg_handler( byte nnode )
     // Handle a player on the server.
     serverplayer = netbuffer->u.servercfg.serverplayer;
     // Client use of player_to_nnode, see Command_PlayerInfo, AddPlayer
-    if (serverplayer < MAXPLAYERS)  // 255 = no player
+    if (serverplayer < MAX_PLAYERS)  // 255 = no player
         player_to_nnode[serverplayer] = cl_servernode;
 
     cl_nnode = netbuffer->u.servercfg.clientnode;  // assigned by server
@@ -4685,7 +4685,7 @@ static void server_cfg_handler( byte nnode )
 #else
         // This was for servertic cmds, no longer need to do this.
         uint32_t  playerdet = read_N32( & netbuffer->u.servercfg.playerdetected );
-        for(j=0;j<MAXPLAYERS;j++)
+        for(j=0;j<MAX_PLAYERS;j++)
         {
             playeringame[j] = (( playerdet & (1<<j) ) != 0);
             player_state[j] = (playeringame[j])? PS_player_from_server : 0;
@@ -4805,7 +4805,7 @@ static void SV_consistency_fault( byte nnode, tic_t fault_tic, int btic )
         DEBFILE(va("Kick player %d\n", pn ));
 
         pn = nnode_to_player[1][nnode];
-        if( pn < MAXPLAYERS )
+        if( pn < MAX_PLAYERS )
         {
             // Kick splitscreen player
             SV_Send_NetXCmd_p2(XD_KICK, pn, KICK_MSG_CON_FAIL);
@@ -4966,7 +4966,7 @@ static void client_cmd_handler( byte netcmd, byte nnode )
     {
         if( (pind_mask & (1<<pind)) == 0 )  continue;
         byte pn = nnode_to_player[pind][nnode];
-        if( pn < MAXPLAYERS )
+        if( pn < MAX_PLAYERS )
             TicCmdCopy( &netcmds[btic][pn], /*src*/ &netbuffer->u.clientpak.cmd[pind] );
     }
     return;
@@ -5001,7 +5001,7 @@ static void SV_Send_Tics (void)
     // For each node create a packet with num_tics and send it.
     // Compute num_tics using nextsend_tic[n], max packet size, and maketic.
     // Assume cl_servernode=0.
-    for(nnode=1; nnode<MAXNETNODES; nnode++)
+    for(nnode=1; nnode<MAX_NETNODES; nnode++)
     {
         if( nnode_state[nnode] < NOS_client )  continue;
         // Need this to send the NetXCmd Add Player
@@ -5057,10 +5057,10 @@ static void SV_Send_Tics (void)
 
 #if 1
             // Limit each to 1 packet.
-            if( (packsize > software_MAXPACKETLENGTH) || (total_textcmd_size > software_MAXPACKETLENGTH) )
+            if( (packsize > software_MAX_PACKETLENGTH) || (total_textcmd_size > software_MAX_PACKETLENGTH) )
 #else
             // Limit together at 1 packet.
-            if( (packsize + total_textcmd_size) > software_MAXPACKETLENGTH )
+            if( (packsize + total_textcmd_size) > software_MAX_PACKETLENGTH )
 #endif
             {
                 // Exceeds max packet size.
@@ -5090,7 +5090,7 @@ static void SV_Send_Tics (void)
 
         bufpos= (byte *)&netbuffer->u.serverpak.cmds;
         // limits
-        endbuf= ((byte*)netbuffer) + software_MAXPACKETLENGTH - 1;
+        endbuf= ((byte*)netbuffer) + software_MAX_PACKETLENGTH - 1;
         end_ticcmd = endbuf - sizeof(ticcmd_t);
         if( end_ticcmd > (byte*)& netbuffer->u.serverpak.cmds[NUM_SERVERTIC_CMD-1] )
             end_ticcmd = (byte*)& netbuffer->u.serverpak.cmds[NUM_SERVERTIC_CMD-1];
@@ -5359,8 +5359,8 @@ static void Net_Packet_Handler(void)
 
     while ( HGetPacket() )
     {
-        nnode = doomcom->remotenode;  // 0..MAXNETNODES-1, BROADCAST_NODE
-        nodestate = (nnode < MAXNETNODES)?  nnode_state[nnode] : NOS_invalid;
+        nnode = doomcom->remotenode;  // 0..MAX_NETNODES-1, BROADCAST_NODE
+        nodestate = (nnode < MAX_NETNODES)?  nnode_state[nnode] : NOS_invalid;
         packettype = netbuffer->packettype;
 
         // [WDJ] Run-time messages are given priority in speed of handling.
@@ -5388,7 +5388,7 @@ static void Net_Packet_Handler(void)
                 client_pn = nnode_to_player[1][nnode];
                 // fall through
              case PT_TEXTCMD :
-                if( client_pn >= MAXPLAYERS )  // unused = 255
+                if( client_pn >= MAX_PLAYERS )  // unused = 255
                 {
                     // Do not ACK the packet from a strange client_pn.
                     Net_Cancel_Packet_Ack(nnode);
@@ -5575,7 +5575,7 @@ static void Net_Packet_Handler(void)
         }
 
         // Packet not accepted.
-        if((nnode >= MAXNETNODES) || (nodestate < NOS_recognized))
+        if((nnode >= MAX_NETNODES) || (nodestate < NOS_recognized))
         {
             DEBFILE(va("Unknown packet received (%d) from unknown host !\n", packettype));
             goto close_node;
@@ -5617,7 +5617,7 @@ static int16_t Consistency(void)
     int   pn;
 
     DEBFILE(va("TIC %d ",gametic));
-    for(pn=0; pn<MAXPLAYERS; pn++)
+    for(pn=0; pn<MAX_PLAYERS; pn++)
     {
         if( playeringame[pn] && players[pn].mo )
         {
@@ -5685,7 +5685,7 @@ void SV_Maketic(void)
     int bticprev, i, player;
     byte nnode;
 
-    for(nnode=0; nnode<MAXNETNODES; nnode++)
+    for(nnode=0; nnode<MAX_NETNODES; nnode++)
     {
         if(playerpernode[nnode] == 0)  continue;  // not in use or DRONE
        
@@ -5877,7 +5877,7 @@ static void SV_Send_Tic_Update( int count )
 
     // Find lowest tic, over all nodes.
     next_tic_send = gametic;
-    for( nn=0; nn<MAXNETNODES; nn++)
+    for( nn=0; nn<MAX_NETNODES; nn++)
     {
         // Max of gametic and nettics[].
         if( (nnode_state[nn] >= NOS_active)

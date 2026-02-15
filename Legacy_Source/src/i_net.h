@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: i_net.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: i_net.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -49,14 +49,14 @@
 
 #define DOOMCOM_ID       0x12345678l
 
-#define MAXPACKETLENGTH  1450 // For use in a LAN
+#define MAX_PACKETLENGTH  1450 // For use in a LAN
 #define INETPACKETLENGTH 512 // For use on the internet
 
 #ifdef SMIF_PC_DOS
 #define DOSNET_SUPPORT
 #endif
 
-extern uint16_t  hardware_MAXPACKETLENGTH;
+extern uint16_t  hardware_MAX_PACKETLENGTH;
 extern uint32_t  net_bandwidth; // in byte/sec
 
 // [WDJ] Can simplify doomcom when drop support for DOS net.
@@ -120,7 +120,7 @@ typedef struct
 
     // The packet data to be sent.
     // Used by all net ports.
-    char                data[MAXPACKETLENGTH];
+    char                data[MAX_PACKETLENGTH];
 
 } doomcom_t;
 
@@ -169,7 +169,7 @@ extern boolean (*I_NetCanSend) (void);
 // Close the net node connection.
 extern void    (*I_NetFreeNode) (byte nodenum);
 // Open a net node connection with a specified address.
-// Return the net node number, or network_error_e > MAXNETNODES.   Error in net_error.
+// Return the net node number, or network_error_e > MAX_NETNODES.   Error in net_error.
 extern byte    (*I_NetMakeNode) (char *address);
 // Open the network socket.
 // Return true if the socket is open.

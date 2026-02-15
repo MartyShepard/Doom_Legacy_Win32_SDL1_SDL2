@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: I_video.c 1656 2023-12-08 14:54:47Z wesleyjohnson $
+// $Id: I_video.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 2000-2016 by DooM Legacy Team.
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 
 static const char
-rcsid[] = "$Id: I_video.c 1656 2023-12-08 14:54:47Z wesleyjohnson $";
+rcsid[] = "$Id: I_video.c 1774 2026-02-07 13:46:24Z wesleyjohnson $";
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -75,7 +75,7 @@ static int windowedModes[MAXWINMODES+1][2] = {
     // hidden from display
     {INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT},  // initial mode
     // public  1..
-    {MAXVIDWIDTH /*1600*/, MAXVIDHEIGHT/*1200*/},
+    {MAX_VIDWIDTH /*1600*/, MAX_VIDHEIGHT/*1200*/},
 #ifdef FIT_RATIO
     {1600, 1024},
 #endif   

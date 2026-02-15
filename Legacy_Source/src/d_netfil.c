@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: d_netfil.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: d_netfil.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -153,7 +153,7 @@ typedef struct {
 } transfer_t;
 
 // Only transfer files to player nodes.
-static transfer_t transfer[MAXNETNODES];
+static transfer_t transfer[MAX_NETNODES];
 
 // read time of file : stat _stmtime
 // write time of file : utime
@@ -730,7 +730,7 @@ memory_err:
 
 // By Server.
 // Close and release the current transfer of the net node.
-//  nnode : net node,  0..(MAXNETNODES-1)
+//  nnode : net node,  0..(MAX_NETNODES-1)
 static void SV_End_SendFile(byte nnode)
 {
     transfer_t * tnnp = & transfer[nnode];
@@ -770,7 +770,7 @@ static void SV_End_SendFile(byte nnode)
 // Called by NetUpdate, CL_ConnectToServer, repair_handler.
 void Filetx_Ticker(void)
 {
-    static byte txnode=0;  // net node num, 0..(MAXNETNODES-1)
+    static byte txnode=0;  // net node num, 0..(MAX_NETNODES-1)
     byte       nn;  // net node num
 
     TAH_e      access_tah;
@@ -787,7 +787,7 @@ void Filetx_Ticker(void)
     // By Server, only server has Filetx_file_cnt > 0.
 
     // Packets per tic
-    packet_cnt = net_bandwidth/(TICRATE*software_MAXPACKETLENGTH);
+    packet_cnt = net_bandwidth/(TICRATE*software_MAX_PACKETLENGTH);
     if(packet_cnt==0)
        packet_cnt++;
     // (((stat_sendbytes-nowsentbyte)*TICRATE)/(I_GetTime()-starttime)<(uint32_t)net_bandwidth)
@@ -795,12 +795,12 @@ void Filetx_Ticker(void)
     while( packet_cnt-- && (Filetx_file_cnt > 0) )
     {
         // Round robin, fair share.
-        nn = (txnode+1)%MAXNETNODES;
-        for( tcnt=0; tcnt<MAXNETNODES; tcnt++ )  // counter
+        nn = (txnode+1)%MAX_NETNODES;
+        for( tcnt=0; tcnt<MAX_NETNODES; tcnt++ )  // counter
         {
             if(transfer[nn].txlist)
                  goto found;
-            nn = (nn+1)%MAXNETNODES;
+            nn = (nn+1)%MAX_NETNODES;
         }
         // no transfer to do
         goto transfer_not_found;  // no transfer to do
@@ -849,7 +849,7 @@ found:
         }
 
         pak=&netbuffer->u.filetxpak;
-        send_size = software_MAXPACKETLENGTH - (FILETX_HEADER_SIZE+PACKET_BASE_SIZE);
+        send_size = software_MAX_PACKETLENGTH - (FILETX_HEADER_SIZE+PACKET_BASE_SIZE);
         if( send_size > ftxp->data_size - tnnp->position )
             send_size = ftxp->data_size - tnnp->position;
 
@@ -1034,7 +1034,7 @@ reject:
 
 // By Server, to cleanup sending files.
 // By Client, does nothing useful.
-//   nnode:  0..(MAXNETNODES-1)
+//   nnode:  0..(MAX_NETNODES-1)
 // Called by Net_CloseConnection, CloseNetFile
 void Abort_SendFiles(byte nnode)
 {
@@ -1052,7 +1052,7 @@ void Close_NetFile(void)
     int i;
 
     // Abort sending.
-    for( i=0;i<MAXNETNODES;i++)
+    for( i=0;i<MAX_NETNODES;i++)
         Abort_SendFiles(i);
 
     // Abort receiving a file.

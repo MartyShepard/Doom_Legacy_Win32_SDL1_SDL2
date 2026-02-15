@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_bsp.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_bsp.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -116,7 +116,7 @@ typedef struct
 
 
 //SoM: 3/28/2000: Fix from boom.
-#define MAX_SOLIDSEGS         MAXVIDWIDTH/2+1
+#define MAX_SOLIDSEGS         MAX_VIDWIDTH/2+1
 
 // new_seg_end is one past the last valid seg
 static cliprange_t*    new_seg_end;
@@ -578,8 +578,8 @@ void R_AddLine (seg_t*  lineseg)
 
     // OPTIMIZE: quickly reject orthogonal back sides.
     // Angles here increase to the left.
-    angle1 = R_PointToAngle (lineseg->v1->x, lineseg->v1->y); // left
-    angle2 = R_PointToAngle (lineseg->v2->x, lineseg->v2->y); // right
+    angle1 = R_ViewPointToAngle (lineseg->v1->x, lineseg->v1->y); // left
+    angle2 = R_ViewPointToAngle (lineseg->v2->x, lineseg->v2->y); // right
 
     // Clip to view edges.
     span = angle1 - angle2;  // normally span > 0, (angle1 > angle2)
@@ -758,8 +758,8 @@ boolean R_CheckBBox (fixed_t*   bspcoord)
 
     // check clip list for an open space
     // Angles here increase to the left.
-    angle1 = R_PointToAngle (x1, y1) - viewangle;  // left
-    angle2 = R_PointToAngle (x2, y2) - viewangle;  // right
+    angle1 = R_ViewPointToAngle (x1, y1) - viewangle;  // left
+    angle2 = R_ViewPointToAngle (x2, y2) - viewangle;  // right
 
     span = angle1 - angle2;  // normally span > 0, (angle1 > angle2)
 

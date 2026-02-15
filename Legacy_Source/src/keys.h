@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: keys.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: keys.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2010 by DooM Legacy Team.
 //
@@ -23,7 +23,7 @@
 enum aux_controller_e
 {
   MOUSEBUTTONS =  8,
-  MAXJOYSTICKS =  4,  // "Only" 4 joysticks per machine.
+  MAX_JOYSTICKS =  4,  // "Only" 4 joysticks per machine.
   JOYBUTTONS   = 16,  // Max number of buttons for a joystick.
   JOYHATBUTTONS = 4,  // Four hat directions.
   XBOXTRIGGERS =  2,  // Two triggers on Xbox-like controllers.

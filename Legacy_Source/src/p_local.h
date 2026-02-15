@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_local.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_local.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -105,7 +105,7 @@
 #define FLOATSPEED              (FRACUNIT*4)
 
 // added by Boris : for dehacked patches, replaced #define by int
-extern int MAXHEALTH;   // 100
+extern int MAX_HEALTH;   // 100
 
 #define VIEWHEIGHT               41
 #define VIEWHEIGHTS             "41"
@@ -125,16 +125,16 @@ extern consvar_t cv_viewheight; // p_mobj.c
 // player radius used only in am_map.c
 #define PLAYERRADIUS    FIXINT(16)
 
-// MAXRADIUS is for precalculated sector block boxes
+// MAX_RADIUS is for precalculated sector block boxes
 // the spider demon is larger,
 // but we do not have any moving sectors nearby
-#define MAXRADIUS       FIXINT(32)
+#define MAX_RADIUS       FIXINT(32)
 
-#define MAXMOVE         (FIXINT(30)/NEWTICRATERATIO)
+#define MAX_MOVE         (FIXINT(30)/NEWTICRATERATIO)
 
 //added:26-02-98: max Z move up or down without jumping
 //      above this, a heigth difference is considered as a 'dropoff'
-#define MAXSTEPMOVE     FIXINT(24)
+#define MAX_STEPMOVE     FIXINT(24)
 
 #define USERANGE        FIXINT(64)
 #define MELEERANGE      FIXINT(64)
@@ -265,7 +265,7 @@ extern  consvar_t cv_mbf_dog_jumping;
 extern  uint16_t helper_MT;  // Substitute helper thing (like DOG).
 
 // when pushing a line 
-//#define MAXSPECIALCROSS 16
+//#define MAX_SPECIALCROSS 16
 
 extern  int *   spechit;                //SoM: 3/15/2000: Limit removal
 extern  int     numspechit;
@@ -506,7 +506,7 @@ extern mobjtype_t      PuffType;
 #define FOOTCLIPSIZE   (10*FRACUNIT)
 #define HITDICE(a) ((1+(P_Random()&7))*a)
 
-#define MAXCHICKENHEALTH 30
+#define MAX_CHICKENHEALTH 30
 
 // Now used by Heretic and Doom powers (ironfeet).
 // A power counts down to 0. Below BLINKTHRESHOLD, there is a warning blink.
@@ -554,7 +554,7 @@ void P_AddBossSpot(fixed_t x, fixed_t y, angle_t angle);
 statenum_t  DEH_frame_to_state( int deh_frame );
 
 extern spr_light_t  sprite_light[NUM_LIGHTS];
-extern byte  sprite_light_ind[NUMSPRITES_DEF];
+extern byte  sprite_light_ind[NUM_SPRITES_DEF];
 void  Setup_sprite_light( byte  mons_ball_light );
 
 //extern consvar_t cv_dynamiclight;

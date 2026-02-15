@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: g_game.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: g_game.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -413,7 +413,7 @@ enum {
 //   EN_skull_bounce_fix = ! comp[comp_soul] // normally on
 // comp_maskedanim - 2s mid textures don't animate
 // comp_ouchface - Fixed permanently, not optional, does not affect play.
-// comp_maxhealth, - limits DEH setting MAXHEALTH, not implemented
+// comp_maxhealth, - limits DEH setting MAX_HEALTH, not implemented
 // comp_translucency, - not implemented
 
 // [WDJ] MBF21, Info from DSDA-Doom
@@ -494,9 +494,9 @@ boolean         multiplayer;
 // players and bots
 byte            max_num_players = 32;      // dependent upon demo
 byte            num_game_players = 0;      // number of actual players, from playeringame, incl bots
-byte            playeringame[MAXPLAYERS];  // player active
-byte            player_state[MAXPLAYERS];  // from where, and pending player
-player_t        players[MAXPLAYERS];
+byte            playeringame[MAX_PLAYERS];  // player active
+byte            player_state[MAX_PLAYERS];  // from where, and pending player
+player_t        players[MAX_PLAYERS];
 
 // [WDJ] Whenever assign to these must update the _ptr too.
 // They are not changed anywhere as often as players[] appears in IF stmts.
@@ -545,6 +545,7 @@ boolean         timingdemo;             // if true, exit with report on completi
 boolean         nodrawers;              // for comparative timing purposes
 boolean         noblit;                 // for comparative timing purposes
 tic_t           demostarttime;          // for comparative timing purposes
+
 
 
 void ShowMessage_OnChange(void);
@@ -609,16 +610,16 @@ consvar_t cv_tele_control     = {"telecontrol" ,"0",CV_SAVE | CV_NETVAR, tele_co
 #endif
 
 
-#if MAXPLAYERS>32
-#error please update "player_name" table using the new value for MAXPLAYERS
+#if MAX_PLAYERS>32
+#error please update "player_name" table using the new value for MAX_PLAYERS
 #endif
-#if MAXPLAYERNAME!=21
-#error please update "player_name" table using the new value for MAXPLAYERNAME
+#if MAX_PLAYERNAME!=21
+#error please update "player_name" table using the new value for MAX_PLAYERNAME
 #endif
 // changed to 2d array 19990220 by Kin
-char    player_names[MAXPLAYERS][MAXPLAYERNAME] =
+char    player_names[MAX_PLAYERS][MAX_PLAYERNAME] =
 {
-    // THESE SHOULD BE AT LEAST MAXPLAYERNAME CHARS
+    // THESE SHOULD BE AT LEAST MAX_PLAYERNAME CHARS
     "Player 1\0a123456789a\0",
     "Player 2\0a123456789a\0",
     "Player 3\0a123456789a\0",
@@ -700,7 +701,7 @@ void Deathmatch_OnChange(void)
     if( deathmatch )
     {
         int j;
-        for (j = 0; j < MAXPLAYERS; j++)
+        for (j = 0; j < MAX_PLAYERS; j++)
         {
             if (playeringame[j])
                 players[j].cards = it_allkeys;
@@ -742,7 +743,7 @@ void FragLimit_OnChange(void)
     // CV_VALUE, may be too large for EV
     if (cv_fraglimit.value > 0)
     {
-        for (i = 0; i < MAXPLAYERS; i++)
+        for (i = 0; i < MAX_PLAYERS; i++)
             P_CheckFragLimit(&players[i]);
     }
 }
@@ -750,13 +751,13 @@ void FragLimit_OnChange(void)
 
 // TEAM STATE
 
-team_info_t*  team_info[MAXTEAMS];  // allocated
+team_info_t*  team_info[MAX_TEAMS];  // allocated
 byte  num_teams = 0;
 
 // Create the team if it does not exist.
-team_info_t*  get_team( int team_num )
+team_info_t*  get_team( byte team_num )
 {
-    if( team_num >= MAXTEAMS )
+    if( team_num >= MAX_TEAMS )
         return NULL;
 
     // Create missing teams
@@ -771,7 +772,7 @@ team_info_t*  get_team( int team_num )
 
 // Set the team name.
 // Create the team if it does not exist.
-void  set_team_name( int team_num, const char * str )
+void  set_team_name( byte team_num, const char * str )
 {
     // Create the team if it does not exist.
     // Because of the complexity, for now, will create team at init.
@@ -788,7 +789,7 @@ void  set_team_name( int team_num, const char * str )
     }
 }
 
-char * get_team_name( int team_num )
+char * get_team_name( byte team_num )
 {
     if( team_num <= num_teams )
     {
@@ -1483,7 +1484,7 @@ void G_DoLoadLevel (boolean resetplayer)
 
     gamestate = GS_LEVEL;
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         if( resetplayer || (playeringame[i] && players[i].playerstate == PST_DEAD))
             players[i].playerstate = PST_REBORN;
@@ -1571,7 +1572,7 @@ boolean G_Responder (event_t* ev)
         do
         {
             displayplayer++;
-            if (displayplayer == MAXPLAYERS)
+            if (displayplayer == MAX_PLAYERS)
                 displayplayer = 0;
         } while (!playeringame[displayplayer] && displayplayer != consoleplayer);
         displayplayer_ptr = &players[displayplayer];
@@ -1680,7 +1681,7 @@ void G_Ticker (void)
     // do player reborns if needed
     if( gamestate == GS_LEVEL )
     {
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i=0 ; i<MAX_PLAYERS ; i++)
         {
             if (playeringame[i])
             {
@@ -1757,7 +1758,7 @@ void G_Ticker (void)
     buf = gametic%BACKUPTICS;
 
     // read/write demo and check turbo cheat
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         // BP: i==0 for playback of demos 1.29 now new players is added with xcmd
         if ((playeringame[i] || i==0) && !dedicated)
@@ -1904,7 +1905,7 @@ boolean  scatter_spawn( mobjtype_t spawn_type, int playernum, mapthing_t * spot 
                 return true;
         }
 #ifdef DOGS
-        else
+        else if( spawn_type == MT_DOGS )
         {
             if (G_SpawnExtraDog(&extra_coop_spawn) )
                 return true;
@@ -1946,7 +1947,7 @@ boolean  G_SpawnExtraDog( mapthing_t * spot )
         // This is a recursive call.
         int i;
         // Try to spawn near one of the other player spots.
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i=0 ; i<MAX_PLAYERS ; i++)
         {
             if( playerstarts[i] == NULL )  continue;
             if( scatter_spawn( MT_DOGS, 0, playerstarts[i] )  )
@@ -2049,7 +2050,7 @@ void G_PlayerFinishLevel (int player)
     }
     if( ! deathmatch )
     {
-        for(i = 0; i < MAXARTECONT; i++)
+        for(i = 0; i < MAX_ARTIFACT_COUNT; i++)
             P_PlayerUseArtifact(p, arti_fly);
     }
     memset (p->powers, 0, sizeof (p->powers));
@@ -2083,7 +2084,7 @@ void G_PlayerFinishLevel (int player)
 
 
 // added 2-2-98 for hacking with dehacked patch
-int initial_health=100; //MAXHEALTH;
+int initial_health=100; //MAX_HEALTH;
 int initial_bullets=50;
 
 void VerifFavoritWeapon (player_t* player);
@@ -2098,7 +2099,7 @@ void G_PlayerReborn (int player)
 {
     player_t*   p;
     int         i;
-    uint16_t    frags[MAXPLAYERS];
+    uint16_t    frags[MAX_PLAYERS];
     uint16_t    addfrags;
     int         killcount;
     int         itemcount;
@@ -2362,7 +2363,7 @@ void G_CoopSpawnPlayer (int playernum)
         return;
 
     // Try to spawn at one of the other players spots.
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         if( G_Player_SpawnSpot( playernum, playerstarts[i]) )
             return;
@@ -2504,7 +2505,7 @@ void G_DoCompleted (void)
 
     gameaction = ga_nothing;
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         if (playeringame[i])
             G_PlayerFinishLevel (i);        // take away cards and stuff
@@ -2538,7 +2539,7 @@ boolean G_Do_umapinfo (void)
         {
             mapname = game_umapinfo->nextsecret;
             int i;
-            for (i = 0; MAXPLAYERS > i; ++i)
+            for (i = 0; MAX_PLAYERS > i; ++i)
                 players[i].GF_flags |= GF_didsecret;
         }
         else if (game_umapinfo->nextmap)
@@ -2563,7 +2564,7 @@ boolean G_Do_umapinfo (void)
             {
                 // Jump to different episode
                 int i;
-                for (i = 0; MAXPLAYERS > i; ++i)
+                for (i = 0; MAX_PLAYERS > i; ++i)
                     players[i].GF_flags &= ~(GF_didsecret);
             }
         }
@@ -2626,7 +2627,7 @@ void G_Start_Intermission( void )
             }
             break; // [WDJ] 4/11/2012  map 8 is not secret level, and prboom and boom do not fall thru here.
           case 9:
-            for (i=0 ; i<MAXPLAYERS ; i++)
+            for (i=0 ; i<MAX_PLAYERS ; i++)
                 players[i].GF_flags |= GF_didsecret;
             break;
         }
@@ -2747,7 +2748,7 @@ beyond_std_setup:
         wminfo.partime = TICRATE*pars[gameepisode][gamemap];
     wminfo.pnum = consoleplayer;
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         wminfo.plyr[i].in = playeringame[i];
         wminfo.plyr[i].skills = players[i].killcount;
@@ -3210,7 +3211,7 @@ void G_gamemode_EN_defaults( void )
 void G_set_gamemode( byte new_gamemode )
 {
     gamemode = new_gamemode;
-    max_num_players = MAXPLAYERS;  // dependent upon demo
+    max_num_players = MAX_PLAYERS;  // dependent upon demo
     EV_legacy = VERSION;  // current DoomLegacy version
     // Legacy defaults.
     EN_doom_etc = 1;
@@ -3350,7 +3351,7 @@ void G_demo_defaults( void )
     delay_ticks_per_sec = 35; // default
 #endif
 
-    max_num_players = MAXPLAYERS;  // dependent upon demo
+    max_num_players = MAX_PLAYERS;  // dependent upon demo
 }
 
 
@@ -3435,7 +3436,7 @@ boolean G_Downgrade(int version)
         // disable rocket trails
         states[S_ROCKET].action = AI_NULL; //NULL like in Doom2 v1.9
 
-        // Boris : for older demos, initialize the new skincolor value
+        // Boris : for older demos, initialize the new skincolor value,
         //         also disable the new preferred weapons order.
         for(i=0;i<4;i++)
         {
@@ -3449,7 +3450,7 @@ boolean G_Downgrade(int version)
         //added:16-02-98: make sure autoaim is used for older
         //                demos not using mouse aiming
         cv_allowautoaim.EV = 9;  // force autoaim
-        for(i=0;i<MAXPLAYERS;i++)
+        for(i=0;i<MAX_PLAYERS;i++)
             players[i].GF_flags |= GF_autoaim;
     }
 
@@ -3610,11 +3611,11 @@ void G_setup_gameskill( void )
 #define DEMOMARKER      0x80    // demoend
 
 // SERVER_ID appears in Demo 1.48
-#if SERVER_PID < MAXPLAYERS
-#  error "SERVER_PID must be > MAXPLAYERS"
+#if SERVER_PID < MAX_PLAYERS
+#  error "SERVER_PID must be > MAX_PLAYERS"
 #endif
 
-ticcmd_t oldcmd[MAXPLAYERS];
+ticcmd_t oldcmd[MAX_PLAYERS];
 
 // Only called when demoplayback.
 static
@@ -3740,7 +3741,7 @@ void G_WriteDemoTiccmd (ticcmd_t* cmd,int playernum)
     *ziptic_p=ziptic;
     //added:16-02-98: attention here for the ticcmd size!
     // latest demos with mouse aiming byte in ticcmd
-    if (ziptic_p > demoend - (5*MAXPLAYERS))
+    if (ziptic_p > demoend - (5*MAX_PLAYERS))
     {
         G_CheckDemoStatus ();   // no more space
         return;
@@ -3816,7 +3817,7 @@ void G_BeginRecording (void)
     *demo_p++ = cv_timelimit.value;      // just to be compatible with old demo (no more used)
     *demo_p++ = multiplayer;             // 1..31
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         if(playeringame[i])
           *demo_p++ = 1;
@@ -4397,7 +4398,7 @@ void G_DoPlayDemo (const char *defdemoname)
 
     if( demo_p > demoend )  goto broken_header;
 
-#if MAXPLAYERS>32
+#if MAX_PLAYERS>32
 #error Please add support for old lmps
 #endif
 

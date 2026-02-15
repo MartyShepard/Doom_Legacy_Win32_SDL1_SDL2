@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //----------------------------------------------------------------------------
 //
-// $Id: t_vari.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: t_vari.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright(C) 2000 Simon Howard
 // Copyright (C) 2001-2011 by DooM Legacy Team.
@@ -115,7 +115,7 @@ fs_variable_t * new_function(const char *name, void (*handler)() );
 
 // arguments to handler functions
 
-#define MAXARGS 128
+#define MAX_FS_ARGS 128
 extern int t_argc;
 extern fs_value_t * t_argv;
 extern fs_value_t t_return;

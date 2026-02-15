@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_event.h 1711 2025-01-17 04:17:06Z wesleyjohnson $
+// $Id: d_event.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -57,9 +57,9 @@ typedef struct
 //
 // GLOBAL VARIABLES
 //
-#define MAXEVENTS               64
+#define MAX_EVENTS               64
 
-extern  event_t         events[MAXEVENTS];
+extern  event_t         events[MAX_EVENTS];
 extern  int             eventhead;
 extern  int             eventtail;
 

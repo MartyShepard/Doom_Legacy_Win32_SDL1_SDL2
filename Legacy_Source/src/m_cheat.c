@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: m_cheat.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: m_cheat.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -1044,11 +1044,11 @@ static void CheatHealthFunc(player_t * player, Cheat_t * cheat)
 {
     if (player->chickenTics)
     {
-        player->health = player->mo->health = MAXCHICKENHEALTH;
+        player->health = player->mo->health = MAX_CHICKENHEALTH;
     }
     else
     {
-        player->health = player->mo->health = MAXHEALTH;
+        player->health = player->mo->health = MAX_HEALTH;
     }
     P_SetMessage(player, TXT_CHEATHEALTH, 51);
 }

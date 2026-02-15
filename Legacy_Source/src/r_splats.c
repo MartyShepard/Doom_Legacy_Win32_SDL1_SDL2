@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_splats.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: r_splats.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -43,12 +43,12 @@
 #include "d_netcmd.h"
 
 #ifdef WALLSPLATS
-static wallsplat_t  wallsplats[MAXLEVELSPLATS];     // WALL splats
+static wallsplat_t  wallsplats[MAX_LEVELSPLATS];     // WALL splats
 static int          freewallsplat;
 #endif
 
 #ifdef FLOORSPLATS
-static floorsplat_t floorsplats[MAXLEVELSPLATS];    // FLOOR splats
+static floorsplat_t floorsplats[MAX_LEVELSPLATS];    // FLOOR splats
 static int          freefloorsplat;
 
 struct rastery_s {
@@ -56,15 +56,15 @@ struct rastery_s {
     fixed_t tx1, ty1;
     fixed_t tx2, ty2;       // start/end points in texture at this line
 };
-static struct rastery_s rastertab[MAXVIDHEIGHT];
+static struct rastery_s rastertab[MAX_VIDHEIGHT];
 
 static void prepare_rastertab (void);
 
 //r_plane.c
-extern fixed_t     cachedheight[MAXVIDHEIGHT];
-extern fixed_t     cacheddistance[MAXVIDHEIGHT];
-extern fixed_t     cachedxstep[MAXVIDHEIGHT];
-extern fixed_t     cachedystep[MAXVIDHEIGHT];
+extern fixed_t     cachedheight[MAX_VIDHEIGHT];
+extern fixed_t     cacheddistance[MAX_VIDHEIGHT];
+extern fixed_t     cachedxstep[MAX_VIDHEIGHT];
+extern fixed_t     cachedystep[MAX_VIDHEIGHT];
 extern fixed_t     basexscale;
 extern fixed_t     baseyscale;
 #endif
@@ -260,7 +260,7 @@ static floorsplat_t* R_AllocFloorSplat (void)
 
     // find splat to use
     freefloorsplat++;
-    if (freefloorsplat >= MAXLEVELSPLATS)
+    if (freefloorsplat >= MAX_LEVELSPLATS)
         freefloorsplat = 0;
 
     // clear the splat from the line if it was in use
@@ -522,8 +522,8 @@ static void R_RenderFloorSplat (floorsplat_t* pSplat, vertex_t* verts, byte* pTe
         else
         {
             index = distance >> LIGHTZSHIFT;
-            if (index >= MAXLIGHTZ )
-                index = MAXLIGHTZ-1;
+            if (index >= MAX_LIGHTZ )
+                index = MAX_LIGHTZ-1;
             ds_colormap = planezlight[index];
         }
 

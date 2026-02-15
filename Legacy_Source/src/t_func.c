@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //---------------------------------------------------------------------------
 //
-// $Id: t_func.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: t_func.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 2000 Simon Howard
 // Copyright (C) 2001-2016 by DooM Legacy Team.
@@ -261,7 +261,7 @@ byte  arg_playernum( fs_value_t * arg, const char * funcname )
     else
         playernum = intvalue(*arg);
 
-    if ( playernum >= MAXPLAYERS
+    if ( playernum >= MAX_PLAYERS
          || ! playeringame[playernum] )  goto player_err;
     return playernum;
 
@@ -274,7 +274,7 @@ player_err:
     goto errexit;
 
 errexit:
-    return  255;  //  > MAXPLAYERS, indicates error
+    return  255;  //  > MAX_PLAYERS, indicates error
 }
 
 
@@ -654,7 +654,7 @@ void SF_PlayerInGame(void)
     t_return.value.i = 0; // default
 
     plnum = intvalue(t_argv[0]);
-    if( plnum < MAXPLAYERS )  // [WDJ] safe limit
+    if( plnum < MAX_PLAYERS )  // [WDJ] safe limit
         t_return.value.i = playeringame[plnum];
 done:
     return;
@@ -684,7 +684,7 @@ void SF_PlayerName(void)
         plnum = intvalue(t_argv[0]);
     }
 
-    if( plnum < MAXPLAYERS )  // [WDJ] safe limit
+    if( plnum < MAX_PLAYERS )  // [WDJ] safe limit
         t_return.value.s = player_names[plnum];
 done:
     return;
@@ -705,7 +705,7 @@ void SF_PlayerAddFrag(void)
     t_return.value.f = 0;  // default
 
     playernum1 = intvalue(t_argv[0]);
-    if ( playernum1 < MAXPLAYERS        // [WDJ] Safe limit
+    if ( playernum1 < MAX_PLAYERS        // [WDJ] Safe limit
          && playeringame[playernum1] )  // [WDJ] Only if player in game
     {
         if (t_argc == 1)
@@ -719,7 +719,7 @@ void SF_PlayerAddFrag(void)
             // player1 fragged by player2
             int playernum2 = intvalue(t_argv[1]);
 
-            if ( playernum2 < MAXPLAYERS        // [WDJ] Safe limit
+            if ( playernum2 < MAX_PLAYERS        // [WDJ] Safe limit
                  && playeringame[playernum2] )  // [WDJ] Only if player in game
             {
                 players[playernum1].frags[playernum2]++;
@@ -757,7 +757,7 @@ void SF_PlayerObj(void)
         plnum = intvalue(t_argv[0]);
     }
 
-    if ( plnum < MAXPLAYERS        // [WDJ] Safe limit
+    if ( plnum < MAX_PLAYERS        // [WDJ] Safe limit
          && playeringame[plnum] )  // [WDJ] Only if player in game
         t_return.value.mobj = players[plnum].mo;
 done:
@@ -797,7 +797,7 @@ void SF_SkinColor(void)
     t_return.value.i = 0;  // default
 
     playernum = arg_playernum( &t_argv[0], "SkinColor" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
 
     if(t_argc == 2)
     {
@@ -860,7 +860,7 @@ void SF_PlayerKeys(void)
     t_return.value.i = 0;  // default
 
     playernum = arg_playernum( &t_argv[0], "PlayerKeys" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
 
     keynum = intvalue(t_argv[1]);
     if (keynum > 7)  goto bad_keyvalue;  // [WDJ] was 5
@@ -913,7 +913,7 @@ void SF_PlayerKeysByte(void)
 
     // [WDJ] full player arg like other functions
     playernum = arg_playernum( &t_argv[0], "PlayerKeysByte" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
 
     if(t_argc == 2)
     {
@@ -950,7 +950,7 @@ void SF_PlayerArmor(void)
 
     // [WDJ] full player arg like other functions
     playernum = arg_playernum( &t_argv[0], "PlayerArmor" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
     player = & players[playernum];
 
     if ( t_argc == 2 )
@@ -984,7 +984,7 @@ void SF_PlayerAmmo(void)
     t_return.value.i = 0;  // default
 
     playernum = arg_playernum( &t_argv[0], "PlayerAmmo" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
     player = & players[playernum];
 
     ammonum = intvalue(t_argv[1]);
@@ -1025,7 +1025,7 @@ void SF_MaxPlayerAmmo(void)
     t_return.value.i = 0;  // default
 
     playernum = arg_playernum( &t_argv[0], "MaxPlayerAmmo" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
     player = & players[playernum];
 
     ammonum = intvalue(t_argv[1]);
@@ -1064,7 +1064,7 @@ void SF_PlayerWeapon(void)
     t_return.value.i = 0;  // default
 
     playernum = arg_playernum( &t_argv[0], "PlayerWeapon" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
     player = & players[playernum];
 
     weaponnum = intvalue(t_argv[1]);
@@ -1107,7 +1107,7 @@ void SF_PlayerSelectedWeapon(void)
     t_return.value.i = 0;  // default
 
     playernum = arg_playernum( &t_argv[0], "PlayerSelectedWeapon" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
     player = & players[playernum];
 
     if(t_argc == 2)
@@ -1146,7 +1146,7 @@ void SF_PlayerPitch(void)
 
     // [WDJ] full player arg like other functions
     playernum = arg_playernum( &t_argv[0], "PlayerPitch" );
-    if( playernum >= MAXPLAYERS )  goto done;
+    if( playernum >= MAX_PLAYERS )  goto done;
 
     if(t_argc == 2)
     {

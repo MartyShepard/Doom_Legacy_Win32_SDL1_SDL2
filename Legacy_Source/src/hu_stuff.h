@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hu_stuff.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: hu_stuff.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -69,9 +69,9 @@ extern char    french_shiftxform[];
 //------------------------------------
 //           chat stuff
 //------------------------------------
-#define HU_MAXMSGLEN    80
+#define HU_MAX_MSG_LEN    80
 
-extern patch_t*       hu_font[HU_FONTSIZE];
+extern patch_t*  hu_font[HU_FONTSIZE];
 extern byte  hu_fonts_loaded; // 1=partially loaded, 2=fully loaded
 
 //set true by hu_ when entering a chat message
@@ -108,11 +108,12 @@ void Command_Chatmacro_f (void);
 
 int HU_Create_TeamFragTbl(fragsort_t* fragtab,
                          int dmtotals[],
-                         int fragtbl[MAXPLAYERS][MAXPLAYERS]);
+                         int fragtbl[MAX_PLAYERS][MAX_PLAYERS]);
 
+void HU_show_team_frag_table(void);
+void HU_show_player_frags(void);
 
-
-void HU_SetTip(char *tip, int displaytics);
+void HU_SetTip(char * tip, int displaytics);
 void HU_Clear_Tips();
 
 void HU_Draw_FSPics();

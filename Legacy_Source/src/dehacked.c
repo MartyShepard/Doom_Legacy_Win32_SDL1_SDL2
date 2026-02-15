@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: dehacked.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: dehacked.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -105,8 +105,8 @@ uint16_t helper_MT = 0xFFFF;  // Substitute helper thing (like DOG).
 static boolean  bex_include_notext = 0;  // bex include with skip deh text
 
 // Save compare values, to handle multiple DEH files and lumps
-static action_fi_t  deh_actions[NUMSTATES_DEF];
-static char*        deh_sprnames[NUMSPRITES_DEF];
+static action_fi_t  deh_actions[NUM_STATES_DEF];
+static char*        deh_sprnames[NUM_SPRITES_DEF];
 static char*        deh_sfxnames[NUM_SFX_DEF];
 static char*        deh_musicname[NUM_MUSIC_DEF];
 static char*        deh_text[NUM_TEXT];
@@ -894,11 +894,11 @@ statenum_t  DEH_frame_to_state( int deh_frame )
   stnum = deh_frame;
 
   // blank the new states
-  if( !(blanked_flag & 0x01) && (stnum > NUMSTATES_DEF) )
+  if( !(blanked_flag & 0x01) && (stnum > NUM_STATES_DEF) )
   {
       blanked_flag |= 0x01;
 
-      zero_states( NUMSTATES_DEF, NUMSTATES_EXT-1 );
+      zero_states( NUM_STATES_DEF, NUM_STATES_EXT-1 );
   }
 
   if( EN_heretic )
@@ -922,7 +922,7 @@ statenum_t  DEH_frame_to_state( int deh_frame )
   }
 #endif
 
-  if( stnum >= 0 && stnum < NUMSTATES_EXT )
+  if( stnum >= 0 && stnum < NUM_STATES_EXT )
        return  stnum;  // remapping range accepted
 
 
@@ -1019,7 +1019,7 @@ uint16_t DEH_sprite_remapping( int deh_value )
 #endif
 
   // Ensure that is within valid range.
-  if( spr_index >= 0 && spr_index < NUMSPRITES_EXT )
+  if( spr_index >= 0 && spr_index < NUM_SPRITES_EXT )
        return  spr_index;
 
 null_sprite:
@@ -2118,7 +2118,7 @@ void  read_pointer( myfile_t* f, int xref )
         return;
 
     statenum_t sj = DEH_frame_to_state( value );
-    if( (sj != S_NULL) && (sj < NUMSTATES_DEF) )
+    if( (sj != S_NULL) && (sj < NUM_STATES_DEF) )
         states[si].action = deh_actions[sj];
   }
 }
@@ -2313,7 +2313,7 @@ void read_text( myfile_t* f, int len1, int len2 )
     if((len1 == 4) && (len2 == 4))  // sprite names are always 4 chars
     {
       // sprite table
-      for(i=0;i < NUMSPRITES_DEF;i++)
+      for(i=0;i < NUM_SPRITES_DEF;i++)
       {
         if(!strncmp(deh_sprnames[i],s,len1))
         {
@@ -3621,7 +3621,7 @@ extern int idkfa_armor_class;
 extern int god_health;
 extern int initial_health;
 extern int initial_bullets;
-extern int MAXHEALTH;
+extern int MAX_HEALTH;
 extern int max_armor;
 extern int green_armor_class;
 extern int blue_armor_class;
@@ -3659,7 +3659,7 @@ void read_misc( myfile_t * f )
       {
         if( word2 )
         {
-          if(!strcasecmp(word2,"Health"))          MAXHEALTH=value;
+          if(!strcasecmp(word2,"Health"))          MAX_HEALTH=value;
           else if(!strcasecmp(word2,"Armor"))      max_armor=value;
           else if(!strcasecmp(word2,"Soulsphere")) max_soul_health=value;
         }
@@ -3980,7 +3980,7 @@ void DEH_LoadDehackedFile( myfile_t* f, byte bex_permission )
                // [WDJ] Cannot even tell what this is supposed to do.
                // It looks like it changes the standard sprite names to something else.
                // Some other ports are not supporting this.
-               if( spr_indx>=0 && spr_indx<NUMSPRITES_EXT )
+               if( spr_indx>=0 && spr_indx<NUM_SPRITES_EXT )
                {
                  if(myfgets(s,sizeof(s),f)!=NULL)
                  {
@@ -3988,7 +3988,7 @@ void DEH_LoadDehackedFile( myfile_t* f, byte bex_permission )
                    if( confirm_searchvalue(koff) )
                    {
                      int k = (koff - 151328)/8;
-                     if( k>=0 && k<NUMSPRITES_DEF )
+                     if( k>=0 && k<NUM_SPRITES_DEF )
                      {
                        sprnames[spr_indx]=deh_sprnames[k];
                      }
@@ -4129,9 +4129,9 @@ void DEH_Init(void)
 {
   int i;
   // save value for cross reference
-  for(i=0;i<NUMSTATES_DEF;i++)
+  for(i=0;i<NUM_STATES_DEF;i++)
       deh_actions[i]=states[i].action;
-  for(i=0;i<NUMSPRITES_DEF;i++)
+  for(i=0;i<NUM_SPRITES_DEF;i++)
       deh_sprnames[i]=sprnames[i];
   for(i=0;i<NUM_SFX_DEF;i++)
       deh_sfxnames[i]=S_sfx[i].name;
@@ -4321,7 +4321,7 @@ void DEH_Finalize( void )
 
     // Apply default code pointer parameters.  Translate some of the parameters.
     int i;
-    for (i=0;i<NUMSTATES_EXT;i++)
+    for (i=0;i<NUM_STATES_EXT;i++)
     {
         state_t * st = & states[i];
         if( st->action )  // any action function

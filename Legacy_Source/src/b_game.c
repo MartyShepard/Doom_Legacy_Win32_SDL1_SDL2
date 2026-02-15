@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_game.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: b_game.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 2002 by DooM Legacy Team.
 //
@@ -165,7 +165,7 @@ static void CV_botspeed_OnChange( void )
 
 boolean B_FindNextNode(player_t* p);
 
-bot_info_t  botinfo[MAXPLAYERS];
+bot_info_t  botinfo[MAX_PLAYERS];
 fixed_t botforwardmove[2] = {25/NEWTICRATERATIO, 50/NEWTICRATERATIO};
 fixed_t botsidemove[2]    = {24/NEWTICRATERATIO, 40/NEWTICRATERATIO};
 angle_t botangleturn[4]   = {500, 1000, 2000, 4000};
@@ -286,7 +286,7 @@ void B_Init_Names()
     CV_ValueIncDec( &cv_bot_random, 7237 ); // add a prime
 
     // Initialize botinfo.
-    for (i=0; i< MAXPLAYERS; i++)
+    for (i=0; i< MAX_PLAYERS; i++)
     {
         // Give each prospective bot a unique name.
         do
@@ -391,7 +391,7 @@ void B_Send_all_bots_NameColor( void )
 {
     byte pn;
 
-    for( pn=0; pn<MAXPLAYERS; pn++ )
+    for( pn=0; pn<MAX_PLAYERS; pn++ )
     {
         if( playeringame[pn] && players[pn].bot )
         {
@@ -414,9 +414,9 @@ void Command_AddBot(void)
 
     pn = SV_get_player_num();
 
-    if( pn >= MAXPLAYERS )
+    if( pn >= MAX_PLAYERS )
     {
-        CONS_Printf ("You can only have %d players.\n", MAXPLAYERS);
+        CONS_Printf ("You can only have %d players.\n", MAX_PLAYERS);
         return;
     }
 
@@ -425,7 +425,7 @@ void Command_AddBot(void)
     // AddBot format: pn, color, name:string0
     WRITEBYTE( b, pn );
     WRITEBYTE( b, bip->colour );
-    b = write_stringn(b, botnames[bip->name_index], MAXPLAYERNAME);
+    b = write_stringn(b, botnames[bip->name_index], MAX_PLAYERNAME);
     SV_Send_NetXCmd(XD_ADDBOT, buf, (b - buf));  // as server
 
     // Cannot send NameColor XCmd before the bot exists.
@@ -435,13 +435,13 @@ void Command_AddBot(void)
 void B_Regulate_Bots( int req_numbots )
 {
     byte pn;
-    for( pn = 0; pn < MAXPLAYERS; pn++ )
+    for( pn = 0; pn < MAX_PLAYERS; pn++ )
     {
         if( playeringame[pn] && players[pn].bot )  req_numbots--;
     }
 
-    if( req_numbots > (MAXPLAYERS - num_game_players) )
-        req_numbots = (MAXPLAYERS - num_game_players);
+    if( req_numbots > (MAX_PLAYERS - num_game_players) )
+        req_numbots = (MAX_PLAYERS - num_game_players);
 
     while( req_numbots > 0 )
     {

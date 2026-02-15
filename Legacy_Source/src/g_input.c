@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: g_input.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: g_input.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -70,7 +70,7 @@ joybinding_t joybindings[MAX_JOYBINDINGS];
 #endif
 
 
-CV_PossibleValue_t mousesens_cons_t[]={{1,"MIN"},{MAXMOUSESENSITIVITY,"MAXCURSOR"},{INT_MAX,"MAX"},{0,NULL}};
+CV_PossibleValue_t mousesens_cons_t[]={{1,"MIN"},{MAX_MOUSESENSITIVITY,"MAXCURSOR"},{INT_MAX,"MAX"},{0,NULL}};
 CV_PossibleValue_t onecontrolperkey_cons_t[]={{1,"One"},{2,"Several"},{0,NULL}};
 
 // mouse values are used once

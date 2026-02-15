@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_main.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: r_main.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -220,16 +220,16 @@ int                     viewangle_to_x[FINE_ANG180];
 // The x_to_viewangleangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
 // from clipangle to -clipangle.
-angle_t                 x_to_viewangle[MAXVIDWIDTH+1];
+angle_t                 x_to_viewangle[MAX_VIDWIDTH+1];
 
 
-lighttable_t*           scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
-lighttable_t*           scalelightfixed[MAXLIGHTSCALE];
-lighttable_t*           zlight[LIGHTLEVELS][MAXLIGHTZ];
+lighttable_t*           scalelight[LIGHTLEVELS][MAX_LIGHTSCALE];
+lighttable_t*           scalelightfixed[MAX_LIGHTSCALE];
+lighttable_t*           zlight[LIGHTLEVELS][MAX_LIGHTZ];
 
 //SoM: 3/30/2000: Hack to support extra boom colormaps.
 int                     num_extra_colormaps = 0;
-extracolormap_t         extra_colormaps[MAXCOLORMAPS];
+extracolormap_t         extra_colormaps[MAX_COLORMAPS];
 
 // bumped light from gun blasts
 lightlev_t  extralight;	     // extralight seen by most draws
@@ -362,7 +362,7 @@ void SplitScreen_OnChange(void)
         // displayplayer2_ptr is valid, even when cv_splitscreen.
 
         // find any player to be player2
-        for( i=0; i<MAXPLAYERS;i++)
+        for( i=0; i<MAX_PLAYERS;i++)
         {
             if( playeringame[i] && i!=consoleplayer )
             {
@@ -468,7 +468,7 @@ int SlopeDiv_64 (fixed_t num, fixed_t den)
 }
 
 //
-// R_PointToAngle
+// R_ViewPointToAngle
 // To get a global angle from cartesian coordinates,
 // the coordinates are flipped until they are in the first octant of
 // the coordinate system, then the y (<=x) is scaled and divided by x
@@ -477,7 +477,7 @@ int SlopeDiv_64 (fixed_t num, fixed_t den)
 
 // Point (x2,y2) to point (x1,y1) angle.
 angle_t R_PointToAngle2 ( fixed_t  x2, fixed_t  y2,
-                          fixed_t  x1, fixed_t  y1)
+                          fixed_t  x1, fixed_t  y1 )
 {
     // [WDJ] This is inaccurate. Angles can be in error by 0x10000000,
     // and not monotonic (ordering errors).
@@ -539,7 +539,7 @@ angle_t R_PointToAngle2 ( fixed_t  x2, fixed_t  y2,
 
 
 // Point of view (viewx,viewy) to point (x1,y1) angle.
-angle_t R_PointToAngle ( fixed_t x, fixed_t y)
+angle_t R_ViewPointToAngle ( fixed_t x, fixed_t y )
 {
     // Has 13 bits correct when compared to atan2(), which is much
     // better than the 5 correct bits of the vanilla function.
@@ -831,7 +831,7 @@ void R_Init_LightTables (void)
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
         startmap = ((LIGHTLEVELS-1-i)*2)*NUM_COLORMAPS/LIGHTLEVELS;
-        for (j=0 ; j<MAXLIGHTZ ; j++)
+        for (j=0 ; j<MAX_LIGHTZ ; j++)
         {
             //added:02-02-98:use BASEVIDWIDTH, vid.width is not set already,
             // and it seems it needs to be calculated only once.
@@ -1134,7 +1134,7 @@ std_fit:
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
         startmap = ((LIGHTLEVELS-1-i)*2)*NUM_COLORMAPS/LIGHTLEVELS;
-        for (j=0 ; j<MAXLIGHTSCALE ; j++)
+        for (j=0 ; j<MAX_LIGHTSCALE ; j++)
         {
             level = startmap - j*vid.width/(rdraw_viewwidth<<detailshift)/DISTMAP;
 
@@ -1513,7 +1513,7 @@ void R_SetupFrame( byte pind, player_t* player )
         walllights = scalelightfixed;
 
         // refresh scalelights to fixedcolormap
-        for (i=0 ; i<MAXLIGHTSCALE ; i++)
+        for (i=0 ; i<MAX_LIGHTSCALE ; i++)
             scalelightfixed[i] = fixedcolormap;
     }
 

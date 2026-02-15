@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: hw_main.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: hw_main.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -471,7 +471,7 @@ int gr_viewangle_to_x[FINE_ANG180];
 // The gr_x_to_viewangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
 // from clipangle to -clipangle.
-angle_t gr_x_to_viewangle[MAXVIDWIDTH + 1];
+angle_t gr_x_to_viewangle[MAX_VIDWIDTH + 1];
 
 // ==========================================================================
 //                                                                    GLOBALS
@@ -2198,7 +2198,7 @@ typedef struct
 } cliprange_t;
 
 //Hurdler: just like in r_bsp.c
-#define MAXSEGS         MAXVIDWIDTH/2+1
+#define MAXSEGS         MAX_VIDWIDTH/2+1
 
 // newend is one past the last valid seg
 cliprange_t * newend;
@@ -2514,12 +2514,12 @@ static void HWR_AddLine(seg_t * lineseg)
 #if 1
     // angle calc uses fixed_t math
     // Angles here increase to the left.
-    angle1 = R_PointToAngle( lineseg->v1->x, lineseg->v1->y );  // left
-    angle2 = R_PointToAngle( lineseg->v2->x, lineseg->v2->y );  // right
+    angle1 = R_ViewPointToAngle( lineseg->v1->x, lineseg->v1->y );  // left
+    angle2 = R_ViewPointToAngle( lineseg->v2->x, lineseg->v2->y );  // right
 #else
     // convert polyvertex_t back to fixed_t
-    angle1 = R_PointToAngle(((polyvertex_t *) lineseg->v1)->x * FRACUNIT, ((polyvertex_t *) lineseg->v1)->y * FRACUNIT);
-    angle2 = R_PointToAngle(((polyvertex_t *) lineseg->v2)->x * FRACUNIT, ((polyvertex_t *) lineseg->v2)->y * FRACUNIT);
+    angle1 = R_ViewPointToAngle(INT_TO_FIXED(((polyvertex_t *) lineseg->v1)->x), INT_TO_FIXED(((polyvertex_t *) lineseg->v1)->y));
+    angle2 = R_ViewPointToAngle(INT_TO_FIXED(((polyvertex_t *) lineseg->v2)->x), INT_TO_FIXED(((polyvertex_t *) lineseg->v2)->y));
 #endif
 
     // Clip to view edges.
@@ -2559,7 +2559,7 @@ static void HWR_AddLine(seg_t * lineseg)
 #if 0
     {
         float fx1, fx2, fy1, fy2;
-        //BP: test with a better projection than viewangle_to_x[R_PointToAngle(angle)]
+        //BP: test with a better projection than viewangle_to_x[R_ViewPointToAngle(angle)]
         // do not enable this at release 4 mul and 2 div
         fx1 = lineseg->pv1->x - gr_viewx;
         fy1 = lineseg->pv1->y - gr_viewy;
@@ -2728,8 +2728,8 @@ static boolean HWR_CheckBBox(fixed_t * bspcoord)
 
     // check clip list for an open space
     // Angles here increase to the left.
-    angle1 = R_PointToAngle(x1, y1) - dup_viewangle;  // left
-    angle2 = R_PointToAngle(x2, y2) - dup_viewangle;  // right
+    angle1 = R_ViewPointToAngle(x1, y1) - dup_viewangle;  // left
+    angle2 = R_ViewPointToAngle(x2, y2) - dup_viewangle;  // right
 
     span = angle1 - angle2;  // normally span > 0, (angle1 > angle2)
 
@@ -3338,7 +3338,7 @@ void HWR_Init_TextureMapping( void )
 // sprites are drawn after all wall and planes are rendered, so that
 // sprite translucency effects apply on the rendered view (instead of the background sky!!)
 
-gr_vissprite_t gr_vissprites[MAXVISSPRITES];
+gr_vissprite_t gr_vissprites[MAX_VISSPRITES];
 gr_vissprite_t * gr_vissprite_p;
 
 // --------------------------------------------------------------------------
@@ -3357,7 +3357,7 @@ gr_vissprite_t gr_overflowsprite;
 
 gr_vissprite_t * HWR_NewVisSprite(void)
 {
-    if (gr_vissprite_p == &gr_vissprites[MAXVISSPRITES])
+    if (gr_vissprite_p == &gr_vissprites[MAX_VISSPRITES])
         return &gr_overflowsprite;
 
     gr_vissprite_p++;
@@ -3674,7 +3674,7 @@ static void HWR_ProjectSprite(mobj_t * thing)
     else
     {
         // choose a different rotation based on player view
-        ang = R_PointToAngle(thing->x, thing->y);       // uses viewx,viewy
+        ang = R_ViewPointToAngle(thing->x, thing->y);       // uses viewx,viewy
 
         if( sprframe->rotation_pattern == SRP_8)
         {
@@ -4354,6 +4354,8 @@ void HWR_SetViewSize( int viewsize )
    
     viewsv_viewnumber = 255;  // force init of render
 }
+
+
 //Hurdler: 3D water stuffs
 static int numplanes = 0;
 static int num_late_walls = 0;  // drawn late, transparent walls

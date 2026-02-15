@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: i_tcp.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: i_tcp.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -629,7 +629,7 @@ static byte get_freenode( void )
     byte nn;
 
     // Only this range is dynamically allocated, the others are preallocated.
-    for( nn=1; nn<MAXNETNODES; nn++)  // self is not free
+    for( nn=1; nn<MAX_NETNODES; nn++)  // self is not free
     {
         if( node_hash[nn] == 0 )
         {
@@ -647,7 +647,7 @@ void SOCK_FreeNode( byte nnode )
 {
     // MAX_CON_NETNODE is preallocated.
     // can't disconnect to self :)
-    if( (nnode == 0) || (nnode >= MAXNETNODES) )
+    if( (nnode == 0) || (nnode >= MAX_NETNODES) )
         return;
 
 #ifdef DEBUGFILE
@@ -692,7 +692,7 @@ byte  SOCK_Get(void)
 #ifdef LINUX
     rcnt = recvfrom(mysocket,
                     &doomcom->data,  // packet
-                    MAXPACKETLENGTH,  // packet length
+                    MAX_PACKETLENGTH,  // packet length
                     0,  // flags
                     /*OUT*/ (struct sockaddr *)&fromaddress,  // net address
                     /*IN,OUT*/ &fromlen );  // net address length
@@ -701,7 +701,7 @@ byte  SOCK_Get(void)
     rcnt = recvfrom(mysocket,
                     // Some other port requires (char*), undocumented.
                     (char *)&doomcom->data,
-                    MAXPACKETLENGTH,  // packet length
+                    MAX_PACKETLENGTH,  // packet length
                     0,  // flags
                     /*OUT*/ (struct sockaddr *)&fromaddress,  // net address
                     /*IN,OUT*/ &fromlen );  // net address length
@@ -717,7 +717,7 @@ byte  SOCK_Get(void)
 #else
     hashaddr = generic_hashaddr( &fromaddress );  // hash != 0
 #endif
-    for (nnode=0; nnode<MAXNETNODES; nnode++)
+    for (nnode=0; nnode<MAX_NETNODES; nnode++)
     {
         // [WDJ] avoid testing null addresses.
         if( node_hash[nnode] != hashaddr )  continue;
@@ -728,7 +728,7 @@ byte  SOCK_Get(void)
 
     // Net node not found.
     nnode = get_freenode();  // Find a free node.
-    if(nnode >= MAXNETNODES)  goto no_nodes;
+    if(nnode >= MAX_NETNODES)  goto no_nodes;
 
     // clientaddress is IP addr and sock port.
     // SOCK_Send will use nnode to send back to this clientaddress.
@@ -1350,7 +1350,7 @@ void I_Shutdown_TCP_Driver(void)
 //   hostname : string with network address of remote server
 //      example "192.168.127.34:5034"
 //      example "doomservers.net"
-// Return the net node number, or network_error_e > MAXNETNODES.
+// Return the net node number, or network_error_e > MAX_NETNODES.
 static
 byte  SOCK_NetMakeNode (char *hostname)
 {
@@ -1391,7 +1391,7 @@ byte  SOCK_NetMakeNode (char *hostname)
 
     // Too early, but avoids resolving names we cannot use.
     newnode = get_freenode();
-    if( newnode >= MAXNETNODES )
+    if( newnode >= MAX_NETNODES )
         goto no_nodes;  // out of nodes
 
     // Find the IP of the server.
@@ -1429,11 +1429,11 @@ clean_ret:
 
     // Rare errors.
 abort_makenode:
-    newnode = NE_fail;  //  > MAXNETNODES
+    newnode = NE_fail;  //  > MAX_NETNODES
     goto clean_ret;
 
 no_nodes:
-    newnode = NE_nodes_exhausted;  //  > MAXNETNODES
+    newnode = NE_nodes_exhausted;  //  > MAX_NETNODES
     goto clean_ret;
 }
 
@@ -1475,7 +1475,7 @@ boolean SOCK_OpenSocket( void )
     if(ipx_select) {
         mysocket = IPX_Socket ();
         net_bandwidth = 800000;
-        hardware_MAXPACKETLENGTH = MAXPACKETLENGTH;
+        hardware_MAX_PACKETLENGTH = MAX_PACKETLENGTH;
     }
     else
 #endif // USE_IPX
@@ -1540,9 +1540,9 @@ void I_Init_TCP_Network( void )
         net_bandwidth = 16000;
 
 #ifdef MACOS_DI
-        hardware_MAXPACKETLENGTH = 512;
+        hardware_MAX_PACKETLENGTH = 512;
 #else
-        hardware_MAXPACKETLENGTH = INETPACKETLENGTH;
+        hardware_MAX_PACKETLENGTH = INETPACKETLENGTH;
 #endif
     }
     else if( M_CheckParm ("-connect") )
@@ -1562,7 +1562,7 @@ void I_Init_TCP_Network( void )
             COM_BufAddText(va("connect \"%s\"\n", serverhostname ));
 
             // probably modem
-            hardware_MAXPACKETLENGTH = INETPACKETLENGTH;
+            hardware_MAX_PACKETLENGTH = INETPACKETLENGTH;
         }
         else
         {
@@ -1570,7 +1570,7 @@ void I_Init_TCP_Network( void )
             COM_BufAddText("connect any\n");
 
             net_bandwidth = 800000;
-            hardware_MAXPACKETLENGTH = MAXPACKETLENGTH;
+            hardware_MAX_PACKETLENGTH = MAX_PACKETLENGTH;
         }
     }
 

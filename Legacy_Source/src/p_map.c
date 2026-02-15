@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_map.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_map.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -110,7 +110,7 @@
 fixed_t         tm_bbox[4];	// box around the thing
 mobj_t        * tm_thing;	// the thing itself
 uint32_t        tm_flags;	// thing flags of tm_thing
-fixed_t         tm_x, tm_y;	// thing map position
+fixed_t         tm_x, tm_y, tm_z;  // thing map position
 static byte     tm_mbf_unstuck; // mbf player unstick
 
 // TryMove, thing map return global vars
@@ -453,6 +453,7 @@ boolean P_TeleportMove( mobj_t* thing, fixed_t x, fixed_t y, byte stomp )
 
     tm_x = x;
     tm_y = y;
+    tm_z = thing->z;
 
     tm_bbox[BOXTOP] = y + tm_thing->radius;
     tm_bbox[BOXBOTTOM] = y - tm_thing->radius;
@@ -487,10 +488,10 @@ boolean P_TeleportMove( mobj_t* thing, fixed_t x, fixed_t y, byte stomp )
     }
 
     // stomp on any things contacted
-    xl = (tm_bbox[BOXLEFT] - bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
-    xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
-    yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
-    yh = (tm_bbox[BOXTOP] - bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
+    xl = (tm_bbox[BOXLEFT] - bmaporgx - MAX_RADIUS)>>MAPBLOCKSHIFT;
+    xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAX_RADIUS)>>MAPBLOCKSHIFT;
+    yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAX_RADIUS)>>MAPBLOCKSHIFT;
+    yh = (tm_bbox[BOXTOP] - bmaporgy + MAX_RADIUS)>>MAPBLOCKSHIFT;
 
     for (bx=xl ; bx<=xh ; bx++)
     {
@@ -584,10 +585,10 @@ byte mbf21_projectile_immune( mobj_t* target, mobj_t* source )
 #endif
 
 #ifdef HEXEN
-//  mt : attacking LIGHTENING
-static void  hexen_set_indirect_lightening_target( mobj_t * mt )
+//  mt : attacking LIGHTNING
+static void  hexen_set_indirect_lightning_target( mobj_t * mt )
 {
-    if( mt->type == MT_HEXEN_LIGHTINGING_FLOOR )
+    if( mt->type == MT_HEXEN_LIGHTNING_FLOOR )
     {
         if( mt->special2.m
             &&  ! mt->special2.m->special1.m )
@@ -641,7 +642,7 @@ static boolean PIT_CheckThing (mobj_t* thing)
         goto ret_pass;  // didn't hit it
 
     // thing and tm_thing overlap in x,y
-    tmtopz = tm_thing->z + tm_thing->height;
+    tmtopz = tm_z + tm_thing->height;
     thing_topz = thing->z + thing->height;
 
     if( EV_legacy >= 145 )
@@ -681,11 +682,11 @@ static boolean PIT_CheckThing (mobj_t* thing)
         {
 #ifdef HEXEN_XX
             // [WDJ] Same as adopted by Legacy
-            if( EN_hexen && (tm_thing->z >= thing_topz) ) goto ret_pass;
+            if( EN_hexen && (tm_z >= thing_topz) ) goto ret_pass;
             else
 #endif
             // if(tm_thing->z > thing_topz) goto ret_pass; // vanilla, DSDA-doom
-            if(tm_thing->z >= thing_topz)  goto ret_pass;  // tm_thing over thing
+            if(tm_z >= thing_topz)  goto ret_pass;  // tm_thing over thing
             if(tmtopz < thing->z)  goto ret_pass;  // tm_thing under thing
         }
     }
@@ -706,7 +707,7 @@ static boolean PIT_CheckThing (mobj_t* thing)
         if( tm_thing->flags & MF_SOLID   // solid object touches it
             && (thing->type != tm_thing->type  // only different species
                 || thing->type == MT_PLAYER ) // ... or different players
-            && thing_topz >= tm_thing->z    // touches vertically
+            && thing_topz >= tm_z    // touches vertically
             && tmtopz >= thing->z
             // PEs and lost souls are considered same
             // but Barons & Knights are intentionally not.
@@ -846,7 +847,7 @@ static boolean PIT_CheckThing (mobj_t* thing)
             goto ret_pass;
 
         // see if it went over / under
-        if (tm_thing->z > thing_topz)  goto ret_pass;  // overhead
+        if (tm_z > thing_topz)  goto ret_pass;  // overhead
         if (tmtopz < thing->z)  goto ret_pass;  // underneath
 
 #ifdef HEXEN
@@ -864,8 +865,8 @@ static boolean PIT_CheckThing (mobj_t* thing)
 
             switch( tm_thing->type )
             {
-             case MT_HEXEN_LIGHTINGING_FLOOR:
-             case MT_HEXEN_LIGHTINGING_CEILING:
+             case MT_HEXEN_LIGHTNING_FLOOR:
+             case MT_HEXEN_LIGHTNING_CEILING:
                 if( (tm_thing->target != thing) && (thing->flags & MF_SHOOTABLE) )
                 {
                     // thing is target,and is shootable.
@@ -883,13 +884,13 @@ static boolean PIT_CheckThing (mobj_t* thing)
                         if( thing->type == MT_HEXEN_CENTAUR
                              || thing->type == MT_HEXEN_CENTAURLEADER )
                         {
-                            // Lightening does more damage to centaurs.
+                            // Lightning does more damage to centaurs.
                             damage = 9;
                         }
                         P_DamageMobj( thing, tm_thing, tm_thing->target, damage );
 
-                        if( ! (S_GetSoundPlayingInfo( tm_thing, sfx_hexen_mage_lightening_zap ) ) )
-                          S_StartMobjSound( tm_thing, sfx_hexen_mage_lightening_zap );
+                        if( ! (S_GetSoundPlayingInfo( tm_thing, sfx_hexen_mage_lightning_zap ) ) )
+                          S_StartMobjSound( tm_thing, sfx_hexen_mage_lightning_zap );
 
                         hexen_target_play_puppybeat( thing, 64 );
                     }
@@ -898,19 +899,19 @@ static boolean PIT_CheckThing (mobj_t* thing)
                     if( tm_thing->health <= 0  || thing->health <= 0 )
                         goto ret_blocked;
 
-                    hexen_set_indirect_lightening_target( tm_thing );
+                    hexen_set_indirect_lightning_target( tm_thing );
 
                 } // thing is target and shootable
                 goto ret_pass;  // ligtening zaps through everything
-                // LIGHTENING
+                // LIGHTNING
 
-             case MT_HEXEN_LIGHTENINGZAP:
+             case MT_HEXEN_LIGHTNING_ZAP:
                 if( (tm_thing->target != thing) && (thing->flags & MF_SHOOTABLE) )
                 {
                     mobj_t * lzspec2 = tm_thing->special2.m;
                     if( lzspec2 )
                     {
-                        hexen_set_indirect_lightening_target( lzspec2 );
+                        hexen_set_indirect_lightning_target( lzspec2 );
 
                         if( ! (leveltime & 3) )
                            lzspec2->health--;
@@ -1669,10 +1670,10 @@ boolean P_CheckPosition ( mobj_t* thing, fixed_t x, fixed_t y )
         return true;
 
     // Check things first, possibly picking things up.
-    // The bounding box is extended by MAXRADIUS
+    // The bounding box is extended by MAX_RADIUS
     // because mobj_ts are grouped into mapblocks
     // based on their origin point, and can overlap
-    // into adjacent blocks by up to MAXRADIUS units.
+    // into adjacent blocks by up to MAX_RADIUS units.
 
     // DarkWolf95:don't check non-solids against other things,
     // keep them in the map though, so still check against lines.
@@ -1680,10 +1681,10 @@ boolean P_CheckPosition ( mobj_t* thing, fixed_t x, fixed_t y )
     if((thing->flags & (MF_SOLID | MF_MISSILE))
         && !(thing->flags2 & MF2_NOCLIPTHING) )
     {
-        xl = (tm_bbox[BOXLEFT] - bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
-        xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
-        yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
-        yh = (tm_bbox[BOXTOP] - bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
+        xl = (tm_bbox[BOXLEFT] - bmaporgx - MAX_RADIUS)>>MAPBLOCKSHIFT;
+        xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAX_RADIUS)>>MAPBLOCKSHIFT;
+        yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAX_RADIUS)>>MAPBLOCKSHIFT;
+        yh = (tm_bbox[BOXTOP] - bmaporgy + MAX_RADIUS)>>MAPBLOCKSHIFT;
         
         for (bx=xl ; bx<=xh ; bx++)
         {
@@ -1764,7 +1765,7 @@ boolean P_TryMove ( mobj_t*       thing,
     if ( !(thing->flags & MF_NOCLIP) )
 #endif
     {
-        fixed_t maxstep = MAXSTEPMOVE;
+        fixed_t maxstep = MAX_STEPMOVE;
 
         if( tmr_ceilingz - tmr_floorz < thing->height )
             goto boom_conditional_impact;  // thing doesn't fit room
@@ -1883,7 +1884,7 @@ boolean P_TryMove ( mobj_t*       thing,
                 if(  (allowdropoff == 0)  // drop off not allowed
 #if 0
                   ||((allowdropoff == 1)  // drop off allowed
-                    && (dropoff_height > MAXSTEPMOVE))
+                    && (dropoff_height > MAX_STEPMOVE))
 #endif
 #ifdef DOGS
                   ||((allowdropoff == 2) // large jump down (e.g. dogs)
@@ -1924,7 +1925,7 @@ boolean P_TryMove ( mobj_t*       thing,
                 goto ignore_dropoff;
 
             // Doom, Boom
-            if( tmr_floorz > tmr_dropoffz + MAXSTEPMOVE )  // excessive height
+            if( tmr_floorz > tmr_dropoffz + MAX_STEPMOVE )  // excessive height
             {
                 // [WDJ] Meant to prevent walking off a dropoff, it also prevents
                 // getting away from one once the thing is over it.
@@ -1977,7 +1978,7 @@ got_dropoff:
          && thing->player
          && (thing->player->cheats & CF_JUMPOVER) )
     {
-        if (tmr_floorz > thing->floorz + MAXSTEPMOVE)
+        if (tmr_floorz > thing->floorz + MAX_STEPMOVE)
             thing->momz >>= 2;
     }
 
@@ -2145,7 +2146,7 @@ static boolean PIT_ApplyTorque(line_t* ld)
 
          dist = FixedMul(x,x) + FixedMul(y,y);
 
-         while( (dist > FIXINT(4)) && (mo->tipcount < MAXTIPCOUNT))
+         while( (dist > FIXINT(4)) && (mo->tipcount < MAX_TIPCOUNT))
          {
             ++mo->tipcount;
             x >>= 1;
@@ -2208,7 +2209,7 @@ void P_ApplyTorque(mobj_t * mo)
 
     if(!((mo->eflags | moeflags) & MFE_FALLING))  // If not falling for a while,
         mo->tipcount = 0;  // Reset it to full strength
-    else if(mo->tipcount < MAXTIPCOUNT)  // Else if not at max tipcount,
+    else if(mo->tipcount < MAX_TIPCOUNT)  // Else if not at max tipcount,
         mo->tipcount++;    // lessen tipping
 }
 
@@ -3835,7 +3836,7 @@ void P_RadiusAttack_VDD ( mobj_t* spot, mobj_t* source, int damage, int distance
     int  yl, yh;
     fixed_t  dist;
 
-    dist = INT_TO_FIXED(damage + MAXRADIUS);
+    dist = INT_TO_FIXED(damage + MAX_RADIUS);
     yh = (spot->y + dist - bmaporgy)>>MAPBLOCKSHIFT;
     yl = (spot->y - dist - bmaporgy)>>MAPBLOCKSHIFT;
     xh = (spot->x + dist - bmaporgx)>>MAPBLOCKSHIFT;
@@ -3890,7 +3891,7 @@ void P_RadiusAttack ( mobj_t*       spot,
 
     fixed_t     dist;
 
-    dist = INT_TO_FIXED(damage + MAXRADIUS);
+    dist = INT_TO_FIXED(damage + MAX_RADIUS);
     yh = (spot->y + dist - bmaporgy)>>MAPBLOCKSHIFT;
     yl = (spot->y - dist - bmaporgy)>>MAPBLOCKSHIFT;
     xh = (spot->x + dist - bmaporgx)>>MAPBLOCKSHIFT;
@@ -4348,6 +4349,7 @@ void P_Create_SecNodeList( mobj_t* thing, fixed_t x, fixed_t y )
 
   tm_x = x;
   tm_y = y;
+  tm_z = thing->z;
 
   tm_bbox[BOXTOP]  = y + tm_thing->radius;
   tm_bbox[BOXBOTTOM] = y - tm_thing->radius;
@@ -4450,7 +4452,7 @@ void P_FakeZMovement(mobj_t * mo)
     {       // float down towards target if too close
         if(!(mo->flags&MF_SKULLFLY) && !(mo->flags&MF_INFLOAT))
         {
-            dist = P_AproxDistance(mo->x - mo->target->x, mo->y - mo->target->y);
+            dist = P_AproxDistance_mobj( mo, mo->target );
             delta =( mo->target->z + (mo->height>>1)) - mo->z;
             if (delta < 0 && dist < -(delta*3))
                mo->z -= FLOATSPEED;
@@ -4533,6 +4535,7 @@ mobj_t * P_CheckOnmobj( mobj_t * thing )
     
     tm_x = x;
     tm_y = y;
+    tm_z = tm_thing->z;
     
     tm_bbox[BOXTOP] = y + tm_thing->radius;
     tm_bbox[BOXBOTTOM] = y - tm_thing->radius;
@@ -4557,14 +4560,14 @@ mobj_t * P_CheckOnmobj( mobj_t * thing )
     
     //
     // check things first, possibly picking things up
-    // the bounding box is extended by MAXRADIUS because mobj_ts are grouped
+    // the bounding box is extended by MAX_RADIUS because mobj_ts are grouped
     // into mapblocks based on their origin point, and can overlap into adjacent
-    // blocks by up to MAXRADIUS units
+    // blocks by up to MAX_RADIUS units
     //
-    xl = (tm_bbox[BOXLEFT] - bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
-    xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
-    yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
-    yh = (tm_bbox[BOXTOP] - bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
+    xl = (tm_bbox[BOXLEFT] - bmaporgx - MAX_RADIUS)>>MAPBLOCKSHIFT;
+    xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAX_RADIUS)>>MAPBLOCKSHIFT;
+    yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAX_RADIUS)>>MAPBLOCKSHIFT;
+    yh = (tm_bbox[BOXTOP] - bmaporgy + MAX_RADIUS)>>MAPBLOCKSHIFT;
 
     for (bx=xl ; bx<=xh ; bx++)
     {
@@ -4593,7 +4596,7 @@ mobj_t * P_CheckOnmobj( mobj_t * thing )
 
 boolean P_TestMobjLocation( mobj_t * mobj )
 {
-        int flags;
+        uint32_t flags;
 
         flags = mobj->flags;
         mobj->flags &= ~MF_PICKUP;

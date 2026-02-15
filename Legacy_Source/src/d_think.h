@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_think.h 1766 2025-11-21 17:46:54Z wesleyjohnson $
+// $Id: d_think.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -105,6 +105,11 @@ typedef enum {
 
 
 // Doubly linked list of actors.
+// thinker_t must be first in any struct that is a thinker. so can cast ptrs.
+// Used in mobj_t.
+// Used in lights,  fireflicker_t, strobe_t, lightfader_t, glow_t, fireflicker_144_t, lightflash_144_t, glow_144_t, lightfader_144_t.
+// Used in sector types, plat_t, vldoor_t, slidedoor_t, ceiling_t, floormove_t, elevator_t, scroll_t.
+// Used in pusher_t, friction_t.
 typedef struct thinker_s  thinker_t;
 typedef struct thinker_s
 {

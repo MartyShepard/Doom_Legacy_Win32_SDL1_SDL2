@@ -10585,8 +10585,6 @@ making a sound in a sector.
 
 There will be further work on this.
 
--- commit
-
 *** w111_vile_raise
 patchfile = w111_016_vile_raise
 - commit revision 1767
@@ -10677,3 +10675,30 @@ It has the same names, but in a different order, to accomplish this.
 These value are not saved anywhere (that I know of).
 
 -- commit
+
+*** w111_viewpoint_angle
+patchfile = w111_023_viewpoint_angle
+- commit revision 1774
+Some massive renames.
+R_PointToAngle  ==> R_ViewPointToAngle.
+MAXxxx ==> MAX_xxx.
+Many small syntax and style adjustments.
+
+*** w111_teamstat
+patchfile = w111_024_teamstat
+- commit revision 1775
+Rewrote much of the team stat code.
+Made it generate stats by team, instead
+of using the player number as a team identifier.
+I think the old code was very confused.
+The team table has been disabled, because can get
+the same info with one small function, that can
+handle late player joins, etc..
+
+*** w111_numxxx
+patchfile = w111_025_numxxx
+- commit revision 1776
+Renames of numxxx to num_xxx to make reading easier.
+
+
+

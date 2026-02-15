@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_defs.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: r_defs.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2015 by DooM Legacy Team.
@@ -126,7 +126,7 @@
 #include "p_mobj.h"
 
 #include "screen.h"
-  // MAXVIDWIDTH, MAXVIDHEIGHT
+  // MAX_VIDWIDTH, MAX_VIDHEIGHT
 
 
 // Max index (or -1). Used in line_t::sidenum and maplinedef_t::sidenum.
@@ -919,7 +919,7 @@ typedef struct draw_ffside_s {
 } draw_ffside_t;
 
 typedef struct draw_ffplane_s {
-  byte          numffloorplanes;  // MAXFLOORS = 40
+  byte          numffloorplanes;  // MAX_FLOORS = 40
   byte          pad1;             // better align
   // z check for sprite clipping
   fixed_t       nearest_scale;  // the nearest scale of the planes

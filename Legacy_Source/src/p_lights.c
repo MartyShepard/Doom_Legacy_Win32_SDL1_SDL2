@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_lights.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_lights.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -634,7 +634,7 @@ spr_light_t  sprite_light[NUM_LIGHTS] = {
 
 // sprite light indirection
 // Indexed by spritenum_e
-byte  sprite_light_ind[NUMSPRITES_DEF] = {
+byte  sprite_light_ind[NUM_SPRITES_DEF] = {
     LT_NOLIGHT,     // SPR_TROO
     LT_NOLIGHT,     // SPR_SHTG
     LT_NOLIGHT,     // SPR_PUNG

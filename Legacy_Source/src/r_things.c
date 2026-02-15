@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_things.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: r_things.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -793,7 +793,7 @@ int R_AddSingleSpriteDef (char* sprname, spritedef_t* spritedef, int wadnum, int
 // Search for sprites replacements in a wad whose names are in namelist
 //
 //   namelist: is just sprnames, cannot be anything else
-//             limited to 0 to NUMSPRITE_DEF, extra are in mapped
+//             limited to 0 to NUM_SPRITE_DEF, extra are in mapped
 void R_AddSpriteDefs (char** namelist, int wadnum)
 {
     lumpinfo_t * lumpinfo;
@@ -1048,7 +1048,7 @@ void R_Init_Sprites (char** namelist)
 
 #if 1
     // namelist is always sprnames, the length is known.
-    numsprites = NUMSPRITES_DEF;
+    numsprites = NUM_SPRITES_DEF;
 #else
 // [WDJ] This does not always work because there could be a NULL in the sprite table.
 // Dehacked has done that.  See wotdoom3.wad.
@@ -1229,8 +1229,8 @@ vissprite_t* R_NewVisSprite ( fixed_t scale, byte dist_pri,
 //  Set to last pixel row inside the drawable screen bounds.
 //  This makes limit tests easier, do not need to do +1 or -1;
 //  Initialized in R_ExecuteSetViewSize (in r_main).
-int16_t  clip_screen_top_min[MAXVIDWIDTH];
-int16_t  clip_screen_bot_max[MAXVIDWIDTH];
+int16_t  clip_screen_top_min[MAX_VIDWIDTH];
+int16_t  clip_screen_bot_max[MAX_VIDWIDTH];
 
 void  set_int16( int16_t * dest, int x1, int x2, int16_t value )
 {
@@ -1376,8 +1376,8 @@ void R_DrawMaskedColumn ( byte * column_data )
 //  dm_floorclip and dm_ceilingclip should also be set.
 //
 //   dlx1, dlx2 : drawing limits
-static void R_DrawVisSprite ( vissprite_t *  vis,
-                              int  dlx1,  int  dlx2 )
+static
+void R_DrawVisSprite ( vissprite_t *  vis, int  dlx1, int  dlx2 )
 {
     int        texturecolumn;
     fixed_t    texcol_frac;
@@ -1608,8 +1608,8 @@ void R_Split_Sprite_over_FFloor (vissprite_t* sprite, mobj_t* thing)
         else
         {
           int dlit = sprite->xscale>>(LIGHTSCALESHIFT-detailshift);
-          if (dlit >= MAXLIGHTSCALE)
-            dlit = MAXLIGHTSCALE-1;
+          if (dlit >= MAX_LIGHTSCALE)
+            dlit = MAX_LIGHTSCALE-1;
           bot_sprite->colormap = spritelights[dlit];
         }
       }
@@ -1729,7 +1729,7 @@ static void R_ProjectSprite (mobj_t* thing)
     else
     {
         // choose a different rotation based on player view
-        ang = R_PointToAngle(thing->x, thing->y);       // uses viewx,viewy
+        ang = R_ViewPointToAngle(thing->x, thing->y);       // uses viewx,viewy
 
         if( sprframe->rotation_pattern == SRP_8)
         {
@@ -2012,8 +2012,8 @@ static void R_ProjectSprite (mobj_t* thing)
             // diminished light
             int index = xscale>>(LIGHTSCALESHIFT-detailshift);
 
-            if (index >= MAXLIGHTSCALE)
-                index = MAXLIGHTSCALE-1;
+            if (index >= MAX_LIGHTSCALE)
+                index = MAX_LIGHTSCALE-1;
 
             vis->colormap = spritelights[index];
         }
@@ -2244,7 +2244,7 @@ void R_DrawPSprite (pspdef_t* psp)
     else
     {
         // local light
-        vis->colormap = spritelights[MAXLIGHTSCALE-1];
+        vis->colormap = spritelights[MAX_LIGHTSCALE-1];
     }
 
     if(viewer_sector->numlights)
@@ -2260,7 +2260,7 @@ void R_DrawPSprite (pspdef_t* psp)
         : (vlight >= 255) ? scalelight[LIGHTLEVELS-1]
         : scalelight[vlight>>LIGHTSEGSHIFT];
 
-      vis->colormap = spritelights[MAXLIGHTSCALE-1];
+      vis->colormap = spritelights[MAX_LIGHTSCALE-1];
     }
     else
       vis->extra_colormap = viewer_sector->extra_colormap;
@@ -2590,7 +2590,7 @@ spr_light_t *  Sprite_Corona_Light_lsp( int sprnum, state_t * sprstate )
    
     // Sprite explosion, light substitution
     byte li = LT_NOLIGHT;
-    if( sprnum < NUMSPRITES_DEF ) // known sprites
+    if( sprnum < NUM_SPRITES_DEF ) // known sprites
         li = sprite_light_ind[sprnum];
     if( (sprstate >= &states[S_EXPLODE1]
          && sprstate <= &states[S_EXPLODE3])
@@ -3027,8 +3027,8 @@ void R_DrawSprite ( vissprite_t * spr, int dbx1, int dbx2, int16_t * env_clip_to
     drawseg_t*          ds;
     // Clip limit is the last drawable row inside the drawable area.
     // This makes limit tests easier, not needing +1 or -1.
-    int16_t             clipbot[MAXVIDWIDTH];
-    int16_t             cliptop[MAXVIDWIDTH];
+    int16_t             clipbot[MAX_VIDWIDTH];
+    int16_t             cliptop[MAX_VIDWIDTH];
     int                 x;
     int                 cx1, cx2; // clipping bounds
     int                 r1, r2;
@@ -3596,10 +3596,10 @@ enum {
 static
 void draw_sprite_vrs_plane( drawsprite_t * dspr, visplane_t * plane )
 {
-    int16_t mask_clip_top[MAXVIDWIDTH];
-    int16_t mask_clip_bot[MAXVIDWIDTH];
-    int16_t vr_clip_top[MAXVIDWIDTH];
-    int16_t vr_clip_bot[MAXVIDWIDTH];
+    int16_t mask_clip_top[MAX_VIDWIDTH];
+    int16_t mask_clip_bot[MAX_VIDWIDTH];
+    int16_t vr_clip_top[MAX_VIDWIDTH];
+    int16_t vr_clip_bot[MAX_VIDWIDTH];
 
     vissprite_t * vsp = dspr->sprite;
     vis_cover_t * pl_cover = plane->cover;
@@ -4378,7 +4378,7 @@ void R_Draw_Masked (void)
 // This does not deallocate the skins memory.
 #define SKIN_ALLOC   8
 int         numskins = 0;
-skin_t *    skins[MAXSKINS+1];
+skin_t *    skins[MAX_SKINS+1];
 skin_t *    skin_free = NULL;
 skin_t      marine;
 
@@ -4394,7 +4394,7 @@ int  get_skin_slot(void)
     {
         if( skins[si] == NULL )  break;
     }
-    if( si >= MAXSKINS )  goto none;
+    if( si >= MAX_SKINS )  goto none;
 
     // Get skin alloc.
     if( skin_free == NULL )
@@ -4425,7 +4425,7 @@ void  free_skin( int skin_num )
 {
     skin_t * sk;
     
-    if( skin_num >= MAXSKINS )  return;
+    if( skin_num >= MAX_SKINS )  return;
     sk = skins[skin_num];
     if( sk == NULL )  return;
 
@@ -4628,9 +4628,9 @@ void R_AddSkins (int wadnum)
         lastlump = lumpn + 1;  // prevent repeating same skin
 
         skin_index = get_skin_slot();
-        if( skin_index > MAXSKINS )
+        if( skin_index > MAX_SKINS )
         {
-            GenPrintf(EMSG_warn, "ignored skin lump %d (%d skins maximum)\n", lumpn, MAXSKINS);
+            GenPrintf(EMSG_warn, "ignored skin lump %d (%d skins maximum)\n", lumpn, MAX_SKINS);
             continue; //faB:so we know how many skins couldn't be added
         }
         sk = skins[skin_index];

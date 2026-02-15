@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: wi_stuff.c 1757 2025-11-20 11:44:00Z wesleyjohnson $
+// $Id: wi_stuff.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -396,9 +396,9 @@ static int              cnt;
 // used for timing of background animation
 static uint32_t         bcnt;
 
-static int              cnt_kills[MAXPLAYERS];
-static int              cnt_items[MAXPLAYERS];
-static int              cnt_secret[MAXPLAYERS];
+static int              cnt_kills[MAX_PLAYERS];
+static int              cnt_items[MAX_PLAYERS];
+static int              cnt_secret[MAX_PLAYERS];
 static int              cnt_time;
 static int              cnt_par;
 
@@ -1207,8 +1207,10 @@ static void WI_Draw_NoState(void)
 }
 
 
-static int              dm_frags[MAXPLAYERS][MAXPLAYERS];
-static int              dm_totals[MAXPLAYERS];
+// Frags dm_frags[A][B], by player A, having killed player B.
+// Frags can be negative too, it seems.
+static int   dm_frags[MAX_PLAYERS][MAX_PLAYERS];
+static int   dm_totals[MAX_PLAYERS];
 
 // Called by WI_Start
 static void WI_Init_DeathmatchStats(void)
@@ -1221,11 +1223,12 @@ static void WI_Init_DeathmatchStats(void)
     memset( dm_frags, 0, sizeof(dm_frags) );  // for new players
     memset( dm_totals, 0, sizeof(dm_totals) );
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
          if (playeringame[i])
          {
-             for(j=0; j<MAXPLAYERS; j++)
+             // Fill in frags, that this player killed.
+             for(j=0; j<MAX_PLAYERS; j++)
              {
                  if( playeringame[j] )
                      dm_frags[i][j] = wb_plyr[i].frags[j];
@@ -1316,7 +1319,7 @@ static void WI_Draw_DeathmatchStats(void)
     int          i,j;
     int          scorelines;
     int          whiteplayer;
-    fragsort_t   fragtab[MAXPLAYERS];
+    fragsort_t   fragtab[MAX_PLAYERS];
 
     // all WI is draw screen0, scale
     WI_Slam_Background();
@@ -1332,7 +1335,7 @@ static void WI_Draw_DeathmatchStats(void)
 
     // count frags for each present player
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (playeringame[i])
         {
@@ -1347,14 +1350,16 @@ static void WI_Draw_DeathmatchStats(void)
 
     // count buchholz
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (playeringame[i])
         {
             fragtab[scorelines].count = 0;
-            for (j=0; j<MAXPLAYERS; j++)
-                if (playeringame[j] && i!=j)
+            for (j=0; j<MAX_PLAYERS; j++)
+            {
+                if( i!=j && playeringame[j] )
                      fragtab[scorelines].count+= dm_frags[i][j]*(dm_totals[j]+dm_frags[j][j]);
+            }
 
             fragtab[scorelines].num = i;
             fragtab[scorelines].color = players[i].skincolor;
@@ -1366,12 +1371,12 @@ static void WI_Draw_DeathmatchStats(void)
 
     // count individual
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (playeringame[i])
         {
             fragtab[scorelines].count = 0;
-            for (j=0; j<MAXPLAYERS; j++)
+            for (j=0; j<MAX_PLAYERS; j++)
             {
                 if (playeringame[j] && i!=j)
                 {
@@ -1393,12 +1398,12 @@ static void WI_Draw_DeathmatchStats(void)
 
     // count deads
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (playeringame[i])
         {
             fragtab[scorelines].count = 0;
-            for (j=0; j<MAXPLAYERS; j++)
+            for (j=0; j<MAX_PLAYERS; j++)
             {
                 if (playeringame[j])
                      fragtab[scorelines].count+=dm_frags[j][i];
@@ -1419,7 +1424,7 @@ boolean teamingame(int teamnum)
 
    if( cv_teamplay.EV == 1 )
    {
-       for(i=0;i<MAXPLAYERS;i++)
+       for(i=0;i<MAX_PLAYERS;i++)
        {
           if(playeringame[i] && players[i].skincolor==teamnum)
               return true;
@@ -1428,7 +1433,7 @@ boolean teamingame(int teamnum)
    else
    if( cv_teamplay.EV == 2)
    {
-       for(i=0;i<MAXPLAYERS;i++)
+       for(i=0;i<MAX_PLAYERS;i++)
        {
           if(playeringame[i] && players[i].skin==teamnum)
               return true;
@@ -1443,7 +1448,7 @@ static void WI_Draw_TeamsStats(void)
     int          i,j;
     int          scorelines;
     int          whiteplayer;
-    fragsort_t   fragtab[MAXPLAYERS];
+    fragsort_t   fragtab[MAX_PLAYERS];
 
     // all WI is draw screen0, scale
     WI_Slam_Background();
@@ -1469,12 +1474,12 @@ static void WI_Draw_TeamsStats(void)
 
     // count buchholz
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (teamingame(i))
         {
             fragtab[scorelines].count = 0;
-            for (j=0; j<MAXPLAYERS; j++)
+            for (j=0; j<MAX_PLAYERS; j++)
             {
                 if (teamingame(j) && i!=j)
                     fragtab[scorelines].count+= dm_frags[i][j]*dm_totals[j];
@@ -1490,12 +1495,12 @@ static void WI_Draw_TeamsStats(void)
 
     // count individuel
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (teamingame(i))
         {
             fragtab[scorelines].count = 0;
-            for (j=0; j<MAXPLAYERS; j++)
+            for (j=0; j<MAX_PLAYERS; j++)
             {
                 if (teamingame(j) && i!=j)
                 {
@@ -1517,12 +1522,12 @@ static void WI_Draw_TeamsStats(void)
 
     // count deads
     scorelines = 0;
-    for (i=0; i<MAXPLAYERS; i++)
+    for (i=0; i<MAX_PLAYERS; i++)
     {
         if (teamingame(i))
         {
             fragtab[scorelines].count = 0;
-            for (j=0; j<MAXPLAYERS; j++)
+            for (j=0; j<MAX_PLAYERS; j++)
             {
                 if (teamingame(j))
                      fragtab[scorelines].count+=dm_frags[j][i];
@@ -1573,7 +1578,7 @@ static void WI_ddrawDeathmatchStats(void)
     x = DM_MATRIXX + DM_SPACINGX;
     y = DM_MATRIXY;
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         if (playeringame[i])
         {
@@ -1621,13 +1626,13 @@ static void WI_ddrawDeathmatchStats(void)
     y = DM_MATRIXY+10;
     w = V_patch(num[0])->width;
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         x = DM_MATRIXX + DM_SPACINGX;
 
         if (playeringame[i])
         {
-            for (j=0 ; j<MAXPLAYERS ; j++)
+            for (j=0 ; j<MAX_PLAYERS ; j++)
             {
                 if (playeringame[j])
                     WI_Draw_Num(x+w, y, dm_frags[i][j], 2);
@@ -1642,7 +1647,7 @@ static void WI_ddrawDeathmatchStats(void)
 
 */
 
-static int      cnt_frags[MAXPLAYERS];
+static int      cnt_frags[MAX_PLAYERS];
 static int      ng_state;
 static byte     dofrags;
 
@@ -1658,7 +1663,7 @@ static void WI_Init_NetgameStats(void)
 
     effect_timer = TICRATE;
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         cnt_kills[i] = cnt_items[i] = cnt_secret[i] = cnt_frags[i] = 0;
 
@@ -1685,7 +1690,7 @@ static void WI_update_NetgameStats(void)
     {
         accelerate_stage = 0;
 
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i=0 ; i<MAX_PLAYERS ; i++)
         {
             if (!playeringame[i])
                 continue;
@@ -1706,7 +1711,7 @@ static void WI_update_NetgameStats(void)
 
     if (ng_state == 2)
     {
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i=0 ; i<MAX_PLAYERS ; i++)
         {
             if (!playeringame[i])
                 continue;
@@ -1731,7 +1736,7 @@ static void WI_update_NetgameStats(void)
     }
     else if (ng_state == 4)
     {
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i=0 ; i<MAX_PLAYERS ; i++)
         {
             if (!playeringame[i])
                 continue;
@@ -1755,7 +1760,7 @@ static void WI_update_NetgameStats(void)
     }
     else if (ng_state == 6)
     {
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i=0 ; i<MAX_PLAYERS ; i++)
         {
             if (!playeringame[i])
                 continue;
@@ -1784,7 +1789,7 @@ static void WI_update_NetgameStats(void)
     }
     else if (ng_state == 8)
     {
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i=0 ; i<MAX_PLAYERS ; i++)
         {
             if (!playeringame[i])
                 continue;
@@ -1902,7 +1907,7 @@ static void WI_Draw_NetgameStats(void)
    
     pwidth = V_patch(percent)->width;
     //added:08-02-98: p[i] replaced by stpb (see WI_Load_Data for more)
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         if (!playeringame[i])
             continue;
@@ -2167,7 +2172,7 @@ static void WI_checkForAccelerate(void)
     player_t * player;
 
     // check for button presses to skip delays
-    for (i=0, player = players ; i<MAXPLAYERS ; i++, player++)
+    for (i=0, player = players ; i<MAX_PLAYERS ; i++, player++)
     {
         if (playeringame[i])
         {
@@ -2535,8 +2540,8 @@ static void WI_Init_Variables( wb_start_t * wb_start)
     detect_range_violation(wbs->epsd, 0, episode_max);
     detect_range_violation(wbs->lev_prev, 0, map_max);
     detect_range_violation(wbs->lev_next, 0, map_max);
-    detect_range_violation(wbs->pnum, 0, MAXPLAYERS);
-//    detect_range_violation(wbs->pnum, 0, MAXPLAYERS);  // duplicate, appears in PrBoom too
+    detect_range_violation(wbs->pnum, 0, MAX_PLAYERS);
+//    detect_range_violation(wbs->pnum, 0, MAX_PLAYERS);  // duplicate, appears in PrBoom too
 #endif
 
     accelerate_stage = 0;

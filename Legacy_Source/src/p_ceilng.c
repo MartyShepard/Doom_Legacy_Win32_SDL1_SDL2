@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_ceilng.c 1762 2025-11-20 11:48:53Z wesleyjohnson $
+// $Id: p_ceilng.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -61,7 +61,7 @@
 
 // SoM: 3/6/2000: the list of ceilings moving currently, including crushers
 ceilinglist_t * activeceilings;
-//ceiling_t*      activeceilings[MAXCEILINGS];
+//ceiling_t*      activeceilings[MAX_CEILINGS];
 int ceilmovesound = sfx_stnmov;
 
 //

@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //----------------------------------------------------------------------------
 //
-// $Id: t_prepro.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: t_prepro.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright(C) 2000 Simon Howard
 // Copyright (C) 2001-2011 by DooM Legacy Team.
@@ -311,7 +311,7 @@ void dry_run_script( void )
   fs_killscript = false;
   
   // allocate space for the tokens
-  token_alloc = Z_Malloc(fs_current_script->len + T_MAXTOKENS, PU_STATIC, 0);
+  token_alloc = Z_Malloc(fs_current_script->len + T_MAX_TOKENS, PU_STATIC, 0);
   
   fs_src_cp = fs_current_script->data;
   

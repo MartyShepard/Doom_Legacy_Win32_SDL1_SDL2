@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_glide.c 1593 2021-10-16 07:36:40Z wesleyjohnson $
+// $Id: r_glide.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2012 by DooM Legacy Team.
 //
@@ -359,7 +359,7 @@ EXPORT void HWRAPI( GetModeList ) (vmode_t** pvidmodes, int* numvidmodes)
         }
 
         // disable too big modes until we get it fixed
-        if ( iWidth > MAXVIDWIDTH || iHeight > MAXVIDHEIGHT )
+        if ( iWidth > MAX_VIDWIDTH || iHeight > MAX_VIDHEIGHT )
         {
             DBG_Printf ("Mode too big (%s)\n",resTxt);
             continue;

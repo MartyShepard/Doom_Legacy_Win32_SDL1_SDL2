@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_net.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: d_net.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -101,7 +101,7 @@ static byte        rebound_head, rebound_tail;
 
 // Network interfaces (i_net.h)
 uint32_t    net_bandwidth;
-uint16_t    hardware_MAXPACKETLENGTH;
+uint16_t    hardware_MAX_PACKETLENGTH;
 network_error_e  net_error;
 
 byte    (*I_NetGet) (void);
@@ -206,21 +206,21 @@ boolean Net_GetNetStat(void)
 
 // The net node num (nnode) are internal to the Doom program communications.
 // Net node num are 1..(MAX_CON_NETNODE-1), 0=myself,
-//   MAXNETNODES < MAX_CON_NETNODE
-//   BROADCAST_NODE=MAXNETNODES
+//   MAX_NETNODES < MAX_CON_NETNODE
+//   BROADCAST_NODE=MAX_NETNODES
 //   BROADCAST_NODE < MAX_CON_NETNODE
 // limited to 254 (byte), 255=empty.
 #if ( MAX_CON_NETNODE > 254 )
 # error Required: MAX_CON_NETNODE <= 254
 #endif
-// Player net nodes num 1..MAXNETNODES,
+// Player net nodes num 1..MAX_NETNODES,
 // limited to 127 by chat message packing.
-#if ( MAXNETNODES > 127 )
-# error Required: MAXNETNODES <= 127
+#if ( MAX_NETNODES > 127 )
+# error Required: MAX_NETNODES <= 127
 #endif
-// MAXNETNODES must be within MAX_CON_NETNODE, or else it may be rejected
-#if ( MAXNETNODES >= MAX_CON_NETNODE )
-# error Required: MAXNETNODES < MAX_CON_NETNODE
+// MAX_NETNODES must be within MAX_CON_NETNODE, or else it may be rejected
+#if ( MAX_NETNODES >= MAX_CON_NETNODE )
+# error Required: MAX_NETNODES < MAX_CON_NETNODE
 #endif
 // BROADCAST_NODE must be within MAX_CON_NETNODE, or else it may be rejected
 #if ( BROADCAST_NODE >= MAX_CON_NETNODE )
@@ -229,8 +229,8 @@ boolean Net_GetNetStat(void)
 
 // Max ack packets that can be saved.  Must exceed the max number of net nodes.
 #define MAXACKPACKETS    64
-#if ( MAXACKPACKETS <= MAXNETNODES )
-# error Required: MAXACKPACKETS > MAXNETNODES
+#if ( MAXACKPACKETS <= MAX_NETNODES )
+# error Required: MAXACKPACKETS > MAX_NETNODES
 #endif
 
 // Max number of acks to queue for return.
@@ -251,11 +251,11 @@ boolean Net_GetNetStat(void)
 typedef struct {
   byte   acknum;
   byte   acknum_at_xmit;  // the current acknum at transmit, and re-transmit.
-  byte   destination_node;  // dest of the packet (0..(MAXNETNODES-1))
+  byte   destination_node;  // dest of the packet (0..(MAX_NETNODES-1))
   byte   resent_cnt;  // num times has been resent (0..10)
   tic_t  senttime;
   uint16_t  length;
-  byte   pak[MAXPACKETLENGTH];  // the packet, for retransmission
+  byte   pak[MAX_PACKETLENGTH];  // the packet, for retransmission
 } ackpak_t;
 
 typedef enum {
@@ -297,7 +297,7 @@ typedef struct {
 } netnode_t;
 
 // Ack structure for player net nodes.
-static netnode_t net_nodes[MAXNETNODES];
+static netnode_t net_nodes[MAX_NETNODES];
 
 // #define  NET_NODE_NUM( nnode )   ( nnode - net_nodes )
 
@@ -331,7 +331,7 @@ static byte Save_packet_acknum( boolean lowtimer )
    netnode_t * np;
 
    rnode = doomcom->remotenode;
-   if( rnode >= MAXNETNODES )
+   if( rnode >= MAX_NETNODES )
        goto ret_fail;  // not a player packet
 
    np = & net_nodes[rnode];
@@ -404,7 +404,7 @@ ret_fail:
 }
 
 // Get the ack to send, from the ack queue of this node.
-//  nnode: 0..(MAXNETNODES-1)
+//  nnode: 0..(MAX_NETNODES-1)
 static byte Get_return_ack(byte nnode)
 {
     net_nodes[nnode].lasttime_ack_returned = I_GetTime();
@@ -417,9 +417,9 @@ static byte Get_return_ack(byte nnode)
 static void Remove_ackpak( ackpak_t * ackpakp )
 {
     netnode_t * dnp;
-    byte dnode = ackpakp->destination_node;  // 0..(MAXNETNODES-1) by caller
+    byte dnode = ackpakp->destination_node;  // 0..(MAX_NETNODES-1) by caller
     
-    if( dnode >= MAXNETNODES )   // invalid node number
+    if( dnode >= MAX_NETNODES )   // invalid node number
     {
         ackpakp->acknum=0;  // ackpak is now idle
         return;
@@ -463,7 +463,7 @@ static boolean Process_packet_ack()
     netnode_t * np;
    
     rnode = doomcom->remotenode;  // net node num
-    if( rnode >= MAXNETNODES )
+    if( rnode >= MAX_NETNODES )
         goto ret_fail;  // not a player net node
 
     np = & net_nodes[rnode];
@@ -620,7 +620,7 @@ ret_fail:
 #endif
 
 // Send a special packet with only the ack queue.
-//  to_node: 0..(MAXNETNODES-1)
+//  to_node: 0..(MAX_NETNODES-1)
 void Net_Send_AcksPacket(int to_node)
 {
     // Send an packet with the ack queue.
@@ -638,7 +638,7 @@ static void Got_AcksPacket(void)
     ackpak_t * ackpakp;
 
     rnode = doomcom->remotenode;
-    if( rnode >= MAXNETNODES )
+    if( rnode >= MAX_NETNODES )
        return;  // not a player packet
 
     // The body of the packet bytepak is the ack queue.
@@ -680,7 +680,7 @@ static void Got_AcksPacket(void)
 }
 
 
-// nnode:  1..(MAXNETNODES-1)
+// nnode:  1..(MAX_NETNODES-1)
 void Net_ConnectionTimeout( byte nnode )
 {
     netbuffer_t * rebp = & reboundstore[rebound_head];
@@ -740,7 +740,7 @@ void Net_AckTicker(void)
         stat_retransmits++; // for stat
     }
 
-    for( nn=1; nn<MAXNETNODES; nn++)
+    for( nn=1; nn<MAX_NETNODES; nn++)
     {
         np = & net_nodes[nn];
         // Using this something like a node open flag.
@@ -764,7 +764,7 @@ void Net_AckTicker(void)
 // Cancel the ack of the last packet received.  This forces the net node
 // to resend it.  This is an escape when the higher layer don't have room,
 // or something else ....)
-//   nnode: 0..(MAXNETNODES-1)
+//   nnode: 0..(MAX_NETNODES-1)
 void Net_Cancel_Packet_Ack(int nnode)
 {
     netnode_t * np;
@@ -867,7 +867,7 @@ void Net_Wait_AllAckReceived( uint32_t timeout )
 }
 
 // Init Ack for player net nodes.
-//  nnode: 0..(MAXNETNODES-1)
+//  nnode: 0..(MAX_NETNODES-1)
 static void InitNode( int nnode )
 {
     netnode_t * np = & net_nodes[nnode];
@@ -889,7 +889,7 @@ static void InitAck()
    for(i=0;i<MAXACKPACKETS;i++)
       ackpak[i].acknum=0;
 
-   for(i=0;i<MAXNETNODES;i++)
+   for(i=0;i<MAX_NETNODES;i++)
        InitNode( i );  // Init Ack for player net nodes.
 }
 
@@ -931,7 +931,7 @@ void Net_CloseConnection(byte nnode, byte forceclose)
 {
     ackpak_t * ackpakp;
 
-    if( nnode >= MAXNETNODES )
+    if( nnode >= MAX_NETNODES )
     {
         // invalid node number, or BROADCAST_NODE
         if( nnode < MAX_CON_NETNODE )  goto free_done;  // old code like dosnet
@@ -1336,7 +1336,7 @@ static void DebugPrintpacket(char *header)
       control_name[netbuffer->u.control.command], DN_read_N32(&netbuffer->u.control.gametic),
       netbuffer->u.control.gameepisode, netbuffer->u.control.gamemap,
       DN_read_N16(&netbuffer->u.control.data) );
-    if( netbuffer->u.control.player_num < MAXPLAYERS )
+    if( netbuffer->u.control.player_num < MAX_PLAYERS )
       fprintf(debugfile, "    player %d player_state %d\n",
         netbuffer->u.control.player_num, netbuffer->u.control.player_state );
     break;
@@ -1356,7 +1356,7 @@ static void DebugPrintpacket(char *header)
     fprintf(debugfile, "    gametic %8d serverplayer %d  skill %d\n    playerstate=",
       DN_read_N32( & netbuffer->u.playerstate.gametic ), netbuffer->u.playerstate.serverplayer, netbuffer->u.playerstate.skill );
     byte pn;
-    for( pn=0; pn<MAXPLAYERS; pn++ )
+    for( pn=0; pn<MAX_PLAYERS; pn++ )
     {
       byte npst = netbuffer->u.playerstate.playerstate[pn];
       if( (npst >=1) && (npst < 8) )
@@ -1586,7 +1586,7 @@ byte  HSendPacket(byte to_node, byte flags, byte acknum, int packetlength)
 #endif
 
     // Include any pending return_ack, player nodes only.
-    netbuffer->ack_return = (to_node<MAXNETNODES)?
+    netbuffer->ack_return = (to_node<MAX_NETNODES)?
        Get_return_ack(to_node)  // ack a previous packet
        : 0;  // broadcast, no ack
 
@@ -1731,7 +1731,7 @@ boolean HGetPacket (void)
    
     stat_getbytes += (net_packetheader_length + doomcom->datalength); // for stat
 
-    if( doomcom->remotenode < MAXNETNODES )
+    if( doomcom->remotenode < MAX_NETNODES )
     {
         // Player netnode
         net_nodes[doomcom->remotenode].lasttime_packet_received = I_GetTime();
@@ -1808,7 +1808,7 @@ boolean D_Startup_NetGame(void)
     multiplayer = false;
 
     // Need dedicated and server determined, before most other Init.
-    num = MAXNETNODES+9;  // invalid, cv_wait_players already has default.
+    num = MAX_NETNODES+9;  // invalid, cv_wait_players already has default.
     // dedicated set by d_main.c
     dedicated = ( M_CheckParm("-dedicated") != 0 );
     if( dedicated )
@@ -1836,15 +1836,15 @@ boolean D_Startup_NetGame(void)
             num = atoi(M_GetNextParm());
             if( num < 0 )
                num = 0;
-            if( num > MAXNETNODES )
-               num = MAXNETNODES;
+            if( num > MAX_NETNODES )
+               num = MAX_NETNODES;
         }
         else
             num = 1;
         // Wait for player nodes during startup.
     }
 
-    if( num < MAXNETNODES+1 )
+    if( num < MAX_NETNODES+1 )
     {
         // It is possible to escape to menus, and direct setting only the
         // value interferes with menu setting of the value.
@@ -1918,7 +1918,7 @@ boolean D_Startup_NetGame(void)
     }
 
     // Defaults
-    hardware_MAXPACKETLENGTH = MAXPACKETLENGTH;
+    hardware_MAX_PACKETLENGTH = MAX_PACKETLENGTH;
     net_bandwidth = 3000;
 
     if(M_CheckParm ("-bandwidth"))
@@ -1931,22 +1931,22 @@ boolean D_Startup_NetGame(void)
             if( net_bandwidth<1000 ) 
                 net_bandwidth=1000;
             if( net_bandwidth>100000 )  
-                hardware_MAXPACKETLENGTH = MAXPACKETLENGTH;
+                hardware_MAX_PACKETLENGTH = MAX_PACKETLENGTH;
             CONS_Printf("Network bandwidth set to %d\n",net_bandwidth);
         }
         else
             I_Error("usage : -bandwidth <byte_per_sec>");
     }
 
-    software_MAXPACKETLENGTH=hardware_MAXPACKETLENGTH;
+    software_MAX_PACKETLENGTH=hardware_MAX_PACKETLENGTH;
     if(M_CheckParm ("-packetsize"))
     {
         num = atoi(M_GetNextParm());
         if(num < 75)
            num = 75;
-        if(num > hardware_MAXPACKETLENGTH)
-           num = hardware_MAXPACKETLENGTH;
-        software_MAXPACKETLENGTH = num;
+        if(num > hardware_MAX_PACKETLENGTH)
+           num = hardware_MAX_PACKETLENGTH;
+        software_MAX_PACKETLENGTH = num;
     }
 
 #ifdef PARANOIA
@@ -1966,7 +1966,7 @@ boolean D_Startup_NetGame(void)
         if( M_IsNextParm() )
             k = atoi(M_GetNextParm())-1;
 
-        while (!debugfile && k<MAXPLAYERS)
+        while (!debugfile && k<MAX_PLAYERS)
         {
             k++;
             sprintf (filename,"debug%i.txt",k);

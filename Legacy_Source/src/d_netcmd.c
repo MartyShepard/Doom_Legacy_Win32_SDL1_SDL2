@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: d_netcmd.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: d_netcmd.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -434,7 +434,7 @@ void Send_NameColor_player( byte pn, byte pind )
 void  Send_NameColor_pind( byte pind )
 {
     byte pn = localplayer[pind];
-    if( pn < MAXPLAYERS )
+    if( pn < MAX_PLAYERS )
         Send_NameColor_pn( pn, cv_playername[pind].string, cv_playercolor[pind].EV, cv_skin[pind].string, pind );
 }
 
@@ -444,13 +444,13 @@ void  Send_NameColor_pind( byte pind )
 //   textcmd_pind : textcmd channel index, [0]=main player, [1]=splitscreen player, [2]=server (bots)
 void  Send_NameColor_pn( byte pn, const char * playername, byte color, const char * skinname, byte textcmd_pind )
 {
-    byte buf[MAXPLAYERNAME + 1 + SKINNAMESIZE + 1];
+    byte buf[MAX_PLAYERNAME + 1 + SKINNAMESIZE + 1];
     byte *p;
 
     p = buf;
     // Format:  color byte, player_name str0, skin_name str0.
     WRITEBYTE(p, color);
-    p = write_stringn(p, playername, MAXPLAYERNAME);
+    p = write_stringn(p, playername, MAX_PLAYERNAME);
 
     // Send the skin by name.
     // Check if player has the skin loaded
@@ -471,7 +471,7 @@ void Got_NetXCmd_NameColor(xcmd_t * xc)
     player_t * p;
     byte  sk;
    
-    if( pn >= MAXPLAYERS )
+    if( pn >= MAX_PLAYERS )
     {
         GenPrintf( EMSG_error, "NameColor: invalid player num %i\n", pn );       
         return;
@@ -485,7 +485,7 @@ void Got_NetXCmd_NameColor(xcmd_t * xc)
     sk = READBYTE(lcp); // unsigned read
     P_SetPlayer_color( p, sk );
 
-    // Players 0..(MAXPLAYERS-1) are init as Player 1 ..
+    // Players 0..(MAX_PLAYERS-1) are init as Player 1 ..
     // name
     if( EV_legacy >= 128 )
     {
@@ -495,17 +495,17 @@ void Got_NetXCmd_NameColor(xcmd_t * xc)
         // [WDJ] String overflow safe
         {
             int pn_len = strlen( lcp ) + 1;
-            int read_len = min( pn_len, MAXPLAYERNAME-1 );  // length safe
+            int read_len = min( pn_len, MAX_PLAYERNAME-1 );  // length safe
             memcpy(pname, lcp, read_len);
-            pname[MAXPLAYERNAME-1] = '\0';
+            pname[MAX_PLAYERNAME-1] = '\0';
             lcp += pn_len;  // whole
         }
     }
     else
     {
         // constant string space in message
-        memcpy(pname, lcp, MAXPLAYERNAME);
-        lcp += MAXPLAYERNAME;
+        memcpy(pname, lcp, MAX_PLAYERNAME);
+        lcp += MAX_PLAYERNAME;
     }
 
     // Protection against malicious packet.
@@ -571,7 +571,7 @@ void D_Send_PlayerConfig(void)
 {
     Send_NameColor_pind(0);
     Send_WeaponPref_pind(0);
-    if( cv_splitscreen.EV && ( localplayer[1] < MAXPLAYERS ))
+    if( cv_splitscreen.EV && ( localplayer[1] < MAX_PLAYERS ))
     {
         Send_NameColor_pind(1);
         Send_WeaponPref_pind(1);
@@ -896,12 +896,12 @@ void Command_Frags_f(void)
         return;
     }
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < MAX_PLAYERS; i++)
     {
         if (playeringame[i])
         {
             CONS_Printf("%-16s", player_names[i]);
-            for (j = 0; j < MAXPLAYERS; j++)
+            for (j = 0; j < MAX_PLAYERS; j++)
                 if (playeringame[j])
                     CONS_Printf(" %3d", players[i].frags[j]);
             CONS_Printf("\n");
@@ -912,9 +912,9 @@ void Command_Frags_f(void)
 void Command_TeamFrags_f(void)
 {
     int i, j;
-    fragsort_t unused[MAXPLAYERS];
-    int frags[MAXPLAYERS];
-    int fragtbl[MAXPLAYERS][MAXPLAYERS];
+    fragsort_t unused[MAX_PLAYERS];
+    int frags[MAX_PLAYERS];
+    int fragtbl[MAX_PLAYERS][MAX_PLAYERS];
 
     if( ! (deathmatch && cv_teamplay.EV) )
     {

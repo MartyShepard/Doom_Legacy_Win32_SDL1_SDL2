@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: command.c 1763 2025-11-20 11:49:30Z wesleyjohnson $
+// $Id: command.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -303,9 +303,9 @@ typedef struct xcommand_s
 static  xcommand_t * com_commands = NULL;     // current commands
 
 
-#define MAX_ARGS        80
+#define MAX_CMD_ARGS        80
 static int  com_argc;
-static char *  com_argv[MAX_ARGS];
+static char *  com_argv[MAX_CMD_ARGS];
 static char *  com_null_string = "";
 static const char * com_args = NULL;          // current command args or NULL
 
@@ -316,7 +316,7 @@ static const char * com_args = NULL;          // current command args or NULL
 void COM_Init (void)
 {
     int i;
-    for( i=0; i<MAX_ARGS; i++ )  com_argv[i] = com_null_string;
+    for( i=0; i<MAX_CMD_ARGS; i++ )  com_argv[i] = com_null_string;
     com_argc = 0;
 
     // allocate command buffer
@@ -428,7 +428,7 @@ void COM_TokenizeString (const char * text, boolean script)
         if (!text)
             return;
 
-        if (com_argc < MAX_ARGS)
+        if (com_argc < MAX_CMD_ARGS)
         {
             com_argv[com_argc] = Z_Malloc (strlen(com_token)+1, PU_STATIC, NULL);
             strcpy (com_argv[com_argc], com_token);

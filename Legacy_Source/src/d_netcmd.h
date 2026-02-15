@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_netcmd.h 1580 2021-07-23 20:55:58Z wesleyjohnson $
+// $Id: d_netcmd.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -105,7 +105,7 @@ typedef enum {
     XD_ADDPLAYER,
     XD_ADDBOT,	//added by AC for acbot
     XD_USEARTIFACT,
-    MAXNETXCMD
+    MAX_NET_XCMD
 } netxcmd_e;
 
 // add game commands, needs cleanup

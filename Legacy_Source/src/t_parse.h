@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //----------------------------------------------------------------------------
 //
-// $Id: t_parse.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: t_parse.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright(C) 2000 Simon Howard
 // Copyright (C) 2001-2011 by DooM Legacy Team.
@@ -47,7 +47,7 @@
 #include "p_mobj.h"
   // doomtype.h, m_fixed.h, mobj_t
 
-#define T_MAXTOKENS 128
+#define T_MAX_TOKENS 128
 #define TOKENLENGTH 128
 #define VARIABLESLOTS 16
 
@@ -198,8 +198,8 @@ extern script_t * fs_current_script;
 extern mobj_t * fs_trigger_obj;
 extern int fs_killscript;
 
-extern char *tokens[T_MAXTOKENS];
-extern tokentype_t tokentype[T_MAXTOKENS];
+extern char *tokens[T_MAX_TOKENS];
+extern tokentype_t tokentype[T_MAX_TOKENS];
 extern int num_tokens;
 // [WDJ] Common fragglescript vars.
 extern char * fs_src_cp;     // current point reached in parsing

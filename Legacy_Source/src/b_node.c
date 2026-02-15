@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_node.c 1758 2025-11-20 11:44:54Z wesleyjohnson $
+// $Id: b_node.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 2002 by DooM Legacy Team.
 //
@@ -345,10 +345,10 @@ boolean B_CheckNodePosition(mobj_t* thing, fixed_t x, fixed_t y)
     validcount++;
     numspechit = 0;
 
-        /*	xl = (tm_bbox[BOXLEFT] - bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
-        xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
-        yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
-        yh = (tm_bbox[BOXTOP] - bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
+        /*	xl = (tm_bbox[BOXLEFT] - bmaporgx - MAX_RADIUS)>>MAPBLOCKSHIFT;
+        xh = (tm_bbox[BOXRIGHT] - bmaporgx + MAX_RADIUS)>>MAPBLOCKSHIFT;
+        yl = (tm_bbox[BOXBOTTOM] - bmaporgy - MAX_RADIUS)>>MAPBLOCKSHIFT;
+        yh = (tm_bbox[BOXTOP] - bmaporgy + MAX_RADIUS)>>MAPBLOCKSHIFT;
 
         for (bx=xl ; bx<=xh ; bx++)
                 for (by=yl ; by<=yh ; by++)
@@ -634,7 +634,7 @@ void B_Init_Nodes( void )
 
     numbotnodes = 0;
     CONS_Printf("Building nodes for acbot.....\n");
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < MAX_PLAYERS; i++)
     {
         if (playerstarts[i])
         {

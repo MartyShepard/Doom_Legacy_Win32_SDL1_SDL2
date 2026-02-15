@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: doomstat.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: doomstat.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -340,7 +340,7 @@ extern  boolean         spirit_update;
 #endif
 
 // Player spawn spots.
-extern  mapthing_t *  playerstarts[MAXPLAYERS];
+extern  mapthing_t *  playerstarts[MAX_PLAYERS];
 
 // Intermission stats.
 // Parameters for world map / intermission.
@@ -404,7 +404,7 @@ extern  int             bodyqueslot;
 
 //extern  ticcmd_t        localcmds[BACKUPTICS];
 
-extern  ticcmd_t        netcmds[BACKUPTICS][MAXPLAYERS];
+extern  ticcmd_t        netcmds[BACKUPTICS][MAX_PLAYERS];
 // Collect stats for netstat.
 extern int   stat_tic_moved, stat_tic_miss;
 

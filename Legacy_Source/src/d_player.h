@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_player.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: d_player.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -173,7 +173,7 @@ typedef struct player_s
 
     // Frags, kills of other players.
     uint16_t            addfrags;   // player have killed a player but is gone
-    uint16_t            frags[MAXPLAYERS];
+    uint16_t            frags[MAX_PLAYERS];  // killed by this player, by index of target
     weapontype_t        readyweapon;
 
     // Is wp_nochange if not changing.
@@ -230,7 +230,7 @@ typedef struct player_s
     // Player skin colorshift,
     //  0-3 for which color to draw player.
     // adding 6-2-98 comment : unused by doom2 1.9 now is used
-    int                 skincolor;
+    byte                skincolor;  // index to skin colors, 0..NUM_SKINCOLORS-1
 
     // added 2/8/98
     int                 skin;
@@ -281,7 +281,7 @@ typedef struct
     int         sitems;
     int         ssecret;
     int         stime;
-    uint16_t    frags[MAXPLAYERS]; // added 17-1-98 more than 4 players
+    uint16_t    frags[MAX_PLAYERS]; // added 17-1-98 more than 4 players
     int         score;  // current score on entry, modified on return
     // BP: unused for now but don't forget....
     uint16_t    addfrags;
@@ -324,7 +324,7 @@ typedef struct
     mapentry_t * umapinfo_next;  // of next map to be played
 #endif
 
-    wb_player_t    plyr[MAXPLAYERS];
+    wb_player_t    plyr[MAX_PLAYERS];
 } wb_start_t;
 
 void A_TicWeapon( player_t* player,  pspdef_t* psp );

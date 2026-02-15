@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: i_video_xshm.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: i_video_xshm.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -311,8 +311,8 @@ static void vidmodes_to_vidmap( void )
     for(i=0; i<num_fullvidmodes; i++)
     {
         XF86VidModeModeInfo * vm = fullvidmodes[i];
-        if(vm->hdisplay <= MAXVIDWIDTH
-           && vm->vdisplay <= MAXVIDHEIGHT)
+        if(vm->hdisplay <= MAX_VIDWIDTH
+           && vm->vdisplay <= MAX_VIDHEIGHT)
         {
             // only init vidmap when mode sizes are within our limits
             // Insert sort, largest first.

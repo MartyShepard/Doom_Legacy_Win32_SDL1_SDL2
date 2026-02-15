@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_inter.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_inter.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -245,7 +245,7 @@ consvar_t cv_fragsweaponfalling
 
 // added 4-2-98 (Boris) for dehacked patch
 // (i don't like that but do you see another solution ?)
-int     MAXHEALTH= 100;
+int     MAX_HEALTH= 100;
 
 //--------------------------------------------------------------------------
 //
@@ -665,9 +665,9 @@ boolean P_GiveHealth ( player_t*     player,
 {
     int max;
     
-    max = MAXHEALTH;
+    max = MAX_HEALTH;
     if(player->chickenTics)
-        max = MAXCHICKENHEALTH;
+        max = MAX_CHICKENHEALTH;
 
     if (player->health >= max)
         return false;
@@ -861,7 +861,7 @@ boolean P_GiveArtifact(player_t* player, artitype_t arti, mobj_t* mo)
     }
     else
     {
-        if(player->inventory[i].count >= MAXARTECONT)
+        if(player->inventory[i].count >= MAX_ARTIFACT_COUNT)
         { // Player already has 16 of this item
             return(false);
         }
@@ -1079,8 +1079,8 @@ get_armor:
         // bonus items
       case SPR_BON1:  // common health inc
         val = player->health + 1;               // can go over 100%
-        if (val > 2*MAXHEALTH)
-            val = 2*MAXHEALTH;
+        if (val > 2*MAX_HEALTH)
+            val = 2*MAX_HEALTH;
         if((val > player->health) && (player->health_pickup < 35))
             player->health_pickup += PICKUP_FLASH_TICS/2;
         player->mo->health = player->health = val;
@@ -1910,7 +1910,7 @@ void P_CheckFragLimit(player_t* p)
     if( cv_teamplay.EV )
     {
         int i;
-        for(i=0;i<MAXPLAYERS;i++)
+        for(i=0;i<MAX_PLAYERS;i++)
         {
             if(ST_SameTeam(p,&players[i]))
                 fragteam += ST_PlayerFrags(i);
@@ -2593,7 +2593,7 @@ boolean P_ChickenMorphPlayer(player_t* player)
     pmo->skin = NULL;  // Chickens all look alike.
     pmo->tflags &= ~MFT_TRANSLATION6; // no color translation for chicken
     // spawnhealth for chicken is 100, this is 30
-    player->health = pmo->health = MAXCHICKENHEALTH;
+    player->health = pmo->health = MAX_CHICKENHEALTH;
     player->armorpoints = player->armortype = 0;
 #ifndef PLAYER_CHICKEN_KEEPS_SHADOW
     // If keep MF_SHADOW and cancel invisibility, then MF_SHADOW is permananet.
@@ -3191,7 +3191,7 @@ boolean P_DamageMobj ( mobj_t*   target,
                 
                 viewx=0;
                 viewy=z;
-                ang = R_PointToAngle(dist,target->z);
+                ang = R_ViewPointToAngle(dist,target->z);
                 amomz = FixedMul (thrust, sine_ANG(ang));
             }
             else //SoM: 2/28/2000: Added new function.
@@ -3217,7 +3217,7 @@ boolean P_DamageMobj ( mobj_t*   target,
 #endif
             // [WDJ] MBF
             // killough 11/98: thrust objects hanging off ledges
-            if( (target->eflags & MFE_FALLING) && (target->tipcount >= MAXTIPCOUNT) )
+            if( (target->eflags & MFE_FALLING) && (target->tipcount >= MAX_TIPCOUNT) )
                 target->tipcount = 0;
         }
     }

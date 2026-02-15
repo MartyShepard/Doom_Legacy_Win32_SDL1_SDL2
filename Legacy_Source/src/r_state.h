@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_state.h 1736 2025-03-14 08:15:57Z wesleyjohnson $
+// $Id: r_state.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -99,14 +99,14 @@ extern lighttable_t*    reg_colormaps;
 
 //SoM: 3/30/2000: Boom colormaps.
 //SoM: 4/7/2000: Had to put a limit on colormaps :(
-//#define                 MAXCOLORMAPS 30
+//#define                 MAX_COLORMAPS 30
 // [WDJ]: 5/17/2010 hth2.wad uses 38 colormaps
 // Too little memory to save to use dynamic methods.
-#define                 MAXCOLORMAPS 64
+#define                 MAX_COLORMAPS 64
 
 // defined colormap lightmaps descriptors
 extern int              num_extra_colormaps;
-extern extracolormap_t  extra_colormaps[MAXCOLORMAPS];
+extern extracolormap_t  extra_colormaps[MAX_COLORMAPS];
 
 extern int		rdraw_viewwidth;		// was viewwidth
 extern int              rdraw_scaledviewwidth;		// was scaledrviewwidth
@@ -176,7 +176,7 @@ extern angle_t          clipangle;
 extern int              viewangle_to_x[FINE_ANG180];
 // The lowest viewangle that maps back to x.
 // Maps (0 to screenwidth) to range (clipangle to -clipangle).
-extern angle_t          x_to_viewangle[MAXVIDWIDTH+1];
+extern angle_t          x_to_viewangle[MAX_VIDWIDTH+1];
 //extern fixed_t                finetangent[FINEANGLES/2];
 
 extern fixed_t          rw_distance;

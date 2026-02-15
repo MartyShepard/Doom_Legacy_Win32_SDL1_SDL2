@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: i_video_mac.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: i_video_mac.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -66,10 +66,10 @@ RGBA_t  gamma_correction = {0x7F7F7F7F};
 WindowRef mainWindow = NULL;
 
 // all modes, used for window modes or fullscreen modes
-#define MAXVIDMODES  33
+#define MAX_VIDMODES  33
 #define MAX_LEN_VIDMODENAME  32
-char   vidModeName[MAXVIDMODES][MAX_LEN_VIDMODENAME];
-struct modeDescription modeList[MAXVIDMODES];
+char   vidModeName[MAX_VIDMODES][MAX_LEN_VIDMODENAME];
+struct modeDescription modeList[MAX_VIDMODES];
 static int nummodes = 0;
 
 #ifdef FIT_RATIO
@@ -82,7 +82,7 @@ static int windowedModes[MAXWINMODES+1][2] = {
    // hidden from display
     {INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT},  // initial mode
    // public  1..
-    {MAXVIDWIDTH /*1600*/, MAXVIDHEIGHT/*1200*/},
+    {MAX_VIDWIDTH /*1600*/, MAX_VIDHEIGHT/*1200*/},
 #ifdef FIT_RATIO
     {1600, 1024},
 #endif   

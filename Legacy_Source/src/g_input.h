@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: g_input.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: g_input.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -59,7 +59,7 @@
 #include "command.h"
   // consvar_t
 
-#define MAXMOUSESENSITIVITY   40        // sensitivity steps
+#define MAX_MOUSESENSITIVITY   40        // sensitivity steps
 
 
 typedef enum

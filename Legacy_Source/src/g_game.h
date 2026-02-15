@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: g_game.h 1727 2025-02-07 05:03:05Z wesleyjohnson $
+// $Id: g_game.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -74,15 +74,15 @@ typedef struct {
     char * name;  // always allocated string
 } PACKED_ATTR  team_info_t;
 
-extern team_info_t*  team_info[MAXTEAMS];
-extern byte          num_teams;  // limited to MAXTEAMS (32)
+extern team_info_t*  team_info[MAX_TEAMS];
+extern byte          num_teams;  // limited to MAX_TEAMS (32)
 
-team_info_t*  get_team( int team_num );
-void  set_team_name( int team_num, const char * str );
-char * get_team_name( int team_num );
+team_info_t*  get_team( byte team_num );
+void  set_team_name( byte team_num, const char * str );
+char * get_team_name( byte team_num );
 
-extern  player_t  players[MAXPLAYERS];
-extern  byte      playeringame[MAXPLAYERS];
+extern  player_t  players[MAX_PLAYERS];
+extern  byte      playeringame[MAX_PLAYERS];
 
 typedef enum {
   PS_unused,
@@ -96,11 +96,11 @@ typedef enum {
   PS_added,
   PS_added_commit,     // add player issued
 } player_state_e;
-extern byte       player_state[MAXPLAYERS];
+extern byte       player_state[MAX_PLAYERS];
 
 //added:11-02-98: yeah now you can change it!
 // changed to 2d array 19990220 by Kin
-extern char       player_names[MAXPLAYERS][MAXPLAYERNAME];
+extern char       player_names[MAX_PLAYERS][MAX_PLAYERNAME];
 extern byte       num_game_players;  // number of actual players
 extern byte       max_num_players;   // dependent upon demo
 

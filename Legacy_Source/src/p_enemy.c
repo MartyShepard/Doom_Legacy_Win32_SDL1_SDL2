@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_enemy.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_enemy.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -193,7 +193,8 @@ consvar_t cv_monbehavior =
 
 // Doom normal is infight, no coop (see Boom).
 // Indexed by monbehavior_cons_t values.
-static byte monbehav_to_infight[] =
+static
+byte monbehav_to_infight[] =
 {
   INFT_infight,      // 0  Normal  (infight)
   INFT_coop,         // 1  Coop default
@@ -227,6 +228,8 @@ consvar_t cv_doorstuck =
 
 
 
+// movedir
+// Index to direction tables.
 typedef enum
 {
     DI_EAST,
@@ -249,7 +252,9 @@ typedef enum
 // [WDJ] Speed comparison of Opposite.
 //  Table: 35 sec,  Calculated: 33 sec.
 #if 0
-static dirtype_t opposite[] =
+// Indexed by dirtype_t.
+static
+dirtype_t opposite[] =
 {
   DI_WEST, DI_SOUTHWEST, DI_SOUTH, DI_SOUTHEAST,
   DI_EAST, DI_NORTHEAST, DI_NORTH, DI_NORTHWEST, DI_NODIR
@@ -260,7 +265,9 @@ static dirtype_t opposite[] =
 #define  DI_OPPOSITE( di )     ((di < DI_NODIR)? ((di) ^ 4) : DI_NODIR)
 #endif
 
-static dirtype_t diags[] =
+// Indexed by detection of x_delta < 0, y_delta < 0.
+static
+dirtype_t diags[] =
 {
     DI_NORTHWEST, DI_NORTHEAST, DI_SOUTHWEST, DI_SOUTHEAST
 };
@@ -273,7 +280,8 @@ typedef struct {
     byte       speed[2];  // normal, fast
 } monster_missile_info_t;
 
-static const monster_missile_info_t  MonsterMissileInfo[] =
+static
+const monster_missile_info_t  MonsterMissileInfo[] =
 {
     // doom
     { MT_BRUISERSHOT, {15, 20}},
@@ -331,7 +339,7 @@ void FastMonster_OnChange(void)
 //	if( ! (EN_boom || EN_mbf) )
 //	    set_fast_state = 0;
 
-        for( i = 0; i < NUMSTATES_EXT; i++ )
+        for( i = 0; i < NUM_STATES_EXT; i++ )
         {
             // [WDJ] The DSDA-Doom implementation does not restore tics correctly.
             // This implementation restores tics exactly.
@@ -423,7 +431,8 @@ consvar_t cv_mbf_dog_jumping = {"dogjump","1", CV_NETVAR | CV_SAVE, CV_OnOff};
   // MBF dog_jumping
 #endif
 
-static void mbf_OnChange( void )
+static
+void mbf_OnChange( void )
 {
     // Demo sets EV_mbf_distfriend.
     EV_mbf_distfriend = INT_TO_FIXED( cv_mbf_distfriend.value );  // to fixed_t
@@ -453,7 +462,8 @@ typedef enum {
   FRE_mbf_enemyfactor = 0x04,
 } friction_en_e;
 
-static const byte friction_table[] =
+static
+const byte friction_table[] =
 {
   0,   // None
   FRE_monster_friction | FRE_mbf_enemyfactor,  // MBF
@@ -669,22 +679,20 @@ static boolean P_CheckMeleeRange (mobj_t* actor)
     if(!plmo)
         goto ret_false;
 
-#ifdef MBF21
-#else
-    // [WDJ] FIXME plmo->info may be NULL (seen in phobiata.wad)
-    if (plmo->info == NULL )
-        goto ret_false;
-#endif
-    
     // [WDJ] prboom, killough, friend monsters do not attack other friend
     if( BOTH_FRIEND(actor, plmo) )
         goto ret_false;
 
     dist = P_AproxDistance_mobj( plmo, actor );
 #ifdef MBF21
+    // Protection of info is not needed for MBF21 due to using ext parameter.
     if ( dist >= req_range )
         goto ret_false;
 #else
+    // [WDJ] FIXME plmo->info may be NULL (seen in phobiata.wad)
+    if (plmo->info == NULL )
+        goto ret_false;
+
     if (dist >= (MELEERANGE - FIXINT(20) + plmo->info->radius) )
         goto ret_false;
 #endif
@@ -714,7 +722,8 @@ ret_false:
 //
 // MBF21 replacement for P_CheckMeleeRange.
 // In one place they could not call this, but have to call the orig.
-static boolean P_CheckMeleeRange( mobj_t* actor )
+static
+boolean P_CheckMeleeRange( mobj_t* actor )
 {
     // MBF21 modifications
 #ifdef UDMF    
@@ -755,7 +764,8 @@ ret_false:
 // This function tries to prevent shooting at friends.
 // Known that (actor->flags & MF_FRIEND), checked by caller.
 // Return true if aiming would hit a friend.
-static boolean P_HitFriend(mobj_t* actor)
+static
+boolean P_HitFriend(mobj_t* actor)
 {
     mobj_t * target = actor->target;
 
@@ -987,7 +997,8 @@ static const fixed_t yspeed[8] = {0,47000,FRACUNIT,47000,0,-47000,-FRACUNIT,-470
 //  dropoff : 0, 1, 2 dog jump
 // Formerly P_Move.
 // Return false when move is blocked.
-static boolean P_MoveActor (mobj_t* actor, byte dropoff)
+static
+boolean P_MoveActor (mobj_t* actor, byte dropoff)
 {
     fixed_t  tryx, tryy;
     fixed_t  old_momx, old_momy;
@@ -1237,7 +1248,8 @@ static boolean P_MoveActor (mobj_t* actor, byte dropoff)
 // [WDJ] From MBF, PrBoom
 // P_SmartMove
 // killough 9/12/98: Same as P_Move, except smarter
-static boolean P_SmartMove(mobj_t* actor)
+static
+boolean P_SmartMove(mobj_t* actor)
 {
     mobj_t * target = actor->target;
     byte  on_lift;
@@ -1317,7 +1329,8 @@ line_t * trywalk_dropoffline;
 // an OpenDoor call is made to start it opening.
 // Called multiple times in one step, while trying to find valid path.
 //
-static boolean P_TryWalk (mobj_t* actor)
+static
+boolean P_TryWalk (mobj_t* actor)
 {
     if( !P_SmartMove(actor) )  // P_MoveActor()
     {
@@ -1346,7 +1359,8 @@ static boolean P_TryWalk (mobj_t* actor)
 static fixed_t dropoff_r_deltax, dropoff_r_deltay, dropoff_floorz;
 
 // Always returns true, searches all lines.
-static boolean PIT_AvoidDropoff(line_t* line)
+static
+boolean PIT_AvoidDropoff(line_t* line)
 {
     if( line->backsector // Ignore one-sided linedefs
         && tm_bbox[BOXRIGHT]  > line->bbox[BOXLEFT]
@@ -1390,7 +1404,8 @@ static boolean PIT_AvoidDropoff(line_t* line)
 //
 // Driver for above
 //
-static fixed_t P_AvoidDropoff(mobj_t* actor)
+static
+fixed_t P_AvoidDropoff(mobj_t* actor)
 {
     int yh, yl, xh, xl;
     int bx, by;
@@ -1600,7 +1615,8 @@ accept_move:
 
 // [WDJ] MBF, from MBF, PrBoom, EternityEngine
 // Most of the original P_NewChaseDir is now in P_NewChaseDir_P2.
-static void P_NewChaseDir(mobj_t* actor)
+static
+void P_NewChaseDir(mobj_t* actor)
 {
     mobj_t *  target = actor->target;
     fixed_t deltax, deltay;
@@ -1689,7 +1705,7 @@ static void P_NewChaseDir(mobj_t* actor)
                        )
                   )
                 {   // Back away from melee attacker
-                    // P_Random usage enabled by mbf_monster_backing.		   
+                    // P_Random usage enabled by mbf_monster_backing.
                     actor->strafecount = PP_Random(pr_enemystrafe) & 0x0F;
                     deltax = -deltax;
                     deltay = -deltay;
@@ -1796,8 +1812,8 @@ boolean PIT_FindTarget(mobj_t* mo)
 // Modifies actor.
 // Returns true if a player is targeted.
 //
-static boolean P_LookForPlayers ( mobj_t*       actor,
-                                  boolean       allaround )
+static
+boolean P_LookForPlayers ( mobj_t* actor, boolean allaround )
 {
     player_t*   player;
     int  c;
@@ -1825,7 +1841,7 @@ static boolean P_LookForPlayers ( mobj_t*       actor,
         // First time look for visible player, then look for anyone.
         for( anyone=0; anyone<=1; anyone++ )
         {
-            for( c=0; c<MAXPLAYERS; c++ )
+            for( c=0; c<MAX_PLAYERS; c++ )
             {
                 if( playeringame[c]
                     && players[c].playerstate == PST_LIVE
@@ -1864,11 +1880,11 @@ static boolean P_LookForPlayers ( mobj_t*       actor,
     {
         // Legacy use of P_Random, enabled by EV_legacy >= 129.
 #ifdef MAX_PLAYERS_VARIABLE  // unneeded
-        // Boom, MBF demo assumes MAXPLAYERS=4, but Legacy MAXPLAYERS=32.
+        // Boom, MBF demo assumes MAX_PLAYERS=4, but Legacy MAX_PLAYERS=32.
         lastlook = PP_Random(pL_initlastlook) % max_num_players;
 #else
         // Boom, MBF Demo cannot reach here.
-        lastlook = PP_Random(pL_initlastlook) % MAXPLAYERS;
+        lastlook = PP_Random(pL_initlastlook) % MAX_PLAYERS;
 #endif
     }
 
@@ -1876,7 +1892,7 @@ static boolean P_LookForPlayers ( mobj_t*       actor,
     stop = (lastlook-1)&PLAYERSMASK;
     stopc = ( !EN_mbf
               && EN_boom  // !demo_compatibility
-              && cv_monster_remember.EV )? MAXPLAYERS : 2;  // killough 9/9/98
+              && cv_monster_remember.EV )? MAX_PLAYERS : 2;  // killough 9/9/98
 
     for ( ; ; lastlook = (lastlook+1)&PLAYERSMASK )
     {
@@ -2031,8 +2047,8 @@ boolean P_LookForMonsters(mobj_t* actor, boolean allaround)
             GenPrintf(EMSG_debug, "COME HERE player missing, come_here=%i\n", come_here );
 # endif
 
-        if( ! SAME_FRIEND(actor, come_here_player) )
 # ifdef DEBUG_COME_HERE
+        if( ! SAME_FRIEND(actor, come_here_player) )
             GenPrintf(EMSG_debug, "COME HERE player not a friend, come_here=%i\n", come_here );
 # endif
 
@@ -2067,6 +2083,7 @@ boolean P_LookForMonsters(mobj_t* actor, boolean allaround)
 
     for (d=1; d<5; d++)
     {
+        // Search around the actor, at distance d.
         int i = 1 - d;
 
         do{
@@ -3281,10 +3298,10 @@ byte P_HealCorpse( mobj_t * actor, mobjinfo_t * actor_info, statenum_t healstate
 #endif
         vilecheck_pos.z = actor->z;
 
-        xl = (vilecheck_pos.x - bmaporgx - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-        xh = (vilecheck_pos.x - bmaporgx + MAXRADIUS*2)>>MAPBLOCKSHIFT;
-        yl = (vilecheck_pos.y - bmaporgy - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-        yh = (vilecheck_pos.y - bmaporgy + MAXRADIUS*2)>>MAPBLOCKSHIFT;
+        xl = (vilecheck_pos.x - bmaporgx - MAX_RADIUS*2)>>MAPBLOCKSHIFT;
+        xh = (vilecheck_pos.x - bmaporgx + MAX_RADIUS*2)>>MAPBLOCKSHIFT;
+        yl = (vilecheck_pos.y - bmaporgy - MAX_RADIUS*2)>>MAPBLOCKSHIFT;
+        yh = (vilecheck_pos.y - bmaporgy + MAX_RADIUS*2)>>MAPBLOCKSHIFT;
 
         vilecheck_actor = actor;
         vilecheck_actor_info = actor_info; // Added for MBF21
@@ -3349,10 +3366,10 @@ void A_VileChase (mobj_t* actor)
 #endif
         vilecheck_pos.z = actor->z;
 
-        xl = (vilecheck_pos.x - bmaporgx - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-        xh = (vilecheck_pos.x - bmaporgx + MAXRADIUS*2)>>MAPBLOCKSHIFT;
-        yl = (vilecheck_pos.y - bmaporgy - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-        yh = (vilecheck_pos.y - bmaporgy + MAXRADIUS*2)>>MAPBLOCKSHIFT;
+        xl = (vilecheck_pos.x - bmaporgx - MAX_RADIUS*2)>>MAPBLOCKSHIFT;
+        xh = (vilecheck_pos.x - bmaporgx + MAX_RADIUS*2)>>MAPBLOCKSHIFT;
+        yl = (vilecheck_pos.y - bmaporgy - MAX_RADIUS*2)>>MAPBLOCKSHIFT;
+        yh = (vilecheck_pos.y - bmaporgy + MAX_RADIUS*2)>>MAPBLOCKSHIFT;
 
         vilecheck_actor = actor;
         for (bx=xl ; bx<=xh ; bx++)
@@ -3978,7 +3995,7 @@ void A_Explode (mobj_t* actor)
          case MT_HEXEN_SORCBALL3:
             distance = 255;
             damage = 255;
-//	    actor->special_args[0] = 1; // do not bounce   // FIXME
+//            actor->special_args[0] = 1; // do not bounce   // FIXME
             break;
          case MT_HEXEN_SORCFX1:  // Sorcerer spell 1
             damage = 30;
@@ -4031,9 +4048,9 @@ void A_Explode (mobj_t* actor)
 static
 state_t * P_FinalState(statenum_t state)
 {
-    static char final_state[NUMSTATES_EXT]; //Hurdler: quick temporary hack to fix hacx freeze
+    static char final_state[NUM_STATES_EXT]; //Hurdler: quick temporary hack to fix hacx freeze
 
-    memset(final_state, 0, NUMSTATES_EXT);
+    memset(final_state, 0, NUM_STATES_EXT);
     while (states[state].tics!=-1)
     {
         final_state[state] = 1;
@@ -4053,7 +4070,7 @@ static
 boolean A_Player_Alive(void)
 {
     int i;
-    for( i = 0 ; i < MAXPLAYERS ; i++ )
+    for( i = 0 ; i < MAX_PLAYERS ; i++ )
     {
         if( playeringame[i] && players[i].health > 0 )
             return true;
@@ -4353,11 +4370,11 @@ void A_Bosstype_Death (mobj_t* mo, int boss_type)
     if( ! A_Player_Alive() )
         return; // no one left alive, so do not end game
 #else
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
         if (playeringame[i] && players[i].health > 0)
             break;
 
-    if (i==MAXPLAYERS)
+    if (i==MAX_PLAYERS)
         return; // no one left alive, so do not end game
 #endif
 
@@ -5115,9 +5132,9 @@ void A_SpawnObject_MBF21( mobj_t * actor )
             tracer = actor->tracer;
         }
 
-//	P_SetTarget( &mo->target, target );
+//        P_SetTarget( &mo->target, target );
         SET_TARGET_REF( mo->target, target );  // Remember previous target
-//	P_SetTarget( &mo->tracer, tracer );
+//        P_SetTarget( &mo->tracer, tracer );
         SET_TARGET_REF( mo->tracer, tracer );
     }
 }

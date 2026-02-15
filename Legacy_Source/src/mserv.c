@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: mserv.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: mserv.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -535,7 +535,7 @@ static void MS_open_UDP_Socket()
 
         sprintf(hostname, "%s:%d", inet_ntoa(ms_addr.sin_addr), ping_port );
         msnode = I_NetMakeNode(hostname);
-          // errors are > MAXNETNODES+2
+          // errors are > MAX_NETNODES+2
 #endif
     }
     else
@@ -579,7 +579,7 @@ void MS_SendPing_MasterServer( tic_t cur_time )
 
         // Keep-alive tick to the MasterServer on MasterServer port+1.
         // cur_time is just a dummy data to send
-        if( msnode > MAXNETNODES+1 )
+        if( msnode > MAX_NETNODES+1 )
             return;  // no UDP connection
 
         *((tic_t *)netbuffer) = cur_time;

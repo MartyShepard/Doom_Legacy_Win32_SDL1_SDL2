@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: screen.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: screen.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -85,8 +85,8 @@ extern int stbar_height;   // status bar, may be scaled
 // we try to re-allocate a minimum of buffers for stability of the memory,
 // so all the small-enough tables based on screen size, are allocated once
 // and for all at the maximum size.
-#define MAXVIDWIDTH    8192/*1600*/
-#define MAXVIDHEIGHT   4320/*1200*/
+#define MAX_VIDWIDTH    8192/*1600*/
+#define MAX_VIDHEIGHT   4320/*1200*/
 
 #define BASEVIDWIDTH    320   //NEVER CHANGE THIS! this is the original
 #define BASEVIDHEIGHT   200  // resolution of the graphics.

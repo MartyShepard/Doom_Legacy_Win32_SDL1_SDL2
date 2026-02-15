@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: v_video.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: v_video.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -2944,7 +2944,7 @@ void V_Drawfont1_string(int x, int y, int option, const char * string)
     byte fbit, c;
     byte fcolor = (option & V_WHITEMAP)? ci_white : ci_green;  // white : green
     byte * lbp;
-    byte lb[FONT1_WIDTH * MAXVIDWIDTH / BASEVIDWIDTH];  // * max dupx
+    byte lb[FONT1_WIDTH * MAX_VIDWIDTH / BASEVIDWIDTH];  // * max dupx
 
     if( !string )  return;
 

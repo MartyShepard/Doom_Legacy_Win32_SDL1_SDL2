@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //----------------------------------------------------------------------------
 //
-// $Id: t_parse.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: t_parse.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright(C) 2000 Simon Howard
 // Copyright (C) 2001-2011 by DooM Legacy Team.
@@ -80,8 +80,8 @@ script_t * fs_current_script;       // the current script
 mobj_t * fs_trigger_obj;         // object which triggered script
 int fs_killscript;               // when set to true, stop the script quickly
 
-char *tokens[T_MAXTOKENS];
-tokentype_t tokentype[T_MAXTOKENS];
+char *tokens[T_MAX_TOKENS];
+tokentype_t tokentype[T_MAX_TOKENS];
 int num_tokens = 0;
 byte script_debug = false;
 
@@ -448,7 +448,7 @@ void parse_data(char * data, char * end)
     fs_killscript = false; // dont kill the script straight away
 
     // allocate space for the tokens
-    token_alloc = Z_Malloc(fs_current_script->len + T_MAXTOKENS, PU_STATIC, 0);
+    token_alloc = Z_Malloc(fs_current_script->len + T_MAX_TOKENS, PU_STATIC, 0);
 
     fs_prev_section = NULL;        // clear it
 

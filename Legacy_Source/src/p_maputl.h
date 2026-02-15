@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_maputl.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: p_maputl.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -59,9 +59,9 @@ typedef struct
     }                   d;
 } intercept_t;
 
-/*#define MAXINTERCEPTS   128
+/*#define MAX_INTERCEPTS   128
 
-extern intercept_t      intercepts[MAXINTERCEPTS];
+extern intercept_t      intercepts[MAX_INTERCEPTS];
 extern intercept_t*     intercept_p;*/
 
 //SoM: 4/6/2000: Remove limit.

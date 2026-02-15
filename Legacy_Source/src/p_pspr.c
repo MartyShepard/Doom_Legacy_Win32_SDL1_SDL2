@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_pspr.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_pspr.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -98,7 +98,7 @@ void P_SetPsprite_psp ( player_t*   player,
             break;
         }
 #ifdef PARANOIA
-        if(stnum >= NUMSTATES_EXT)
+        if(stnum >= NUM_STATES_EXT)
         {
             I_SoftError("P_SetPsprite : state %d unknown\n",stnum);
             return;
@@ -186,7 +186,7 @@ void P_SetPsprite ( player_t*     player,
             break;
         }
 #ifdef PARANOIA
-        if(stnum >= NUMSTATES_EXT)
+        if(stnum >= NUM_STATES_EXT)
         {
             I_SoftError("P_SetPsprite : state %d unknown\n",stnum);
             return;

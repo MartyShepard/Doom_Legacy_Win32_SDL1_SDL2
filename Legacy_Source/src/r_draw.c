@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_draw.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: r_draw.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -104,19 +104,19 @@ int             view_window_x;
 int             view_window_y;
 
                 // pointer to the start of each line of the screen,
-byte*           ylookup[MAXVIDHEIGHT];
+byte*           ylookup[MAX_VIDHEIGHT];
 
-byte*           ylookup1[MAXVIDHEIGHT]; // for view1 (splitscreen)
-byte*           ylookup2[MAXVIDHEIGHT]; // for view2 (splitscreen)
+byte*           ylookup1[MAX_VIDHEIGHT]; // for view1 (splitscreen)
+byte*           ylookup2[MAX_VIDHEIGHT]; // for view2 (splitscreen)
 
                 // x byte offset for columns inside the view_window
                 // so the first column starts at (SCRWIDTH-VIEWWIDTH)/2
-int             columnofs[MAXVIDWIDTH];
+int             columnofs[MAX_VIDWIDTH];
 
 #ifdef HORIZONTALDRAW
 //Fab 17-06-98: horizontal column drawer optimisation
-byte*           yhlookup[MAXVIDWIDTH];
-int             hcolumnofs[MAXVIDHEIGHT];
+byte*           yhlookup[MAX_VIDWIDTH];
+int             hcolumnofs[MAX_VIDHEIGHT];
 #endif
 
 byte            dr_alpha;  // translucent and fog alpha, 0..255
@@ -247,7 +247,7 @@ void R_RecalcFuzzOffsets (void)
 //                   TRANSLATION COLORMAP CODE
 // =========================================================================
 
-char *Color_Names[NUM_SKINCOLORS]={
+char * Color_Names[NUM_SKINCOLORS]={
    "Green",
    "Gray" ,
    "Brown",

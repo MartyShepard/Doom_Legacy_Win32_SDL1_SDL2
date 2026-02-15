@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: Vid_vesa.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: Vid_vesa.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -37,7 +37,7 @@
 #include <stdlib.h>
 
 #include "doomincl.h"
-  // MAXVIDWIDTH, MAXVIDHEIGHT
+  // MAX_VIDWIDTH, MAX_VIDHEIGHT
   // I_Error(), CONS_Printf
 //#include "i_system.h"
 #include "Vid_vesa.h"
@@ -583,8 +583,8 @@ int VID_VesaGetModeInfo (int vesa_modenum, byte gmi_req_bitpp)
 #else
         if ((bytes_per_pixel > 2) ||
 #endif
-            (vesamodeinfo.XResolution > MAXVIDWIDTH) ||
-            (vesamodeinfo.YResolution > MAXVIDHEIGHT))
+            (vesamodeinfo.XResolution > MAX_VIDWIDTH) ||
+            (vesamodeinfo.YResolution > MAX_VIDHEIGHT))
         {
             return false;
         }

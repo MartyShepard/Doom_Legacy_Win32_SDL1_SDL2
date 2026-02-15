@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_setup.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_setup.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -288,7 +288,7 @@ uint32_t        num_rejectmatrix = 0;
 // Maintain single and multi player starting spots.
 mapthing_t  *   deathmatchstarts[MAX_DM_STARTS];
 byte            num_dm_starts;  // MAX_DM_STARTS is < 255
-mapthing_t  *   playerstarts[MAXPLAYERS];
+mapthing_t  *   playerstarts[MAX_PLAYERS];
 
 
 
@@ -2009,19 +2009,19 @@ void P_GroupLines (void)
         sector->soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2;
 
         // adjust bounding box to map blocks
-        block = (bbox[BOXTOP]-bmaporgy+MAXRADIUS)>>MAPBLOCKSHIFT;
+        block = (bbox[BOXTOP]-bmaporgy+MAX_RADIUS)>>MAPBLOCKSHIFT;
         block = block >= bmapheight ? bmapheight-1 : block;
         sector->blockbox[BOXTOP]=block;
 
-        block = (bbox[BOXBOTTOM]-bmaporgy-MAXRADIUS)>>MAPBLOCKSHIFT;
+        block = (bbox[BOXBOTTOM]-bmaporgy-MAX_RADIUS)>>MAPBLOCKSHIFT;
         block = block < 0 ? 0 : block;
         sector->blockbox[BOXBOTTOM]=block;
 
-        block = (bbox[BOXRIGHT]-bmaporgx+MAXRADIUS)>>MAPBLOCKSHIFT;
+        block = (bbox[BOXRIGHT]-bmaporgx+MAX_RADIUS)>>MAPBLOCKSHIFT;
         block = block >= bmapwidth ? bmapwidth-1 : block;
         sector->blockbox[BOXRIGHT]=block;
 
-        block = (bbox[BOXLEFT]-bmaporgx-MAXRADIUS)>>MAPBLOCKSHIFT;
+        block = (bbox[BOXLEFT]-bmaporgx-MAX_RADIUS)>>MAPBLOCKSHIFT;
         block = block < 0 ? 0 : block;
         sector->blockbox[BOXLEFT]=block;
     }
@@ -2209,7 +2209,7 @@ boolean P_SetupLevel (int      to_episode,
     // Clear existing level variables and reclaim memory.
     totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
     wminfo.partime = 180;
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         players[i].killcount = players[i].secretcount
             = players[i].itemcount = 0;
@@ -2440,7 +2440,7 @@ boolean P_SetupLevel (int      to_episode,
     num_dm_starts = 0;
     // added 25-4-98 : reset the players starts
     //SoM: Set pointers to NULL
-    for(i=0;i<MAXPLAYERS;i++)
+    for(i=0;i<MAX_PLAYERS;i++)
        playerstarts[i] = NULL;
 
     P_Init_AmbientSound ();  // Heretic
@@ -2456,7 +2456,7 @@ boolean P_SetupLevel (int      to_episode,
     P_Init_BrainTarget();
 
     //BP: spawnplayers after all structures are inititialized
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i=0 ; i<MAX_PLAYERS ; i++)
     {
         if (playeringame[i])
         {

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: m_menu.c 1772 2026-01-13 16:02:20Z wesleyjohnson $
+// $Id: m_menu.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1334,8 +1334,8 @@ CV_PossibleValue_t exmy_cons_t[] ={{11,"e1m1"} ,{12,"e1m2"} ,{13,"e1m3"}
 
 consvar_t cv_skill    = {"skill"    ,"4",CV_HIDEN,skill_cons_t};
 consvar_t cv_monsters = {"monsters" ,"0",CV_HIDEN,CV_YesNo};
-// The bots use player slots, so number of bots is limited to MAXPLAYERS.
-CV_PossibleValue_t bots_cons_t[] = {{0,"MIN"}, {MAXPLAYERS,"MAX"}, {0,NULL}};
+// The bots use player slots, so number of bots is limited to MAX_PLAYERS.
+CV_PossibleValue_t bots_cons_t[] = {{0,"MIN"}, {MAX_PLAYERS,"MAX"}, {0,NULL}};
 consvar_t cv_bots = {"bots", "0", CV_HIDEN, bots_cons_t};
 consvar_t cv_nextmap  = {"nextmap"  ,"1",CV_HIDEN,map_cons_t};
 consvar_t cv_nextepmap  = {"nextepmap"  ,"11",CV_HIDEN,exmy_cons_t};
@@ -1736,7 +1736,7 @@ static  state_t*  multi_state;
 
 // this is set before entering the MultiPlayer setup menu,
 // for either player 1 or 2
-static  char       setupm_name[MAXPLAYERNAME+1];
+static  char       setupm_name[MAX_PLAYERNAME+1];
 static  player_t*  setupm_player;
 static  consvar_t* setupm_cvskin;
 static  consvar_t* setupm_cvcolor;
@@ -1843,7 +1843,7 @@ void M_DrawSetupMultiPlayerMenu(void)
     M_DrawGenericMenu();
 
     // draw name string
-    M_DrawTextBox(mx+PLBOXX, my-8, MAXPLAYERNAME, 1);
+    M_DrawTextBox(mx+PLBOXX, my-8, MAX_PLAYERNAME, 1);
     V_DrawString (mx+PLBOXX+8 ,my, 0, setupm_name);
 
     // draw skin string
@@ -1962,7 +1962,7 @@ void M_MultiPlayer_Responder (int key)
         if (!is_printable(input_char) || itemOn != 0)
           break;
         l = strlen(setupm_name);
-        if (l<MAXPLAYERNAME-1)
+        if (l<MAX_PLAYERNAME-1)
         {
             S_StartSound(menu_sfx_val);
             setupm_name[l] = input_char;
@@ -3715,7 +3715,6 @@ void M_DrawVideoMode(void)
     for(i=0; i<vidm_nummodes; i++)
     {
         mdp = & modedescs[i];
-
 
         V_DrawString (col, row, (mdp == current_modedesc) ? V_WHITEMAP : 0, mdp->desc);
 

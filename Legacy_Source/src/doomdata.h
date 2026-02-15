@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: doomdata.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: doomdata.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2011 by DooM Legacy Team.
@@ -283,17 +283,14 @@ typedef struct mobj_s  mobj_t;
 // WAD lump structure, almost.  P_LoadThings has actual WAD struct.
 typedef struct
 {
-    int16_t             x;
-    int16_t             y;
-    int16_t             z; // Z support for objects SSNTails 07-24-2002
-    int16_t             angle;  // normally (0,90,180,270), reported neg sometimes
-    uint16_t            type;  // DoomEd id number
-    uint16_t            options;  // flags
-    mobj_t            * mobj;  // Extra MapThing, voodoo, and FS tests
+    int16_t     x;
+    int16_t     y;
+    int16_t     z;     // Z support for objects SSNTails 07-24-2002
+    int16_t     angle; // normally (0,90,180,270), reported neg sometimes
+    uint16_t    type;  // DoomEd id number
+    uint16_t    options;  // flags
+    mobj_t  *   mobj;  // Extra MapThing, voodoo, and FS tests
 } mapthing_t;
-
-
-extern char *Color_Names[NUM_SKINCOLORS];
 
 
 #endif  // DOOMDATA_H

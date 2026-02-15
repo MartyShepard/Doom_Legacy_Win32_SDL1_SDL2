@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: info.h 1743 2025-03-26 07:04:22Z wesleyjohnson $
+// $Id: info.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -70,6 +70,7 @@
 #endif
 #endif
 
+// Sprite id
 typedef enum
 {
     SPR_TROO, // 0
@@ -363,16 +364,18 @@ SPR_AMB2,  // 266  (Heretic 125)
     SPR_SPARE1,
     SPR_SPARE2,
     SPR_SPARE3,
-    NUMSPRITES_DEF,
+    NUM_SPRITES_DEF,
 
 #if defined(DEHEXTRA) && (DEHEXTRA_MAX_SPRITES > 267 )
-    NUMSPRITES_EXT = DEHEXTRA_MAX_SPRITES+1
+    NUM_SPRITES_EXT = DEHEXTRA_MAX_SPRITES+1
 #else
-    NUMSPRITES_EXT = NUMSPRITES_DEF
+    NUM_SPRITES_EXT = NUM_SPRITES_DEF
 #endif
 
 } spritenum_e;
 
+
+// Sprite states
 typedef enum
 {
     S_NULL,  // 0
@@ -2615,16 +2618,16 @@ S_DUMMY2,    // 2131
   // 2164
   S_BLANK,     // [WDJ] blank state for compatibility
 
-    NUMSTATES_DEF,
+    NUM_STATES_DEF,
 
   S_SPARE0,
   S_SPARE1,
   S_SPARE2,
   S_SPARE3,
 #if defined(ENABLE_DEHEXTRA) && (DEHEXTRA_MAX_STATES > 2164 )
-    NUMSTATES_EXT = DEHEXTRA_MAX_STATES,
+    NUM_STATES_EXT = DEHEXTRA_MAX_STATES,
 #else
-    NUMSTATES_EXT,
+    NUM_STATES_EXT,
 #endif
 
 } statenum_e;
@@ -2667,8 +2670,8 @@ typedef struct
   uint16_t      state_ext_id;  // rarely used information
 } state_t;
 
-extern state_t  states[NUMSTATES_EXT];
-extern char * sprnames[NUMSPRITES_EXT+1];
+extern state_t  states[NUM_STATES_EXT];
+extern char * sprnames[NUM_SPRITES_EXT+1];
 
 
 

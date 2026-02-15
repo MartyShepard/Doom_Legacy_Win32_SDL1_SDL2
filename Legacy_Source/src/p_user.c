@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_user.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_user.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -739,7 +739,7 @@ boolean P_UndoPlayerChicken( player_t* player )
 #endif
     player->powers[pw_weaponlevel2] = 0;
     player->weaponinfo = wpnlev1info;
-    player->health = pmo->health = MAXHEALTH;
+    player->health = pmo->health = MAX_HEALTH;
 
     // This telefog is placed differently than others.
     int angf = ANGLE_TO_FINE( pmo->angle );

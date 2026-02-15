@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_plane.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_plane.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -100,7 +100,7 @@ planefunction_t         ceilingfunc = NULL;
 
 // [WDJ] visplane base   vispl_
 // Here comes the obnoxious "visplane".
-/*#define                 MAXVISPLANES 128 //SoM: 3/20/2000
+/*#define                 MAX_VISPLANES 128 //SoM: 3/20/2000
 visplane_t*             vispl_head;
 visplane_t*             vispl_last;*/
 
@@ -148,17 +148,17 @@ unsigned int            numffplane;
 //  Init floorclip to SCREENHEIGHT (bottom of screen).
 //  Init ceilingclip to 0 (top of screen).
 //  There are other limit tests applied that will limit the clip to the window.
-int16_t                 floorclip[MAXVIDWIDTH];
-int16_t                 ceilingclip[MAXVIDWIDTH];
-fixed_t                 backscale[MAXVIDWIDTH];
+int16_t                 floorclip[MAX_VIDWIDTH];
+int16_t                 ceilingclip[MAX_VIDWIDTH];
+fixed_t                 backscale[MAX_VIDWIDTH];
 
 
 //
 // spanstart holds the start of a plane span
 // initialized to 0 at start
 //
-int                     spanstart[MAXVIDHEIGHT];
-//int                     spanstop[MAXVIDHEIGHT]; //added:08-02-98: Unused!!
+int                     spanstart[MAX_VIDHEIGHT];
+//int                     spanstop[MAX_VIDHEIGHT]; //added:08-02-98: Unused!!
 
 //
 // texture mapping
@@ -173,17 +173,17 @@ fixed_t                 planeheight;
 //                (this is to calculate yslopes only when really needed)
 //                (when mouselookin', yslope is moving into yslopetab)
 //                Check R_SetupFrame, R_SetViewSize for more...
-fixed_t                 yslopetab[MAXVIDHEIGHT*4];
+fixed_t                 yslopetab[MAX_VIDHEIGHT*4];
 fixed_t*                yslope = NULL;
 
-fixed_t                 distscale[MAXVIDWIDTH];
+fixed_t                 distscale[MAX_VIDWIDTH];
 fixed_t                 base_scale_x;
 fixed_t                 base_scale_y;
 
-fixed_t                 cachedheight[MAXVIDHEIGHT];
-fixed_t                 cacheddistance[MAXVIDHEIGHT];
-fixed_t                 cachedxstep[MAXVIDHEIGHT];
-fixed_t                 cachedystep[MAXVIDHEIGHT];
+fixed_t                 cachedheight[MAX_VIDHEIGHT];
+fixed_t                 cacheddistance[MAX_VIDHEIGHT];
+fixed_t                 cachedxstep[MAX_VIDHEIGHT];
+fixed_t                 cachedystep[MAX_VIDHEIGHT];
 
 fixed_t   xoffs, yoffs;
 
@@ -275,8 +275,8 @@ void R_MapPlane ( int y, int x1, int x2 )
     {
         index = distance >> LIGHTZSHIFT;
 
-        if (index >= MAXLIGHTZ )
-            index = MAXLIGHTZ-1;
+        if (index >= MAX_LIGHTZ )
+            index = MAX_LIGHTZ-1;
 
         ds_colormap = planezlight[index];
         if(vsp_currentplane->extra_colormap || view_colormap)

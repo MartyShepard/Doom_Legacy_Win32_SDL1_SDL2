@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hw_defs.h 1593 2021-10-16 07:36:40Z wesleyjohnson $
+// $Id: hw_defs.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -295,7 +295,7 @@ typedef enum {
     HWD_SET_POLYGON_SMOOTH,
     HWD_SET_TINT_COLOR,  // damage and special object palette
     HWD_SET_TEXTUREFILTERMODE,
-    HWD_NUMSTATE,
+    HWD_NUM_STATE,
     // [WDJ] Stifle compiler complaints
     // Unknown where this value is ever set
     HWD_MIRROR_77 = 77  // see SetSpecialState where it does ClearBuffer

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: d_main.c 1763 2025-11-20 11:49:30Z wesleyjohnson $
+// $Id: d_main.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2024 by DooM Legacy Team.
@@ -660,7 +660,7 @@ void  owner_wad_search_order( void )
 // Events can be discarded if no responder claims them
 // referenced from i_system.c for I_GetKey()
 
-event_t events[MAXEVENTS];
+event_t events[MAX_EVENTS];
 int eventhead = 0;
 int eventtail = 0;
 
@@ -671,7 +671,7 @@ int eventtail = 0;
 void D_PostEvent(const event_t * ev)
 {
     events[eventhead] = *ev;
-    eventhead = (eventhead + 1) & (MAXEVENTS - 1);
+    eventhead = (eventhead + 1) & (MAX_EVENTS - 1);
 }
 
 // just for lock this function
@@ -709,7 +709,7 @@ void D_Process_Events(void)
           G_Responder(ev);
 
         eventtail++;
-        eventtail = eventtail & (MAXEVENTS - 1);
+        eventtail = eventtail & (MAX_EVENTS - 1);
     }
 }
 

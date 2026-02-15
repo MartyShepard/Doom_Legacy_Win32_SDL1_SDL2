@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hw_md2.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: hw_md2.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -63,7 +63,7 @@
 
 
 // Only for known sprites
-md2_t md2_models[NUMSPRITES_DEF];
+md2_t md2_models[NUM_SPRITES_DEF];
 
 //
 // load model
@@ -567,7 +567,7 @@ void HWR_Init_MD2()
     float   scale, offset;
 
     CONS_Printf("InitMD2()...\n");
-    for (i=0; i<NUMSPRITES_DEF; i++)
+    for (i=0; i<NUM_SPRITES_DEF; i++)
     {
         md2_models[i].scale = -1.0f;
         md2_models[i].model = NULL;
@@ -593,7 +593,7 @@ void HWR_Init_MD2()
 #endif
     while ( (i=fscanf(f, "%s %s %f %f", name, filename, &scale, &offset)) == 4)
     {
-        for (i=0; i<NUMSPRITES_DEF; i++)
+        for (i=0; i<NUM_SPRITES_DEF; i++)
         {
             if (!strcmp(name, sprnames[i]))
             {
@@ -604,7 +604,7 @@ void HWR_Init_MD2()
                 break;
             }
         }
-        if (i==NUMSPRITES_DEF)
+        if (i==NUM_SPRITES_DEF)
         {
             CONS_Printf("    Not found: %s\n", name);
         }

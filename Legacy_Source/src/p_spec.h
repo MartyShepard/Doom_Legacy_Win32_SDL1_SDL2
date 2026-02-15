@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_spec.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_spec.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -376,16 +376,16 @@ typedef struct
 
 
  // max # of wall switches in a level
-#define MAXSWITCHES             50
+#define MAX_SWITCHES             50
 
  // 4 players, 4 buttons each at once, max.
- // added 19-1-98 16->MAXPLAYERS*4
-#define MAXBUTTONS           (MAXPLAYERS*4) //16
+ // added 19-1-98 16->MAX_PLAYERS*4
+#define MAX_BUTTONS           (MAX_PLAYERS*4) //16
 
  // 1 second, in ticks.
 #define BUTTONTIME      35
 
-extern button_t buttonlist[MAXBUTTONS];
+extern button_t buttonlist[MAX_BUTTONS];
 
 void P_ChangeSwitchTexture ( line_t* line, int useAgain );
 
@@ -487,7 +487,7 @@ void   P_Remove_AllActivePlats(void); //SoM: 3/9/2000
 
 #define PLATWAIT                3
 #define PLATSPEED               (FRACUNIT/NEWTICRATERATIO)
-#define MAXPLATS                30
+#define MAX_PLATS                30
 
 
 extern platlist_t * activeplats;
@@ -664,7 +664,7 @@ typedef struct
 #define SWAITTICS               4
 
 // how many diff. types of anims
-#define MAXSLIDEDOORS   5
+#define MAX_SLIDEDOORS   5
 
 void  P_Init_SlidingDoorFrames(void);
 
@@ -745,7 +745,7 @@ void P_Remove_AllActiveCeilings(void); //SoM: 3/9/2000
 
 #define CEILSPEED               (FRACUNIT/NEWTICRATERATIO)
 #define CEILWAIT                150
-#define MAXCEILINGS             30
+#define MAX_CEILINGS             30
 
 extern ceilinglist_t* activeceilings;  //SoM: 3/6/2000: New improved boom code.
 

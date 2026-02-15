@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_saveg.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_saveg.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2017 by DooM Legacy Team.
@@ -601,7 +601,7 @@ void P_ArchivePlayers(void)
     uint32_t diff;
     player_t * ply;
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < MAX_PLAYERS; i++)
     {
         if (!playeringame[i])
             continue;
@@ -658,7 +658,7 @@ void P_ArchivePlayers(void)
         WRITEBYTE(save_p, ply->playerstate);
 
         WRITEU16(save_p, ply->addfrags);
-        for (j = 0; j < MAXPLAYERS; j++)
+        for (j = 0; j < MAX_PLAYERS; j++)
         {
             if (playeringame[j])	// [WDJ] was [i] which was useless
                 WRITEU16(save_p, ply->frags[j]);
@@ -749,7 +749,7 @@ void P_UnArchivePlayers(void)
     player_t * ply;
        
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < MAX_PLAYERS; i++)
     {
         SG_Readbuf();
 
@@ -781,7 +781,7 @@ void P_UnArchivePlayers(void)
         ply->playerstate = READBYTE(save_p);
 
         ply->addfrags = READU16(save_p);
-        for (j = 0; j < MAXPLAYERS; j++)
+        for (j = 0; j < MAX_PLAYERS; j++)
         {
             if (playeringame[j])	// [WDJ] was [i] which was useless
                 ply->frags[j] = READU16(save_p);
@@ -2521,7 +2521,7 @@ void P_UnArchiveThinkers(void)
                 if (diff1 & MD_PLAYER)
                 {
                     i = READBYTE(save_p);
-                    if( i < MAXPLAYERS )
+                    if( i < MAX_PLAYERS )
                     {
                         mobj->player = &players[i];
                         mobj->player->mo = mobj;  // connect player to this mobj
@@ -2531,7 +2531,7 @@ void P_UnArchiveThinkers(void)
                         if (displayplayer2 == i)  // player 2
                             localangle[1] = mobj->angle;
                     }
-                    else if( i >= 128 && i < MAXPLAYERS+128 )
+                    else if( i >= 128 && i < MAX_PLAYERS+128 )
                     {
                         // voodoo dolls
                         i -= 128; // voodoo doll flag
@@ -3582,7 +3582,7 @@ void P_Archive_Bots()
     bot_t * botp;
     byte  saveflags;
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < MAX_PLAYERS; i++)
     {
         if (!playeringame[i])  continue;
 
@@ -3657,10 +3657,10 @@ void P_UnArchive_Bots()
         SG_Readbuf();
 
         playernum = READBYTE(save_p);
-        if( playernum > MAXPLAYERS )
+        if( playernum > MAX_PLAYERS )
         {
             I_SoftError( "SaveGame Bots: Bad Player number\n" );
-            playernum = MAXPLAYERS - 1;
+            playernum = MAX_PLAYERS - 1;
         }
         player = & players[playernum];
 
@@ -3723,7 +3723,7 @@ void P_ArchiveMisc()
     WRITEBYTE(save_p, gameepisode);
     WRITEBYTE(save_p, gamemap);
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < MAX_PLAYERS; i++)
         pig |= (playeringame[i] != 0) << i;
 
     WRITEU32(save_p, pig);
@@ -3753,7 +3753,7 @@ boolean P_UnArchiveMisc()
 
     pig = READU32(save_p);
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < MAX_PLAYERS; i++)
     {
         playeringame[i] = (pig & (1 << i)) != 0;
         player_state[i] = (playeringame[i])? PS_player_from_savegame : 0;

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hw_md2.h 1718 2025-01-25 05:50:41Z wesleyjohnson $
+// $Id: hw_md2.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -116,11 +116,11 @@ typedef struct
 typedef struct
 {
     md2_header_t            header;
-    md2_skin_t              *skins;
-    md2_textureCoordinate_t *texCoords;
-    md2_triangle_t          *triangles;
-    md2_frame_t             *frames;
-    int                     *glCommandBuffer;
+    md2_skin_t *            skins;
+    md2_textureCoordinate_t * texCoords;
+    md2_triangle_t *        triangles;
+    md2_frame_t *           frames;
+    int *                   glCommandBuffer;
 } md2_model_t;
 
 typedef struct
@@ -128,20 +128,20 @@ typedef struct
     char        filename[32];
     float       scale;
     float       offset;
-    md2_model_t *model;
+    md2_model_t * model;
     int         texture;
 } md2_t;
 
-extern md2_t md2_models[NUMSPRITES_DEF];
+extern md2_t md2_models[NUM_SPRITES_DEF];
 
-md2_model_t *md2_readModel (const char *filename);
-void md2_freeModel (md2_model_t *model);
-void md2_getBoundingBox (md2_model_t *model, float *minmax);
+md2_model_t * md2_readModel (const char * filename);
+void md2_freeModel (md2_model_t * model);
+void md2_getBoundingBox (md2_model_t * model, float * minmax);
 int  md2_getAnimationCount (md2_model_t *model);
-const char *md2_getAnimationName (md2_model_t *model, int animation);
-void md2_getAnimationFrames (md2_model_t *model, int animation, int *startFrame, int *endFrame);
-void md2_printModelInfo (md2_model_t *model);
-int  md2_loadTexture (const char *filename);
+const char * md2_getAnimationName (md2_model_t * model, int animation);
+void md2_getAnimationFrames (md2_model_t * model, int animation, int * startFrame, int * endFrame);
+void md2_printModelInfo (md2_model_t * model);
+int  md2_loadTexture (const char * filename);
 
 void HWR_Init_MD2();
 void HWR_DrawMD2(gr_vissprite_t* spr);

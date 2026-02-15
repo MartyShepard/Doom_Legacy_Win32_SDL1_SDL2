@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: wi_stuff.h 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: wi_stuff.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -40,10 +40,10 @@
 
 //added:05-02-98:
 typedef struct {
-    int  count;
-    int  num;
-    int  color;
-    char *name;
+    char * name;
+    int  count;  // can maybe be negative too.
+    byte num;
+    byte color;
 } fragsort_t;
 
 // Called by main loop, animate the intermission.

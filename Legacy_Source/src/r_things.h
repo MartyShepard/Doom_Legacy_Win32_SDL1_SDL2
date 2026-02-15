@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_things.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: r_things.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -71,15 +71,15 @@
 #endif
 
 
-// MAXVISSPRITES was 128, then 256 (2-2-98)
-#define MAXVISSPRITES   16000
+// MAX_VISSPRITES was 128, then 256 (2-2-98)
+#define MAX_VISSPRITES   16000
  // [WDJ] Remove sprite limits. This is tuning not a hard limit.
 extern consvar_t  cv_spritelim;
 
 // Constant arrays used for psprite clipping
 //  and initializing clipping.
-extern int16_t          clip_screen_top_min[MAXVIDWIDTH];
-extern int16_t          clip_screen_bot_max[MAXVIDWIDTH];
+extern int16_t          clip_screen_top_min[MAX_VIDWIDTH];
+extern int16_t          clip_screen_bot_max[MAX_VIDWIDTH];
 
 // vars for R_DrawMaskedColumn
 // clipping array[x], in int screen coord.
@@ -141,7 +141,7 @@ typedef struct
 } skin_t;
 
 extern int       numskins;
-extern skin_t *  skins[MAXSKINS+1];
+extern skin_t *  skins[MAX_SKINS+1];
 extern consvar_t cv_skin[2];
 
 void    SetPlayerSkin_by_index( player_t * player, int index );

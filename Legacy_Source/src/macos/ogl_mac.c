@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: ogl_mac.c 1085 2014-02-03 17:32:31Z wesleyjohnson $
+// $Id: ogl_mac.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -37,7 +37,7 @@
 #include "doomincl.h"
 #include "i_system.h"
 #include "r_opengl.h"
-#include "screen.h"	//MAXVIDWIDTH
+#include "screen.h"	//MAX_VIDWIDTH
 
 AGLContext	ctx = NULL;
 int    oglflags = 0;

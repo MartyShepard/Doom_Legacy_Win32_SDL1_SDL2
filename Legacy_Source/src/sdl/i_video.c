@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: i_video.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: i_video.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -222,7 +222,7 @@ static int windowedModes[MAXWINMODES+1][2] = {
    // hidden from display
     {INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT},  // initial mode
    // public  1..
-    {MAXVIDWIDTH /*1600*/, MAXVIDHEIGHT/*1200*/},
+    {MAX_VIDWIDTH /*1600*/, MAX_VIDHEIGHT/*1200*/},
 #ifdef EXP_RATIO // Marty: Added Modes
     {5793, 3055},
     {5461, 2880},
@@ -600,8 +600,8 @@ boolean  VID_Query_Modelist( byte request_drawmode, byte request_fullscreen, byt
        //byte bpp = SDL_BITSPERPIXEL( mode.format );
          byte bpp = Query_Screen_Modes_PixelFormat(num_modes, request_bitpp, mode); // Marty
         if( (bpp == request_bitpp)
-            && (mode.w <= MAXVIDWIDTH)
-            && (mode.h <= MAXVIDHEIGHT) )
+            && (mode.w <= MAX_VIDWIDTH)
+            && (mode.h <= MAX_VIDHEIGHT) )
         {
 # ifdef DEBUG_VID
                 printf( "VALID\n" );
@@ -676,8 +676,8 @@ void  VID_make_fullscreen_modelist( byte request_bitpp )
         }
 
         if( (bpp == request_bitpp)
-            && (mode.w <= MAXVIDWIDTH)
-            && (mode.h <= MAXVIDHEIGHT) )
+            && (mode.w <= MAX_VIDWIDTH)
+            && (mode.h <= MAX_VIDHEIGHT) )
         {
             add_vid_mode( mode.w, mode.h );
         }
@@ -743,7 +743,7 @@ void  VID_make_fullscreen_modelist( byte request_bitpp )
                      (((i&0x03)==0)?(i)?"\nModes ":"Modes ":""),
                      modelist[i]->w, modelist[i]->h );
         }
-        if((modelist[i]->w <= MAXVIDWIDTH) && (modelist[i]->h <= MAXVIDHEIGHT))
+        if((modelist[i]->w <= MAX_VIDWIDTH) && (modelist[i]->h <= MAX_VIDHEIGHT))
         {
             add_vid_mode( modelist[i]->w, modelist[i]->h );
         }
@@ -1807,7 +1807,7 @@ void Get_Screen_Modes_Pixelformat(int num_modes, byte modelist_bpp, byte request
 
     if ( modelist_bpp == bpp )
     {
-      if( (bpp == request_bitpp) && (mode.w <= MAXVIDWIDTH) && (mode.h <= MAXVIDHEIGHT) )      
+      if( (bpp == request_bitpp) && (mode.w <= MAX_VIDWIDTH) && (mode.h <= MAX_VIDHEIGHT) )      
             add_vid_mode( mode.w, mode.h );    
     }
 
