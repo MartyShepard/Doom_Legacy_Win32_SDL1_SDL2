@@ -1,4 +1,4 @@
-Doom Legacy 1.48.19 (1773)  [Underbuild 002: 2026-01-28]
+Doom Legacy 1.48.19 (1776)  [Underbuild 003: 2026-02-16]
 
 	Compiled with GCC-7.2.0
   Windows 7/ 32GB / FX8350/ RTX 2060[12GB]/ Asus Xonar
@@ -60,6 +60,17 @@ Doom Legacy 1.48.19 (1773)  [Underbuild 002: 2026-01-28]
 		
     SDL2 Only:		
 	  - From v2.0.20 to v2.0.32	... ach ne .. von v2.20.0 to v2.32.0 .. 
+
+ !=================================================================================================!
+  Update: Underbuild 003  
+  Fixed Enddoom text windows cmd
+  For Original Endoom Texts take Legacy.wad. For Legacy Default Enddom text take Legacy_enddom.wad
+  Change the Textout command:
+    0 = Off (No endpoint text is displayed)
+    1 = Standard Text (No color)
+    2 = Color (Console is reset with a black background and white text)
+    3 = Color (Console is reset with a blue background and white text)
+    4 = Color (Console is reset to standard colors; this may or may not work. It hasn't for me yet.)
   
 	
 	* Todo

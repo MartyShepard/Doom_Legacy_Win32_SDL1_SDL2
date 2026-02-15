@@ -518,8 +518,15 @@ consvar_t cv_msg_fontsize =
 // Controls FinalText output.
 CV_PossibleValue_t textout_sel_t[] = {
    {0,"Off"},
+#if !defined (__WIN32__) // Marty: Modified EndText for WindowsCMD 
    {1,"Vanilla"},
    {2,"UTF8"},
+#else
+   {1,"Vanilla Plain"},
+   {2,"Vanilla Color (Black)"},  // Reset the Prompt to Black(BG)/White(Txt Col)
+   {3,"Vanilla Color (Blue)"},   // Reset the Prompt to Blue(BG)/White(Txt Col)
+   {4,"Vanilla Color (Default)"},// Reset the Prompt to Default(BG)/White(Txt Col)   
+#endif
    {0,NULL} };
 consvar_t cv_textout = { "textout", "2", CV_SAVE, textout_sel_t, NULL };
 

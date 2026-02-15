@@ -598,7 +598,7 @@
 		#define VALUE_LEGALCOPYRIGHT   "Copyright (C) 1998-2024 by DooM Legacy Team"
 		#define VALUE_LEGALTRADEMARKS  "Compiled from Marty 2026"
 		#define VALUE_ORIGINALFILENAME "DoomLegacy.exe"
-		#define VALUE_PRODUCTNAME      "Doom Legacy Underbuild v002"
+		#define VALUE_PRODUCTNAME      "Doom Legacy Underbuild v003"
 		#define VALUE_PRIVATEBUILD     ""
 		#define VALUE_SPECIALBUILD     ""
 

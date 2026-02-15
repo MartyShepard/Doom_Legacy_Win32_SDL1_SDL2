@@ -54,6 +54,8 @@
 
 // When have UTF capable term, and it has the fonts, and UTF8 is choosen as the encoding.
 // This could be disabled for DOS and some Windows.
+#if !defined (__WIN32__)
+
 #define CP437_TO_UTF
 
 #ifdef CP437_TO_UTF
@@ -172,14 +174,14 @@ void I_Show_EndText( uint16_t * text )
 #if 0
 //	char *col;
 
-	/* if the xterm has more then 80 columns we need to add nl's */
-	/* doesn't work, COLUMNS is not in the environment at this time ???
-	col = getenv("COLUMNS");
-	if (col) {
-		if (atoi(col) > 80)
-			nlflag++;
-	}
-	*/
+  /* if the xterm has more then 80 columns we need to add nl's */
+  /* doesn't work, COLUMNS is not in the environment at this time ???
+  col = getenv("COLUMNS");
+  if (col) {
+    if (atoi(col) > 80)
+      nlflag++;
+  }
+  */
 #endif
 
 #ifdef TEST_TABLES_OUT
@@ -223,7 +225,7 @@ void I_Show_EndText( uint16_t * text )
     {
         // [MB] 2020-04-26: Fixed endianess
         uint16_t ac = (uint16_t)LE_SWAP16(*text++);
-	// attribute is first in 16 bit char.
+  // attribute is first in 16 bit char.
         byte att = ac >> 8;
         byte c = ac & 0xff;
 
@@ -240,7 +242,7 @@ void I_Show_EndText( uint16_t * text )
         // forground color
         byte fg = att & 0x0f;
         // background color
-	// [MB] 2020-04-26: Mask only bg color bits here
+  // [MB] 2020-04-26: Mask only bg color bits here
 #ifdef MSB_BLINK
         byte bg = (att >> 4) & 0x07;  // MSB is blink
 #else
@@ -248,29 +250,29 @@ void I_Show_EndText( uint16_t * text )
 #endif
         printf("\033[%sm\033[%sm", fg_att_str[fg], bg_att_str[bg] );
 
-	// now the text
+  // now the text
 #ifdef CP437_TO_UTF
         if( cv_textout.EV == 2 )  // UTF8
         {
             // [MB] 2020-04-26: Convert data to Unicode and print as UTF-8
             printf( "%s", cp437_to_utf[c] );
-	}
+  }
         else
         {
             putchar( c );
-	}
+  }
 #else
         putchar( c );
 #endif
 
-	// do we need a nl?
+  // do we need a nl?
         if( nlflag )
         {
-	    if( !(i % 80) )  // end of screen
+      if( !(i % 80) )  // end of screen
             {
                 printf("\033[0m");
                 printf("\n");
-	    }
+      }
         }
     }
 #endif  // TEST_TABLES_OUT
@@ -281,3 +283,138 @@ void I_Show_EndText( uint16_t * text )
     if( nlflag )
         printf("\n");
 }
+
+#else // __WIN32__
+
+#include <windows.h>     // Muss oben stehen
+#include <stdbool.h>     // Für bool (falls nicht: int + 1/0 nutzen)
+
+void I_EndText_Plain(uint16_t *text)
+{ 
+    // Für die gute Sitte, falls jemand danach etwas anderes erwartet
+    UINT oldCP = GetConsoleOutputCP();
+   
+    SetConsoleOutputCP(437);  // für ▀ ─ etc.
+   
+    putchar('\n'); 
+    putchar('\n');
+    
+    int pos = 0;
+    while (pos < 2000)    
+    {
+      putchar(*text++ & 0xff);
+      pos++;
+
+      if (pos % 80 == 0)
+        putchar('\n');
+    }
+
+    SetConsoleOutputCP(oldCP);
+    
+    putchar('\n');   // letzte Zeile + eine Leerzeile danach
+       
+    return;
+}
+
+void I_EndText_Color(uint16_t *text)
+{
+   HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+   if (hConsole == INVALID_HANDLE_VALUE)
+        return;
+
+    CONSOLE_SCREEN_BUFFER_INFOEX csbiex = {0};
+    csbiex.cbSize = sizeof(csbiex);
+    
+    // 1. Aktuelle Farben + Attribute merken
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (!GetConsoleScreenBufferInfo(hConsole, &csbi))
+    {
+        // Falls das scheitert, einfach ohne Farben weitermachen
+        //goto plain_text;
+        // I_EndText_Plain(text);
+    }
+      
+   putchar('\n'); 
+   putchar('\n');
+   
+   // Für die gute Sitte, falls jemand danach etwas anderes erwartet
+   UINT oldCP = GetConsoleOutputCP();
+   
+   SetConsoleOutputCP(437);  // für ▀ ─ etc.
+   WORD currentAttributes  = csbi.wAttributes;   
+    // currentAttributes enthält genau das, was SetConsoleTextAttribute setzt:
+    //   - Bits 0–3:   Foreground-Farbe
+    //   - Bits 4–7:   Background-Farbe
+    //   - Bit  8:     Intensity (heller Text)
+    //   - Bit  15:    Blink (wenn unterstützt)
+    
+    WORD last_attr = 0xFFFF;
+
+    for (int i = 0; i < 2000; i++)
+    {
+        uint16_t word = *text++;
+        byte attrib = (word >> 8) & 0xFF;
+        byte ch     = word & 0xFF;
+
+        byte fg = attrib & 0x0F;
+        byte bg = (attrib >> 4) & 0x0F;
+
+        WORD wAttr = 0;
+        if (fg & 1) wAttr |= FOREGROUND_BLUE;
+        if (fg & 2) wAttr |= FOREGROUND_GREEN;
+        if (fg & 4) wAttr |= FOREGROUND_RED;
+        if (fg & 8) wAttr |= FOREGROUND_INTENSITY;
+
+        if (bg & 1) wAttr |= BACKGROUND_BLUE;
+        if (bg & 2) wAttr |= BACKGROUND_GREEN;
+        if (bg & 4) wAttr |= BACKGROUND_RED;
+        if (bg & 8) wAttr |= BACKGROUND_INTENSITY;
+
+        if (wAttr != last_attr) {
+            SetConsoleTextAttribute(hConsole, wAttr);
+            last_attr = wAttr;
+        }
+
+        putchar(ch);
+
+        if ((i + 1) % 80 == 0)
+            putchar('\n');
+    }
+
+    // Optional: Leerzeile danach (wie im Original)
+    putchar('\n');
+
+    // 2. ALLES zurücksetzen – das ist der entscheidende Teil!
+    SetConsoleTextAttribute(hConsole, currentAttributes );
+    
+    if( cv_textout.EV == 2 )
+        SetConsoleTextAttribute(hConsole, FOREGROUND_RED   |
+                                          FOREGROUND_GREEN |
+                                          FOREGROUND_BLUE  |
+                                          FOREGROUND_INTENSITY);
+    
+    if( cv_textout.EV == 3 )
+        SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE  |
+                                          FOREGROUND_RED   |
+                                          FOREGROUND_GREEN |
+                                          FOREGROUND_BLUE  |
+                                          FOREGROUND_INTENSITY);
+    
+    SetConsoleOutputCP(oldCP);
+    return;  
+}
+
+void I_Show_EndText(uint16_t *text)
+{
+
+  if( cv_textout.EV == 1 )
+    I_EndText_Plain(text);
+  
+  if((cv_textout.EV == 2) ||
+     (cv_textout.EV == 3) ||
+     (cv_textout.EV == 4) )
+    I_EndText_Color(text);
+   
+}
+
+#endif
