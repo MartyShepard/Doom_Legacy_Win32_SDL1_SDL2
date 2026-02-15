@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hu_stuff.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: hu_stuff.c 1775 2026-02-07 13:48:15Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -1028,17 +1028,16 @@ void HU_Erase (void)
 
 // count frags for each team
 int HU_Create_TeamFragTbl(fragsort_t* fragtab,
-                         int dmtotals[], int fragtbl[MAX_PLAYERS][MAX_PLAYERS])
+                          int dmtotals[], int fragtbl[MAX_PLAYERS][MAX_PLAYERS])
 {
-    int i,j,k,scorelines,team;
+    int i,j,k,scorelines;
 
     scorelines = 0;
     for (i=0; i<MAX_PLAYERS; i++)
     {
         if (playeringame[i])
         {
-            team = (cv_teamplay.EV==1) ? players[i].skincolor
-                                       : players[i].skin;
+            byte team = player_to_team(i);
 
             for(j=0; j<scorelines; j++)
             {
@@ -1050,9 +1049,8 @@ int HU_Create_TeamFragTbl(fragsort_t* fragtab,
                          {
                              if(playeringame[k])
                              {
-                                 int k_indx = (cv_teamplay.EV==1) ?
-                                     players[k].skincolor : players[k].skin;
-                                 fragtbl[team][k_indx] += players[i].frags[k];
+                                 byte k_team = player_to_team(k);
+                                 fragtbl[team][k_team] += players[i].frags[k];
                              }
                          }
                      }
@@ -1084,9 +1082,8 @@ int HU_Create_TeamFragTbl(fragsort_t* fragtab,
                     {
                         if(playeringame[k])
                         {
-                            int k_indx = (cv_teamplay.EV==1) ?
-                                players[k].skincolor : players[k].skin;
-                            fragtbl[team][k_indx] += players[i].frags[k];
+                            int k_team = player_to_team(k);
+                            fragtbl[team][k_team] += players[i].frags[k];
                         }
                     }
                 }
@@ -1176,6 +1173,63 @@ void HU_Draw_DeathmatchRankings (void)
         WI_Draw_Ranking("Teams", 80, y, fragtab, scorelines, large, players[whiteplayer].skincolor, 32);
     }
 }
+
+// Limited by display space, and the number of team colors.
+// Number of teams: MAX_TEAMS  32
+// #define MAX_TEAM_COLORS   11
+#define MAX_TEAM_COLORS   NUM_SKINCOLORS
+
+
+// Called by Command_TeamFrags_f
+void HU_show_team_frag_table(void)
+{
+    // Frags can go negative too.
+    fragsort_t unused[MAX_PLAYERS];
+    int frags[MAX_PLAYERS];
+    int fragtbl[MAX_PLAYERS][MAX_PLAYERS];
+
+    HU_Create_TeamFragTbl(unused, frags, fragtbl);
+
+    // The specifics of cv_teamplay, are handled by team_in_game
+    // and get_team_name.
+    byte i;
+    for (i = 0; i < MAX_TEAMS; i++)
+    {
+        // Teams exist by having a player of that skincolor, or skin.
+        if( team_in_game(i) )
+        {
+            CONS_Printf("%-8s", get_team_name(i));
+            byte j;
+            for (j = 0; j < MAX_TEAMS; j++)
+            {
+                if (team_in_game(j))
+                  CONS_Printf(" %3d", fragtbl[i][j]);
+            }
+            CONS_Printf("\n");
+        }
+    }
+}
+
+    
+// Called by Command_Frags_f
+void HU_show_player_frags(void)
+{
+    int i, j;
+    for (i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (playeringame[i])
+        {
+            CONS_Printf("%-16s", player_names[i]);
+            for (j = 0; j < MAX_PLAYERS; j++)
+            {
+                if (playeringame[j])
+                    CONS_Printf(" %3d", players[i].frags[j]);
+            }
+            CONS_Printf("\n");
+        }
+    }
+}
+
 
 
 // draw the Crosshair, at the exact center of the view.

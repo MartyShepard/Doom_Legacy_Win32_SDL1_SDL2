@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: wi_stuff.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: wi_stuff.c 1775 2026-02-07 13:48:15Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -1378,13 +1378,14 @@ static void WI_Draw_DeathmatchStats(void)
             fragtab[scorelines].count = 0;
             for (j=0; j<MAX_PLAYERS; j++)
             {
-                if (playeringame[j] && i!=j)
+                if( i!=j && playeringame[j] )
                 {
-                     if(dm_frags[i][j]>dm_frags[j][i])
-                         fragtab[scorelines].count+=3;
-                     else
-                         if(dm_frags[i][j]==dm_frags[j][i])
-                              fragtab[scorelines].count+=1;
+                    int f_ij = dm_frags[i][j];
+                    int f_ji = dm_frags[j][i];
+                    if( f_ij > f_ji )
+                      fragtab[scorelines].count+=3;
+                    else if( f_ij == f_ji )
+                      fragtab[scorelines].count+=1;
                 }
             }
 
@@ -1411,44 +1412,120 @@ static void WI_Draw_DeathmatchStats(void)
             fragtab[scorelines].num   = i;
             fragtab[scorelines].color = players[i].skincolor;
             fragtab[scorelines].name  = player_names[i];
-
             scorelines++;
         }
     }
     WI_Draw_Ranking("deads", 245, RANKINGY, fragtab, scorelines, false, whiteplayer, 6);
 }
 
-boolean teamingame(int teamnum)
-{
-   int i;
 
-   if( cv_teamplay.EV == 1 )
-   {
-       for(i=0;i<MAX_PLAYERS;i++)
-       {
-          if(playeringame[i] && players[i].skincolor==teamnum)
-              return true;
-       }
-   }
-   else
-   if( cv_teamplay.EV == 2)
-   {
-       for(i=0;i<MAX_PLAYERS;i++)
-       {
-          if(playeringame[i] && players[i].skin==teamnum)
-              return true;
-       }
-   }
-   return false;
+// return teamid currently in use.
+byte  player_to_team( byte player_id )
+{
+    switch( cv_teamplay.EV )
+    {
+     case 1:
+        return  players[player_id].skin;  // teams by skin
+     case 2:
+        return  players[player_id].skincolor;  // otherwise, team by color
+    }
+    return 0xFF;
 }
+
+
+// Teams identified by a player of that skincolor.
+// teamid : skincolor 0..NUM_SKINCOLORS-1 or skin 0..MAX_SKINS
+boolean team_in_game( byte teamid )
+{
+    int i;
+    
+    if( cv_teamplay.EV == 0 )
+      return false;
+
+    for(i=0; i<MAX_PLAYERS; i++)
+    {
+        if( playeringame[i] )
+        {
+            if( player_to_team(i) == teamid )
+              return true;
+        }
+    }
+    return false;
+}
+
+
+// Return scorelines
+//   stattype: 0=dead, 1=indiv, 2=bucholtz
+static
+unsigned int count_team_stats( fragsort_t * fragtab, byte stattype )
+{
+    byte teamid;
+    byte num_on_team;
+    unsigned int scorelines = 0;
+    for (teamid=0; teamid<MAX_TEAMS; teamid++)
+    {
+        num_on_team = 0;
+
+        int i;
+        for (i=0; i<MAX_PLAYERS; i++)
+        {
+            if( ! playeringame[i] )
+              continue;
+
+            if( player_to_team(i) != teamid )
+              continue;
+
+            num_on_team ++;
+            fragtab[scorelines].count = 0;
+            int j;
+            for (j=0; j<MAX_PLAYERS; j++)
+            {
+                if( i==j || ! playeringame[j] )
+                  continue;
+
+                if( player_to_team(j) == teamid )  // other teams only
+                  continue;
+
+                switch( stattype )
+                {
+                 case 0: // deads
+                    fragtab[scorelines].count += dm_frags[j][i];
+                    break;
+                 case 1: // indiv.
+                    {
+                        int f_ij = dm_frags[i][j];
+                        int f_ji = dm_frags[j][i];
+                        if( f_ij > f_ji )
+                          fragtab[scorelines].count+=3;
+                        else if( f_ij == f_ji )
+                          fragtab[scorelines].count+=1;
+                    }
+                    break;
+                 case 2: // Buchholz
+                    fragtab[scorelines].count += dm_frags[i][j]*dm_totals[j];
+                    break;
+                }
+            }
+        }
+
+        if( num_on_team )
+        {
+            fragtab[scorelines].num   = teamid;
+            fragtab[scorelines].color = teamid;
+            fragtab[scorelines].name  = get_team_name(teamid);
+            scorelines++;
+        }
+    }
+    return scorelines;
+}
+
 
 // Called by WI_Drawer
 static void WI_Draw_TeamsStats(void)
 {
-    int          i,j;
-    int          scorelines;
-    int          whiteplayer;
     fragsort_t   fragtab[MAX_PLAYERS];
+    unsigned int scorelines;
+    int          whiteplayer;
 
     // all WI is draw screen0, scale
     WI_Slam_Background();
@@ -1468,79 +1545,24 @@ static void WI_Draw_TeamsStats(void)
                                    : consoleplayer_ptr->skin;
 
     // count frags for each present player
-    scorelines = HU_Create_TeamFragTbl(fragtab,dm_totals,dm_frags);
+    scorelines = HU_Create_TeamFragTbl(fragtab, dm_totals, dm_frags);
 
     WI_Draw_Ranking("Frags", 5, 80, fragtab, scorelines, false, whiteplayer, 6);
 
+    // Go through all players, collect team stats.
     // count buchholz
-    scorelines = 0;
-    for (i=0; i<MAX_PLAYERS; i++)
-    {
-        if (teamingame(i))
-        {
-            fragtab[scorelines].count = 0;
-            for (j=0; j<MAX_PLAYERS; j++)
-            {
-                if (teamingame(j) && i!=j)
-                    fragtab[scorelines].count+= dm_frags[i][j]*dm_totals[j];
-            }
-
-            fragtab[scorelines].num   = i;
-            fragtab[scorelines].color = i;
-            fragtab[scorelines].name  = get_team_name(i);
-            scorelines++;
-        }
-    }
+    scorelines = count_team_stats( fragtab, 2 ); // buchholz
     WI_Draw_Ranking("Buchholz", 85, 80, fragtab, scorelines, false, whiteplayer, 6);
 
     // count individuel
-    scorelines = 0;
-    for (i=0; i<MAX_PLAYERS; i++)
-    {
-        if (teamingame(i))
-        {
-            fragtab[scorelines].count = 0;
-            for (j=0; j<MAX_PLAYERS; j++)
-            {
-                if (teamingame(j) && i!=j)
-                {
-                     if(dm_frags[i][j]>dm_frags[j][i])
-                         fragtab[scorelines].count+=3;
-                     else
-                         if(dm_frags[i][j]==dm_frags[j][i])
-                              fragtab[scorelines].count+=1;
-                }
-            }
-
-            fragtab[scorelines].num = i;
-            fragtab[scorelines].color = i;
-            fragtab[scorelines].name  = get_team_name(i);
-            scorelines++;
-        }
-    }
+    scorelines = count_team_stats( fragtab, 1 ); // Individual
     WI_Draw_Ranking("indiv.", 165, 80, fragtab, scorelines, false, whiteplayer, 6);
 
     // count deads
-    scorelines = 0;
-    for (i=0; i<MAX_PLAYERS; i++)
-    {
-        if (teamingame(i))
-        {
-            fragtab[scorelines].count = 0;
-            for (j=0; j<MAX_PLAYERS; j++)
-            {
-                if (teamingame(j))
-                     fragtab[scorelines].count+=dm_frags[j][i];
-            }
-            fragtab[scorelines].num   = i;
-            fragtab[scorelines].color = i;
-            fragtab[scorelines].name  = get_team_name(i);
-
-            scorelines++;
-        }
-    }
+    scorelines = count_team_stats( fragtab, 0 ); // deads
     WI_Draw_Ranking("deads", 245, 80, fragtab, scorelines, false, whiteplayer, 6);
 }
+
 
 
 /* old code

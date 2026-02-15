@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: st_stuff.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: st_stuff.c 1775 2026-02-07 13:48:15Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -693,10 +693,10 @@ static void ST_updateFaceWidget(void)
     st_facecount--;
 }
 
-boolean ST_SameTeam(player_t* a,player_t* b)
+// Return true, when on the same team.
+boolean ST_SameTeam( player_t* a, player_t* b )
 {
     switch( cv_teamplay.EV ) {
-       case 0 : return false;
        case 1 : return (a->skincolor == b->skincolor);
        case 2 : return (a->skin == b->skin);
     }

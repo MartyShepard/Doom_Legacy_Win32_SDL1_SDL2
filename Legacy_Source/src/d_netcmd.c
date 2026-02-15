@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: d_netcmd.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: d_netcmd.c 1775 2026-02-07 13:48:15Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -887,8 +887,6 @@ void Command_Addfile(void)
 
 void Command_Frags_f(void)
 {
-    int i, j;
-
     if( ! deathmatch )
     {
         CONS_Printf("Frags : show the frag table\n");
@@ -896,26 +894,11 @@ void Command_Frags_f(void)
         return;
     }
 
-    for (i = 0; i < MAX_PLAYERS; i++)
-    {
-        if (playeringame[i])
-        {
-            CONS_Printf("%-16s", player_names[i]);
-            for (j = 0; j < MAX_PLAYERS; j++)
-                if (playeringame[j])
-                    CONS_Printf(" %3d", players[i].frags[j]);
-            CONS_Printf("\n");
-        }
-    }
+    HU_show_player_frags();
 }
 
 void Command_TeamFrags_f(void)
 {
-    int i, j;
-    fragsort_t unused[MAX_PLAYERS];
-    int frags[MAX_PLAYERS];
-    int fragtbl[MAX_PLAYERS][MAX_PLAYERS];
-
     if( ! (deathmatch && cv_teamplay.EV) )
     {
         CONS_Printf("teamfrags : show the frag table for teams\n");
@@ -923,19 +906,7 @@ void Command_TeamFrags_f(void)
         return;
     }
 
-    HU_Create_TeamFragTbl(unused, frags, fragtbl);
-
-    for (i = 0; i < 11; i++)
-    {
-        if (teamingame(i))
-        {
-            CONS_Printf("%-8s", get_team_name(i));
-            for (j = 0; j < 11; j++)
-                if (teamingame(j))
-                    CONS_Printf(" %3d", fragtbl[i][j]);
-            CONS_Printf("\n");
-        }
-    }
+    HU_show_team_frag_table();
 }
 
 //  Returns program version.

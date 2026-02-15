@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: g_game.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: g_game.c 1775 2026-02-07 13:48:15Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -750,14 +750,21 @@ void FragLimit_OnChange(void)
 
 
 // TEAM STATE
+//#define  ENABLE_TEAM_TABLE
 
-team_info_t*  team_info[MAX_TEAMS];  // allocated
+#ifdef ENABLE_TEAM_TABLE
+// [WDJ] This team info table is extra work, and unnecessary.
+// This would allow setting your own team names,
+// but that is not supported right now.
+// The table gets reset everytime you change cv_teamplay.
+// More difficult to support players joining the game late.
+team_info_t*  team_info[MAXTEAMS];  // allocated
 byte  num_teams = 0;
 
 // Create the team if it does not exist.
-team_info_t*  get_team( byte team_num )
+team_info_t*  get_team( int team_num )
 {
-    if( team_num >= MAX_TEAMS )
+    if( team_num >= MAXTEAMS )
         return NULL;
 
     // Create missing teams
@@ -772,7 +779,7 @@ team_info_t*  get_team( byte team_num )
 
 // Set the team name.
 // Create the team if it does not exist.
-void  set_team_name( byte team_num, const char * str )
+void  set_team_name( int team_num, const char * str )
 {
     // Create the team if it does not exist.
     // Because of the complexity, for now, will create team at init.
@@ -789,7 +796,7 @@ void  set_team_name( byte team_num, const char * str )
     }
 }
 
-char * get_team_name( byte team_num )
+char * get_team_name( int team_num )
 {
     if( team_num <= num_teams )
     {
@@ -798,6 +805,33 @@ char * get_team_name( byte team_num )
     }
     return "Unknown team";
 }
+
+#else
+
+// [WDJ] Decode the team indexing currently in use.
+// Do not have to save any team names, as the names
+// are not going anywhere.
+
+// when team by color, teamid is color from Color_names.
+// when team by skin,  teamid is skin index.
+char *  get_team_name( byte teamid )
+{
+    if(cv_teamplay.EV == 1)
+    {
+        // team by color
+        if( teamid < NUM_SKINCOLORS )
+          return Color_Names[teamid];
+    }
+    else
+    if(cv_teamplay.EV == 2)
+    {
+        // team by skin id
+        if( teamid < numskins )
+          return  skins[teamid]->name;
+    }
+    return "Unknown team";
+}
+#endif
 
 
 CV_PossibleValue_t teamplay_cons_t[] = { {0, "Off"}, {1, "Color"}, {2, "Skin"}, {3, NULL} };
@@ -809,13 +843,14 @@ consvar_t cv_teamdamage = { "teamdamage", "0", CV_NETVAR, CV_OnOff };
 
 void TeamPlay_OnChange(void)
 {
+#ifdef ENABLE_TEAM_TABLE
     int i;
     // Change the name of the teams
 
     if(cv_teamplay.EV == 1)
     {
         // color
-        for(i=0; i<NUM_SKINCOLORS; i++)
+        for(i=0; i<NUMSKINCOLORS; i++)
             set_team_name( i, Color_Names[i]);
     }
     else
@@ -825,6 +860,9 @@ void TeamPlay_OnChange(void)
         for(i=0; i<numskins; i++)
             set_team_name( i, skins[i]->name);
     }
+#else
+    // Determine the team names at usage.
+#endif
 }
 
 
