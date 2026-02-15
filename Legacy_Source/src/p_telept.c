@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_telept.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_telept.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2011 by DooM Legacy Team.
@@ -378,7 +378,7 @@ int EV_Teleport ( line_t*       line,
 
     tag = line->tag;
     uint32_t i;
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < num_sectors; i++)
     {
         sector = &sectors[ i ];
         if (sector->tag == tag )

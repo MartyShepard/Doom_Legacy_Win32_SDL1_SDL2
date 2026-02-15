@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: d_clisrv.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: d_clisrv.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -244,7 +244,7 @@ typedef enum {
 #define NUM_SERVERTIC_CMD   45
 typedef struct {
    byte        starttic; // low byte of gametic
-   byte        numtics;  // 1..
+   byte        num_tics;  // 1..
    N32_t       cmd_player_mask;  // bit for each player with ticcmd
    byte        flags;    // tic_packet_flag_e
    byte        cmds_offset;  // extension packet offset
@@ -257,7 +257,7 @@ typedef struct {
 // aligned to 2 bytes
 #endif
    ticcmd_t    cmds[NUM_SERVERTIC_CMD];
-     // number of cmds used is (numtics*numplayers)
+     // number of cmds used is (num_tics*num_players)
      // normaly [BACKUPTIC][MAX_PLAYERS] but too large
 // unaligned
 // After variable number of ticcmd_t

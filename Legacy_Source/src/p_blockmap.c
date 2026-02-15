@@ -94,7 +94,7 @@ void  P_create_blockmap(void)
 
     // Find limits of map
     uint32_t i1;
-    for( i1=0 ; i1<numvertexes ; i1++ )
+    for( i1=0 ; i1<num_vertexes ; i1++ )
     {
         vertex_t * vi = & vertexes[i1];
 
@@ -143,7 +143,7 @@ void  P_create_blockmap(void)
         // calloc inits the bmap memory to 0.
 
         uint32_t ln;
-        for( ln=0; ln < numlines; ln++ )
+        for( ln=0; ln < num_lines; ln++ )
         {
             line_t * lp = & lines[ln];
             int x, y, adx, ady;

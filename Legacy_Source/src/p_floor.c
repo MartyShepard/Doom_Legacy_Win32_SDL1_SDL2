@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_floor.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_floor.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2010 by DooM Legacy Team.
@@ -86,9 +86,9 @@ void DemoAdapt_p_floor( void )
 
 
 // [WDJ] Other doom code does not have 3D floors and does not have floor
-// stopping dependent upon numattached.  To keep compatible behavior,
+// stopping dependent upon num_attached.  To keep compatible behavior,
 // the floor movement must always stop and recheck.
-// I have found no reason for the && numattached test.  It may have been
+// I have found no reason for the && num_attached test.  It may have been
 // thought that only 3D floors could obstruct in those directions, but it is
 // also possible because of dest in wrong direction (insta-move).  Doom2 Map5.
 #define COMPAT_FLOOR_STOP  1
@@ -136,7 +136,7 @@ result_e T_MovePlane ( sector_t*     sector,
 #ifdef COMPAT_FLOOR_STOP
             if (contact_flag == true)  // hit something
 #else
-            if (contact_flag == true && sector->numattached)  // BUG
+            if (contact_flag == true && sector->num_attached)  // BUG
 #endif
             {
               sector->floorheight =lastpos;
@@ -151,7 +151,7 @@ result_e T_MovePlane ( sector_t*     sector,
             // PrBoom: EN_boom_floor = !comp[comp_floors]
             // Vanilla compatibility, or 3D floor.
             if( contact_flag == true
-                && (!EN_boom_floor || sector->numattached) )
+                && (!EN_boom_floor || sector->num_attached) )
             {
               // Diff here between Boom and original Doom.
               // This code not in Boom, added back by prboom.
@@ -289,11 +289,11 @@ result_e T_MovePlane ( sector_t*     sector,
 #else
             // [WDJ] BUG: Doom2 Map05, this closes secret rooms tagged with 9,
             // because the ceiling is not stopped.
-            if (contact_flag == true && sector->numattached)
+            if (contact_flag == true && sector->num_attached)
 # if 0
             // alternative plan
             if (contact_flag == true
-                &&( sector->numattached
+                &&( sector->num_attached
                     || lastpos > dest ) // insta-move, started wrong side of dest
                 )
 # endif
@@ -309,7 +309,7 @@ result_e T_MovePlane ( sector_t*     sector,
           { // ceiling moving up
             sector->ceilingheight = newheight;  // intermediate position
             contact_flag = P_CheckSector(sector, crush_flag);
-            if (contact_flag == true && sector->numattached) // 3D floor only
+            if (contact_flag == true && sector->num_attached) // 3D floor only
             {
               // This code not in Boom.
               // It stops ceiling from moving when objects stuck in floor.

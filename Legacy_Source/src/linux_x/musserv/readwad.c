@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: readwad.c 1579 2021-05-19 03:42:59Z wesleyjohnson $
+// $Id: readwad.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1995-1996 Michael Heasley (mheasley@hmc.edu)
 //   GNU General Public License
@@ -95,7 +95,7 @@ unsigned short SwapSHORT(unsigned short x)
 typedef struct
 {
     char       identification[4];   // should be "IWAD" or "PWAD"
-    uint32_t   numlumps;            // how many resources
+    uint32_t   num_lumps;            // how many resources
     uint32_t   infotableofs;        // the 'directory' of resources
 } wadinfo_t;
 
@@ -129,10 +129,10 @@ uint32_t  read_wad_dir( FILE * wadfile, char * filename, int lumpnum,
     }
     // [WDJ] 1/16/2010 changed from swap when little-endian to LE_SWAP32,
     // wad directory is little-endian (see w_wad.c)
-    header.numlumps = LE_SWAP32(header.numlumps);
+    header.num_lumps = LE_SWAP32(header.num_lumps);
     header.infotableofs = LE_SWAP32(header.infotableofs);
    
-    if( lumpnum > header.numlumps )
+    if( lumpnum > header.num_lumps )
     {
       printf("musserver: Bad lump number for the file, lumpnum=%i, FILE=%s\n.", lumpnum, filename );
       return 0;

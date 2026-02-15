@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_data.h 1756 2025-11-20 11:41:32Z wesleyjohnson $
+// $Id: r_data.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -163,10 +163,10 @@ typedef struct
 // [WDJ] Original Doom bug: conflict between texture[0] and 0=no-texture.
 // Their solution was to not use the first texture.
 // See BUGFIX_TEXTURE0 in r_data.c.
-//   array[ 0.. numtextures-1 ] of texture_t*,
+//   array[ 0.. num_textures-1 ] of texture_t*,
 //   but [0] is unusable because it conflicts with 0=no-texture.
 
-extern unsigned int    numtextures;
+extern unsigned int    num_textures;
 extern texture_t**     textures;
 
 #define RENDER_TEXTURE_EXTRA_FULL

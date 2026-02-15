@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_main.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_main.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -1231,10 +1231,10 @@ subsector_t* R_PointInSubsector ( fixed_t x, fixed_t y )
     uint32_t    nodenum;
 
     // single subsector is a special case
-    if (!numnodes)
+    if (!num_nodes)
         return subsectors;
 
-    nodenum = numnodes - 1;  // 0..
+    nodenum = num_nodes - 1;  // 0..
 
     while (! (nodenum & NF_SUBSECTOR) )
     {
@@ -1256,10 +1256,10 @@ subsector_t* R_IsPointInSubsector ( fixed_t x, fixed_t y )
     subsector_t* ret;
 
     // single subsector is a special case
-    if (!numnodes)
+    if (!num_nodes)
         return subsectors;
 
-    uint32_t nodenum = numnodes - 1; // 0..
+    uint32_t nodenum = num_nodes - 1; // 0..
 
     while (! (nodenum & NF_SUBSECTOR) )
     {
@@ -1270,7 +1270,7 @@ subsector_t* R_IsPointInSubsector ( fixed_t x, fixed_t y )
 
     ret=&subsectors[nodenum & ~NF_SUBSECTOR];
     uint32_t i;
-    for(i=0; i<ret->numlines; i++)
+    for(i=0; i<ret->num_lines; i++)
     {
         if(R_PointOnSegSide(x,y,&segs[ret->firstline+i]))
             return 0;
@@ -1651,7 +1651,7 @@ void R_RenderPlayerView( byte pind, player_t* player )
 #endif
 
     // [WDJ] Intercept degenerate case, so BSP node is never -1.
-    R_RenderBSPNode( ( numnodes > 0 )? numnodes-1
+    R_RenderBSPNode( ( num_nodes > 0 )? num_nodes-1
                    : ( 0 | NF_SUBSECTOR ) );  // Degenerate, sector 0
 
 #ifdef TIMING

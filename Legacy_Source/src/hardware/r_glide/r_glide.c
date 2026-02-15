@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_glide.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_glide.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2012 by DooM Legacy Team.
 //
@@ -411,7 +411,7 @@ static int Set3DfxMode (viddef_t *lvid, vmode_t *pcurrentmode)
     DBG_Printf ("Set3DfxMode() iResolution(%d)\n", iResolution);
 
     // this is normally not used (but we are actually double-buffering with glide)
-    lvid->u.numpages = 2;
+    lvid->u.num_pages = 2;
 
     // Change window attributes
     SetWindowLong (lvid->WndParent, GWL_STYLE, WS_POPUP | WS_VISIBLE);

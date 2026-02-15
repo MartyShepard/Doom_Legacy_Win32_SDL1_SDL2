@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_bsp.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_bsp.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -843,14 +843,14 @@ void R_Subsector ( uint32_t num )
     ff_light_t *        ff_light;  // lightlist index
 
 #ifdef RANGECHECK
-    if (num>=numsubsectors)
+    if (num>=num_subsectors)
         I_Error ("R_Subsector: ss %u with numss = %u",
                  num,
-                 numsubsectors);
+                 num_subsectors);
 #endif
 
     //faB: subsectors added at run-time
-    if (num>=numsubsectors)
+    if (num>=num_subsectors)
         return;
 
 #ifdef DEBUG_SUBSECTOR
@@ -860,7 +860,7 @@ void R_Subsector ( uint32_t num )
     sscount++;
     sub = &subsectors[num];
     ssector = sub->sector;  // for working on sector
-    segcount = sub->numlines;
+    segcount = sub->num_lines;
     lineseg = &segs[sub->firstline];
 
     //SoM: 3/17/2000: Deep water/fake ceiling effect.
@@ -881,13 +881,13 @@ void R_Subsector ( uint32_t num )
       if(vsector->moved) // floor or ceiling moved, must refresh
 #endif
       {
-        vsector->numlights = ssector->numlights = 0;
+        vsector->num_lights = ssector->num_lights = 0;
         R_Prep3DFloors(vsector);  // refresh light lists
         // This assumes that updating ssector with vsector's Prep3DFloors data, is correct.
         // This only works because where it is not correct, it is also not visible.
         // So that multiple sector DeepWater that moved get updated, once.
         ssector->lightlist = vsector->lightlist;
-        ssector->numlights = vsector->numlights;
+        ssector->num_lights = vsector->num_lights;
 #ifdef SECTOR_FLAGS
         ssector->flags &= ~(SCF_floor_moved); // clear floor moved flags
         vsector->flags &= ~(SCF_floor_moved);
@@ -944,8 +944,8 @@ void R_Subsector ( uint32_t num )
 
 
     // BSP reuses the ffplane array for each sector, to pass info to Render
-    numffplane = 0;
-    ffplane[numffplane].plane = NULL;
+    num_ffplane = 0;
+    ffplane[num_ffplane].plane = NULL;
     first_subsec_seg = NULL;
 
     if(vsector->ffloors)
@@ -959,7 +959,7 @@ void R_Subsector ( uint32_t num )
            || !(fff->flags & FF_EXISTS))
           continue;
 
-        ffplane[numffplane].plane = NULL;
+        ffplane[num_ffplane].plane = NULL;
 
         fixed_t ffbh = *fff->bottomheight;
         if( ffbh <= vsector->ceilingheight
@@ -974,7 +974,7 @@ void R_Subsector ( uint32_t num )
 #endif
         {
           ff_light = R_GetPlaneLight_viewz(vsector, ffbh);
-          ffplane[numffplane].plane =
+          ffplane[num_ffplane].plane =
             R_FindPlane(ffbh,
                         *fff->bottompic,
                         *ff_light->lightlevel,
@@ -983,10 +983,10 @@ void R_Subsector ( uint32_t num )
                         ff_light->extra_colormap,
                         fff);
 
-          ffplane[numffplane].height = ffbh;
-          ffplane[numffplane].ffloor = fff;
-          numffplane++;
-          if(numffplane >= MAXFFLOORS)
+          ffplane[num_ffplane].height = ffbh;
+          ffplane[num_ffplane].ffloor = fff;
+          num_ffplane++;
+          if(num_ffplane >= MAXFFLOORS)
             break;
         }
 
@@ -1003,7 +1003,7 @@ void R_Subsector ( uint32_t num )
 #endif
         {
           ff_light = R_GetPlaneLight_viewz(vsector, ffth);
-          ffplane[numffplane].plane =
+          ffplane[num_ffplane].plane =
             R_FindPlane(ffth,
                         *fff->toppic,
                         *ff_light->lightlevel,
@@ -1012,10 +1012,10 @@ void R_Subsector ( uint32_t num )
                         ff_light->extra_colormap,
                         fff);
 
-          ffplane[numffplane].height = ffth;
-          ffplane[numffplane].ffloor = fff;
-          numffplane++;
-          if(numffplane >= MAXFFLOORS)
+          ffplane[num_ffplane].height = ffth;
+          ffplane[num_ffplane].ffloor = fff;
+          num_ffplane++;
+          if(num_ffplane >= MAXFFLOORS)
             break;
         }
       }
@@ -1069,13 +1069,13 @@ void R_Prep3DFloors(sector_t*  sector)
     }
   }
 
-  if(count != sector->numlights)
+  if(count != sector->num_lights)
   {
     // Allocate the fake-floor light list.
     if(sector->lightlist)
       Z_Free(sector->lightlist);
     sector->lightlist = Z_Malloc(sizeof(ff_light_t) * count, PU_LEVEL, 0);
-    sector->numlights = count;
+    sector->num_lights = count;
   }
   // clear lightlist 
   memset(sector->lightlist, 0, sizeof(ff_light_t) * count);
@@ -1122,7 +1122,7 @@ void R_Prep3DFloors(sector_t*  sector)
     }
     if(!best)  // failure escape
     {
-      sector->numlights = gi;
+      sector->num_lights = gi;
       return;
     }
 
@@ -1178,14 +1178,14 @@ void R_Prep3DFloors(sector_t*  sector)
 
 
 // Find light under planeheight, plain version
-// Only called when have ffloors, thus have lightlist and numlights > 0.
+// Only called when have ffloors, thus have lightlist and num_lights > 0.
 // Return a fake-floor light.
 ff_light_t *  R_GetPlaneLight(sector_t* sector, fixed_t planeheight)
 {
-  // [WDJ] Cannot index past numlights-1, as that is off end of list,
+  // [WDJ] Cannot index past num_lights-1, as that is off end of list,
   // but this only tests that addr, which is allowed.
   ff_light_t * light1 = & sector->lightlist[1];  // first fake-floor
-  ff_light_t * lightend = & sector->lightlist[sector->numlights];  // after last lightlist addr
+  ff_light_t * lightend = & sector->lightlist[sector->num_lights];  // after last lightlist addr
 
   // [0] is sector light, which is above all
   // lightlist is highest first
@@ -1203,7 +1203,7 @@ ff_light_t *  R_GetPlaneLight(sector_t* sector, fixed_t planeheight)
 ff_light_t *  R_GetPlaneLight_viewz(sector_t* sector, fixed_t  planeheight)
 {
   ff_light_t * light1 = & sector->lightlist[1];  // first fake-floor
-  ff_light_t * lightend = & sector->lightlist[sector->numlights];  // addr past last
+  ff_light_t * lightend = & sector->lightlist[sector->num_lights];  // addr past last
 
 #if 0
   // faster
@@ -1251,7 +1251,7 @@ void R_RenderBSPNode_degen (int bspnum)
     if (bspnum == -1)
     {
         // BP: never happen : bspnum = int, children = unsigned short
-        // except first call if numsubsectors=0 ! who care ?
+        // except first call if num_subsectors=0 ! who care ?
         R_Subsector (0);
     }
 }

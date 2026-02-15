@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: g_game.c 1775 2026-02-07 13:48:15Z wesleyjohnson $
+// $Id: g_game.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -826,7 +826,7 @@ char *  get_team_name( byte teamid )
     if(cv_teamplay.EV == 2)
     {
         // team by skin id
-        if( teamid < numskins )
+        if( teamid < num_skins )
           return  skins[teamid]->name;
     }
     return "Unknown team";
@@ -857,7 +857,7 @@ void TeamPlay_OnChange(void)
     if(cv_teamplay.EV == 2)
     {
         // skins
-        for(i=0; i<numskins; i++)
+        for(i=0; i<num_skins; i++)
             set_team_name( i, skins[i]->name);
     }
 #else

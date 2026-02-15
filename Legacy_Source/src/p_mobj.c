@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_mobj.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: p_mobj.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -3399,7 +3399,7 @@ void P_SpawnPlayer( mapthing_t * mthing, int playernum )
        // But not the last spawnpoint, otherwise deathmatch gets extraneous voodoo dolls.
        int mtpn = (playernum < 4)? (playernum+1) : (playernum - 4 + 4001);
        uint16_t i;
-       for (i=0 ; i<nummapthings ; i++)
+       for (i=0 ; i<num_mapthings ; i++)
        {
            mapthing_t* mt = &mapthings[i];
            if( mt->type == mtpn ) // a spawnpoint for this player

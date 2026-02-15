@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //---------------------------------------------------------------------------
 //
-// $Id: t_func.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: t_func.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 2000 Simon Howard
 // Copyright (C) 2001-2016 by DooM Legacy Team.
@@ -2096,7 +2096,7 @@ void SF_MapthingNumExist(void)
     t_return.type = FSVT_int;
 
     intval = intvalue(t_argv[0]);
-    if (intval < 0 || intval >= nummapthings || !mapthings[intval].mobj)
+    if (intval < 0 || intval >= num_mapthings || !mapthings[intval].mobj)
     {
         t_return.value.i = 0;
     }
@@ -2116,7 +2116,7 @@ err_numarg:
 void SF_Mapthings(void)
 {
     t_return.type = FSVT_int;
-    t_return.value.i = nummapthings;
+    t_return.value.i = num_mapthings;
 }
 
 // ObjType( {mobj} )
@@ -3847,7 +3847,7 @@ void SF_LineFlag(void)
     t_return.type = FSVT_int;
 
     linenum = intvalue(t_argv[0]);
-    if (linenum < 0 || linenum > numlines)  goto err_noline;
+    if (linenum < 0 || linenum > num_lines)  goto err_noline;
     line = & lines[linenum];  // for test, set, clear
 
     flagnum = intvalue(t_argv[1]);

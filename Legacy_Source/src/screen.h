@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: screen.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: screen.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -133,7 +133,7 @@ typedef struct viddef_s
     modenum_t   modenum;         // vidmode num, same as setmodeneeded
     byte        drawmode;        // drawing mode, optimized for tables and switch stmts, drawmode_e
     byte        bitpp;		 // BITS per pixel: 8, 15, 16, 24, 32
-    byte        numpages;        // always 1, PAGE FLIPPING TODO!!!
+    byte        num_pages;        // always 1, PAGE FLIPPING TODO!!!
 //    byte        windowed;        // windowed or fullscreen mode ?
     byte        fullscreen;      // windowed or fullscreen mode ?
     byte        recalc;          // if true, recalc vid-based stuff
@@ -176,7 +176,7 @@ typedef struct vmode_s {
     unsigned int rowbytes;          //bytes per scanline
     byte         bytesperpixel;     // 1 for 256c, 2 for highcolor
     byte         modetype;          // from modetype_e
-    byte         numpages;
+    byte         num_pages;
     vesa_extra_t * extradata;       //vesa mode extra data
     int          (*setmode_func)(viddef_t* lvid, struct vmode_s* pcurrentmode);
     int          misc;              //misc for display driver (r_glide.dll etc)

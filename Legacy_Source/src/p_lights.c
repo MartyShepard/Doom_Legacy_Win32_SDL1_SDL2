@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_lights.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: p_lights.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -257,7 +257,7 @@ int EV_TurnTagLightsOff(line_t* line)
     sector = sectors;
 
     uint32_t j;
-    for (j = 0; j < numsectors; j++, sector++)
+    for (j = 0; j < num_sectors; j++, sector++)
     {
         // for each sector
         if (sector->tag == line->tag)

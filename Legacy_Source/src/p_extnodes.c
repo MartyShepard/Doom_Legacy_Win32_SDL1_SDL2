@@ -54,13 +54,12 @@ mapformat_t P_CheckMapFormat ( lumpnum_t lumpnum )
     int b;
 
 #if 0  // [MB] 2020-04-21: Hexen format was already checked in p_setup.c
-    if ((b = lumpnum+ML_BLOCKMAP+1) < numlumps &&
-        !strcasecmp(lumpinfo[b].name, "BEHAVIOR"))
+    if ((b = lumpnum+ML_BLOCKMAP+1) < num_lumps && !strcasecmp(lumpinfo[b].name, "BEHAVIOR"))
         I_Error("P_CheckMapFormat: Hexen map format not supported in %s.\n",
                 lumpinfo[lumpnum-ML_NODES].name);
 #endif
 
-    // [MB] 2020-04-21: Check for <numlumps removed (numlumps not available)
+    // [MB] 2020-04-21: Check for <num_lumps removed (num_lumps not available)
     b = lumpnum+ML_NODES;
     if ((nodes = W_CacheLumpNum(b, PU_IN_USE)) && W_LumpLength(b) > 8)
     {
@@ -111,7 +110,7 @@ typedef PACKED_STRUCT (
 
 typedef PACKED_STRUCT (
 {
-    uint16_t numsegs;
+    uint16_t num_segs;
     int32_t firstseg;
 }) mapsubsector_deepbsp_t;
 
@@ -136,7 +135,7 @@ typedef PACKED_STRUCT (
 
 typedef PACKED_STRUCT (
 {
-    uint32_t numsegs;
+    uint32_t num_segs;
 }) mapsubsector_zdbsp_t;
 
 
@@ -163,21 +162,21 @@ void P_LoadSegs_DeePBSP ( lumpnum_t lump )
     byte * data;
     uint32_t vn1, vn2;  // not valid negative
 
-    numsegs = W_LumpLength(lump) / sizeof(mapseg_deepbsp_t);
-    uint32_t sizesegs = numsegs * sizeof(seg_t);
+    num_segs = W_LumpLength(lump) / sizeof(mapseg_deepbsp_t);
+    uint32_t sizesegs = num_segs * sizeof(seg_t);
     segs = Z_Malloc(sizesegs, PU_LEVEL, NULL);
     memset(segs, 0, sizesegs);
     data = W_CacheLumpNum(lump, PU_STATIC);
     // [WDJ] Do endian as read from segs lump temp
 
-    if( !data || (numsegs < 1))
+    if( !data || (num_segs < 1))
     {
         I_SoftError( "Bad segs data\n" );
         return;
     }
 
     uint32_t si;
-    for (si=0; si<numsegs; si++)
+    for (si=0; si<num_segs; si++)
     {
         seg_t * li = & segs[si];
         mapseg_deepbsp_t * ml = (mapseg_deepbsp_t *) data + si;
@@ -188,7 +187,7 @@ void P_LoadSegs_DeePBSP ( lumpnum_t lump )
         vn1 = LE_SWAP32(ml->v1);
         vn2 = LE_SWAP32(ml->v2);
         // [MB] 2020-04-21: Detect buggy wad (same as for normal nodes)
-        if( vn1 > numvertexes || vn2 > numvertexes )
+        if( vn1 > num_vertexes || vn2 > num_vertexes )
         {
             I_SoftError("P_LoadSegs_DeePBSP: Seg vertex bad %u,%u\n",
                          vn1, vn2 );
@@ -211,10 +210,10 @@ void P_LoadSegs_DeePBSP ( lumpnum_t lump )
         linedef = (uint16_t)( LE_SWAP16(ml->linedef) );
 
         // [MB] 2020-04-21: Detect buggy wad (same as for normal nodes)
-        if( linedef > numlines )
+        if( linedef > num_lines )
         {
-            I_SoftError( "P_LoadSegs_DeePBSP: linedef #%i > numlines %i\n",
-                         linedef, numlines );
+            I_SoftError( "P_LoadSegs_DeePBSP: linedef #%i > num_lines %i\n",
+                         linedef, num_lines );
             linedef = 0; // default
         }
 
@@ -246,7 +245,7 @@ void P_LoadSegs_DeePBSP ( lumpnum_t lump )
             li->backsector = 0;
 
         // [MB] 2020-04-21: Added (same as for normal nodes)
-        li->numlights = 0;
+        li->num_lights = 0;
         li->rlights = NULL;
     }
 
@@ -258,17 +257,17 @@ void P_LoadSubsectors_DeePBSP ( lumpnum_t lump )
 {
     mapsubsector_deepbsp_t * data;
 
-    numsubsectors = W_LumpLength (lump) / sizeof(mapsubsector_deepbsp_t);
-    uint32_t sizesubsec = numsubsectors * sizeof(subsector_t);
+    num_subsectors = W_LumpLength (lump) / sizeof(mapsubsector_deepbsp_t);
+    uint32_t sizesubsec = num_subsectors * sizeof(subsector_t);
     subsectors = Z_Malloc(sizesubsec, PU_LEVEL, 0);
     data = (mapsubsector_deepbsp_t *)W_CacheLumpNum(lump, PU_STATIC);
 
     memset(subsectors, 0, sizesubsec);
 
     uint32_t i;
-    for (i=0; i<numsubsectors; i++)
+    for (i=0; i<num_subsectors; i++)
     {
-        subsectors[i].numlines = (uint16_t)( LE_SWAP16(data[i].numsegs) );
+        subsectors[i].num_lines = (uint16_t)( LE_SWAP16(data[i].num_segs) );
         subsectors[i].firstline = (uint32_t)( LE_SWAP32(data[i].firstseg) );
     }
 
@@ -279,8 +278,8 @@ void P_LoadNodes_DeePBSP ( lumpnum_t lump )
 {
     byte * data;
 
-    numnodes = W_LumpLength (lump) / sizeof(mapnode_deepbsp_t);
-    nodes = Z_Malloc (numnodes*sizeof(node_t),PU_LEVEL,0);
+    num_nodes = W_LumpLength (lump) / sizeof(mapnode_deepbsp_t);
+    nodes = Z_Malloc (num_nodes*sizeof(node_t),PU_LEVEL,0);
     data = W_CacheLumpNum (lump, PU_STATIC);
 
     // [FG] skip header
@@ -288,14 +287,14 @@ void P_LoadNodes_DeePBSP ( lumpnum_t lump )
 
     // [MB] 2020-04-21: Added similar check as for normal nodes
     // No nodes and one subsector is a trivial but legal map.
-    if( (numnodes < 1) && (numsubsectors > 1) )
+    if( (num_nodes < 1) && (num_subsectors > 1) )
     {
         I_SoftError("P_LoadNodes_DeePBSP: Bad node data\n");
         return;
     }
 
     uint32_t i;
-    for (i=0; i<numnodes; i++)
+    for (i=0; i<num_nodes; i++)
     {
         node_t * no = nodes + i;
         mapnode_deepbsp_t * mn = (mapnode_deepbsp_t *) data + i;
@@ -520,7 +519,7 @@ void P_LoadNodes_ZDBSP ( lumpnum_t lump, boolean compressed )
     z_newVerts = (uint32_t)LE_SWAP32(*((uint32_t*)data));
     data += sizeof(z_newVerts);
 
-    if ((orgVerts + z_newVerts) == numvertexes)
+    if ((orgVerts + z_newVerts) == num_vertexes)
     {
         newvertarray = vertexes;
     }
@@ -552,7 +551,7 @@ void P_LoadNodes_ZDBSP ( lumpnum_t lump, boolean compressed )
     if (vertexes != newvertarray)
     {
         uint32_t i3;
-        for (i3 = 0; i3 < (uint32_t)numlines; i3++)
+        for (i3 = 0; i3 < (uint32_t)num_lines; i3++)
         {
             // update lines from old vertexes to newvertarray
             line_t * lip = & lines[i3];
@@ -562,7 +561,7 @@ void P_LoadNodes_ZDBSP ( lumpnum_t lump, boolean compressed )
 
         Z_Free(vertexes);
         vertexes = newvertarray;
-        numvertexes = (orgVerts + z_newVerts);
+        num_vertexes = (orgVerts + z_newVerts);
     }
 
     // 2. Load subsectors
@@ -576,21 +575,21 @@ void P_LoadNodes_ZDBSP ( lumpnum_t lump, boolean compressed )
         goto nodes_fail;
     }
 
-    numsubsectors = z_numSubs;
-    subsectors = Z_Malloc(numsubsectors * sizeof(subsector_t), PU_LEVEL, 0);
+    num_subsectors = z_numSubs;
+    subsectors = Z_Malloc(num_subsectors * sizeof(subsector_t), PU_LEVEL, 0);
 
     currSeg = 0;
     uint32_t si;
-    for (si = 0; si < numsubsectors; si++)
+    for (si = 0; si < num_subsectors; si++)
     {
         mapsubsector_zdbsp_t * mseg = (mapsubsector_zdbsp_t*) data + si;
 
         subsectors[si].firstline = currSeg;
-        subsectors[si].numlines = (uint32_t)LE_SWAP32(mseg->numsegs);
-        currSeg += (uint32_t)LE_SWAP32(mseg->numsegs);
+        subsectors[si].num_lines = (uint32_t)LE_SWAP32(mseg->num_segs);
+        currSeg += (uint32_t)LE_SWAP32(mseg->num_segs);
     }
 
-    data += numsubsectors * sizeof(mapsubsector_zdbsp_t);
+    data += num_subsectors * sizeof(mapsubsector_zdbsp_t);
 
     // 3. Load segs
 
@@ -605,11 +604,11 @@ void P_LoadNodes_ZDBSP ( lumpnum_t lump, boolean compressed )
         goto nodes_fail;
     }
 
-    numsegs = z_numSegs;
-    segs = Z_Malloc(numsegs * sizeof(seg_t), PU_LEVEL, 0);
+    num_segs = z_numSegs;
+    segs = Z_Malloc(num_segs * sizeof(seg_t), PU_LEVEL, 0);
 
     uint32_t ti;
-    for (ti = 0; ti < numsegs; ti++)
+    for (ti = 0; ti < num_segs; ti++)
     {
         line_t * ldef;
         unsigned int linedef;
@@ -621,7 +620,7 @@ void P_LoadNodes_ZDBSP ( lumpnum_t lump, boolean compressed )
         vn1 = LE_SWAP32(ml->v1);
         vn2 = LE_SWAP32(ml->v2);
         // [MB] 2020-04-21: Detect buggy wad (same as for normal nodes)
-        if( vn1 > numvertexes || vn2 > numvertexes )
+        if( vn1 > num_vertexes || vn2 > num_vertexes )
         {
             I_SoftError("P_LoadSegs_ZDBSP: Seg vertex bad %u,%u\n",
                          vn1, vn2 );
@@ -646,7 +645,7 @@ void P_LoadNodes_ZDBSP ( lumpnum_t lump, boolean compressed )
 
         // e6y: check for wrong indexes
         // These are both unsigned now.
-        if (ldef->sidenum[side] >= numsides)
+        if (ldef->sidenum[side] >= num_sides)
         {
             I_SoftError("Linedef %u for seg %u references a non-existent sidedef %u",
                     linedef, ti, ldef->sidenum[side]);
@@ -668,18 +667,18 @@ void P_LoadNodes_ZDBSP ( lumpnum_t lump, boolean compressed )
             li->backsector = 0;
     }
 
-    data += numsegs * sizeof(mapseg_zdbsp_t);
+    data += num_segs * sizeof(mapseg_zdbsp_t);
 
     // 4. Load nodes
 
     z_numNodes = (uint32_t)LE_SWAP32(*((uint32_t*)data));
     data += sizeof(z_numNodes);
 
-    numnodes = z_numNodes;
-    nodes = Z_Malloc(numnodes * sizeof(node_t), PU_LEVEL, 0);
+    num_nodes = z_numNodes;
+    nodes = Z_Malloc(num_nodes * sizeof(node_t), PU_LEVEL, 0);
 
     uint32_t ni;
-    for (ni = 0; ni < numnodes; ni++)
+    for (ni = 0; ni < num_nodes; ni++)
     {
         node_t * no = & nodes[ni];
         mapnode_zdbsp_t * mn = (mapnode_zdbsp_t *) data + ni;

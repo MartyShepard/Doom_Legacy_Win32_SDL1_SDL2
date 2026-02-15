@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_defs.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_defs.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2015 by DooM Legacy Team.
@@ -460,10 +460,10 @@ typedef struct sector_s
     int  *              attached;   // list of control sectors (by secnum)
                                     // realloc in P_AddFakeFloor
                                     // [WDJ] 7/2010 deallocate in P_SetupLevel
-    uint16_t            numattached;
+    uint16_t            num_attached;
     ff_light_t *        lightlist;  // array of fake floor lights
                                     // ZMalloc PU_LEVEL, in R_Prep3DFloors
-    uint16_t            numlights;
+    uint16_t            num_lights;
     int                 validsort; //if == validsort already been sorted
 
     // SoM: 4/3/2000: per-sector colormaps!
@@ -612,14 +612,14 @@ typedef struct line_s
 typedef struct subsector_s
 {
     sector_t*   sector;   // (ref) part of this sector, from segs->sector of firstline
-    // numlines and firstline are from the subsectors lump (nodebuilder)
+    // num_lines and firstline are from the subsectors lump (nodebuilder)
 #ifdef DEEPSEA_EXTENDED_NODES
     // [MB] 2020-04-22: Changed to 32-Bit for extended nodes
-    uint32_t  numlines;   // number of segs in this subsector
+    uint32_t  num_lines;   // number of segs in this subsector
     uint32_t  firstline;  // index into segs lump (loaded from wad)
 #else   
     // [WDJ] some wad may be large enough to overflow signed short.
-    uint16_t  numlines;   // number of segs in this subsector
+    uint16_t  num_lines;   // number of segs in this subsector
     uint16_t  firstline;  // index into segs lump (loaded from wad)
 #endif
     // floorsplat_t list
@@ -822,7 +822,7 @@ typedef struct
     // SoM: Why slow things down by calculating lightlists for every
     // thick side.
     r_lightlist_t*    rlights;
-    uint16_t          numlights;
+    uint16_t          num_lights;
 } seg_t;
 
 
@@ -912,14 +912,14 @@ typedef struct drawsprite_s {
 
 
 typedef struct draw_ffside_s {
-  uint16_t      numthicksides; // no max
+  uint16_t      num_thicksides; // no max
   int16_t    *  thicksidecol;  // ref
   ffloor_t   *  thicksides[];  // ref
      // variable size array
 } draw_ffside_t;
 
 typedef struct draw_ffplane_s {
-  byte          numffloorplanes;  // MAX_FLOORS = 40
+  byte          num_ffloorplanes;  // MAX_FLOORS = 40
   byte          pad1;             // better align
   // z check for sprite clipping
   fixed_t       nearest_scale;  // the nearest scale of the planes
@@ -1185,10 +1185,10 @@ typedef struct
 //
 typedef struct
 {
-    byte                numframes; // MAX_FRAMES are 29
+    byte                num_frames; // MAX_FRAMES are 29
     byte                frame_rot; // array indexing step
-    spriteframe_t *     spriteframe;  // array[numframes]
-    sprite_frot_t *     framerotation;  // array[numframes * frame_rot]
+    spriteframe_t *     spriteframe;  // array[num_frames]
+    sprite_frot_t *     framerotation;  // array[num_frames * frame_rot]
 } spritedef_t;
 
 spriteframe_t *  get_spriteframe( const spritedef_t * spritedef, unsigned int frame_num );

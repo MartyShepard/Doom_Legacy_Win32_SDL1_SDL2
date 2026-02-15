@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: w_wad.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: w_wad.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -141,8 +141,8 @@
 //===========================================================================
 //                                                                    GLOBALS
 //===========================================================================
-int          numwadfiles;             // number of active wadfiles
-wadfile_t *  wadfiles[MAX_WADFILES];  // 0 to numwadfiles-1 are valid
+int          num_wadfiles;             // number of active wadfiles
+wadfile_t *  wadfiles[MAX_WADFILES];  // 0 to num_wadfiles-1 are valid
   // wadfile_t are Z_MALLOC
 
 
@@ -151,7 +151,7 @@ wadfile_t * lumpnum_to_wad( lumpnum_t lumpnum )
 {
     // level_lumpnum contains index to the wad
     int wadnum = WADFILENUM( lumpnum );
-    if( wadnum < numwadfiles )
+    if( wadnum < num_wadfiles )
       return  wadfiles[ wadnum ];
     return NULL;
 }
@@ -167,9 +167,9 @@ void W_Shutdown(void)
 #ifdef ZIP_WAD   
     WZ_close_all();
 #endif
-    while (numwadfiles--)
+    while (num_wadfiles--)
     {
-        wadfile_t * wf = wadfiles[numwadfiles];
+        wadfile_t * wf = wadfiles[num_wadfiles];
         if( wf->handle >= 0 )
             close(wf->handle);
     }
@@ -292,7 +292,7 @@ int W_Load_WadFile ( const char * filename )
     MipPatch_t *     grPatch;
 #endif
     int              filenum;  // return value
-    int              numlumps = 0;
+    int              num_lumps = 0;
     int              handle = -1;
     filestatus_e     fs;
     int              i, m;
@@ -307,7 +307,7 @@ int W_Load_WadFile ( const char * filename )
     //
     // check if limit of active wadfiles
     //
-    filenum = numwadfiles;
+    filenum = num_wadfiles;
     if( filenum >= MAX_WADFILES )
     {
         msg = "Maximum wad files reached";
@@ -380,7 +380,7 @@ int W_Load_WadFile ( const char * filename )
         // but zip files are not accessed by handle.
         close( handle );
         handle = -2;
-        numlumps = 0;
+        num_lumps = 0;
         lumpinfo = NULL;
 #else
         msg = "Cannot read zip file, do not have ziplib option.";
@@ -396,7 +396,7 @@ int W_Load_WadFile ( const char * filename )
         // at position 0 and size of the whole file.
         // This allow deh file to be copied by network and loaded at the
         // console, like wad files.
-        numlumps = 1; 
+        num_lumps = 1; 
         lumpinfo = Z_Malloc (sizeof(lumpinfo_t),PU_STATIC,NULL);
         lumpinfo->position = 0;
         lumpinfo->size = file_size;
@@ -439,11 +439,11 @@ int W_Load_WadFile ( const char * filename )
             }
             // ???modifiedgame = true;
         }
-        header.numlumps = LE_SWAP32(header.numlumps);
+        header.num_lumps = LE_SWAP32(header.num_lumps);
         header.infotableofs = LE_SWAP32(header.infotableofs);
 
         // read wad file directory
-        length = header.numlumps * sizeof(filelump_t);
+        length = header.num_lumps * sizeof(filelump_t);
         fileinfo = calloc (length, sizeof(*fileinfo));  // temp alloc, zeroed
 
         // Read fileinfo at offset specified in header.
@@ -464,14 +464,14 @@ int W_Load_WadFile ( const char * filename )
                 goto read_failure;
         }
 
-        numlumps = header.numlumps;
+        num_lumps = header.num_lumps;
         
         within_namespace = LNS_global;  // each wad starts in global namespace
 
         // fill in lumpinfo array for this wad
         flp = fileinfo;
-        lump_p = lumpinfo = Z_Malloc (numlumps*sizeof(lumpinfo_t),PU_STATIC,NULL);
-        for (i=0 ; i<numlumps ; i++, lump_p++, flp++)
+        lump_p = lumpinfo = Z_Malloc (num_lumps*sizeof(lumpinfo_t),PU_STATIC,NULL);
+        for (i=0 ; i<num_lumps ; i++, lump_p++, flp++)
         {
             // Make name compatible with compares using numerical_name.
             *((uint64_t*)&lump_p->name) = 0;  // clear
@@ -498,7 +498,7 @@ int W_Load_WadFile ( const char * filename )
     wadfile = Z_Malloc (sizeof (wadfile_t),PU_STATIC,NULL);
     wadfile->filename = Z_StrDup(filenamebuf);
     wadfile->handle = handle;
-    wadfile->numlumps = numlumps;
+    wadfile->num_lumps = num_lumps;
     wadfile->lumpinfo = lumpinfo;
     wadfile->filesize = file_size;
 
@@ -506,7 +506,7 @@ int W_Load_WadFile ( const char * filename )
     //  add the wadfile
     //
     wadfiles[filenum] = wadfile;
-    numwadfiles++;
+    num_wadfiles++;
 
     //
     //  generate md5sum
@@ -580,7 +580,7 @@ int W_Load_WadFile ( const char * filename )
     //
     //  set up caching
     //
-    length = numlumps * sizeof(lumpcache_t);
+    length = num_lumps * sizeof(lumpcache_t);
     lumpcache = Z_Malloc (length,PU_STATIC,NULL);
 
     memset (lumpcache, 0, length);
@@ -590,11 +590,11 @@ int W_Load_WadFile ( const char * filename )
     //faB: now allocates MipPatch info structures STATIC from the start,
     //     because these were causing a lot of fragmentation of the heap,
     //     considering they are never freed.
-    length = numlumps * sizeof(MipPatch_t);
+    length = num_lumps * sizeof(MipPatch_t);
     grPatch = Z_Malloc (length, PU_HWRPATCHINFO, NULL);    //never freed
     // set mipmap.downloaded to false
     memset (grPatch, 0, length);
-    for (i=0; i<numlumps; i++)
+    for (i=0; i<num_lumps; i++)
     {
         // store the software patch lump number for each MipPatch
         grPatch[i].patch_lumpnum = WADLUMP(filenum,i);  // form file/lump
@@ -602,7 +602,7 @@ int W_Load_WadFile ( const char * filename )
     wadfile->hwrcache = grPatch;
 #endif
 
-    GenPrintf(EMSG_info, "Added file %s (%i lumps)\n", filenamebuf, numlumps);
+    GenPrintf(EMSG_info, "Added file %s (%i lumps)\n", filenamebuf, num_lumps);
     W_Load_dehacked_wad_lumps( filenum );
 
 #ifdef ENABLE_UMAPINFO   
@@ -664,7 +664,7 @@ void W_Reload (void)
         I_Error ("W_Reload: couldn't open %s",reload_filename);
 
     read (handle, &header, sizeof(header));
-    lumpcount = LE_SWAP32(header.numlumps);
+    lumpcount = LE_SWAP32(header.num_lumps);
     header.infotableofs = LE_SWAP32(header.infotableofs);
     length = lumpcount*sizeof(filelump_t);
     fileinfo = calloc (length, sizeof(*fileinfo));  // temp alloc, zeroed
@@ -716,7 +716,7 @@ int W_Init_MultipleFiles ( char ** filenames )
     int  rc = 1;
 
     // open all the files, load headers, and count lumps
-    numwadfiles = 0;
+    num_wadfiles = 0;
 
     // will be realloced as lumps are added
     for ( ; *filenames ; filenames++)
@@ -728,7 +728,7 @@ int W_Init_MultipleFiles ( char ** filenames )
         }
     }
 
-    if (!numwadfiles)
+    if (!num_wadfiles)
     {
         I_SoftError ("W_Init_MultipleFiles: no files found\n");
         fatal_error = 1;
@@ -760,13 +760,13 @@ lumpnum_t  W_Check_Namespace (const char* name, lump_namespace_e within_namespac
     numerical_name( name, & name8 );
 
     // Scan wad files backwards so PWAD files take precedence.
-    for (i = numwadfiles-1 ; i>=0; i--)
+    for (i = num_wadfiles-1 ; i>=0; i--)
     {
         // Scan forward within a wad file.
         lump_p = wadfiles[i]->lumpinfo;
         if( ! lump_p )  continue;
 
-        for (j = 0; j<wadfiles[i]->numlumps; j++,lump_p++)
+        for (j = 0; j<wadfiles[i]->num_lumps; j++,lump_p++)
         { 
             // Fast numerical name compare.
             if ( *(uint64_t *)lump_p->name == name8.namecode )
@@ -820,13 +820,13 @@ lumpnum_t  W_CheckNumForNamePwad (const char* name, int wadid, int startlump)
     // start at 'startlump', useful parameter when there are multiple
     //                       resources with the same name
     //
-    if (startlump < wadfiles[wadid]->numlumps)
+    if (startlump < wadfiles[wadid]->num_lumps)
     {
         lump_p = wadfiles[wadid]->lumpinfo + startlump;
         if( ! lump_p )
             return NO_LUMP;
 
-        for (i = startlump; i<wadfiles[wadid]->numlumps; i++,lump_p++)
+        for (i = startlump; i<wadfiles[wadid]->num_lumps; i++,lump_p++)
         {
             // Fast numerical name compare.
             if ( *(uint64_t *)lump_p->name == name8.namecode )
@@ -874,12 +874,12 @@ lumpnum_t  W_CheckNumForNameFirst (const char* name)
 
     // scan wad files forward, when original wad resources
     //  must take precedence
-    for (i = 0; i<numwadfiles; i++)
+    for (i = 0; i<num_wadfiles; i++)
     {
         lump_p = wadfiles[i]->lumpinfo;
         if( ! lump_p )  continue;
 
-        for (j = 0; j<wadfiles[i]->numlumps; j++,lump_p++)
+        for (j = 0; j<wadfiles[i]->num_lumps; j++,lump_p++)
         {
             if ( *(uint64_t *)lump_p->name == name8.namecode )
             {
@@ -926,7 +926,7 @@ void  W_name_prefix_detect( int wadnum )
         return;
 
     int j;
-    for (j = 0; j<wadf->numlumps; j++)
+    for (j = 0; j<wadf->num_lumps; j++)
     { 
         const char * lin = lumpinfo[j].name;
         int k;
@@ -986,8 +986,8 @@ uint32_t  W_LumpLength (lumpnum_t lump)
     if( ! VALID_LUMP(lump) )
         I_Error("W_LumpLength: lump not exist\n");
 
-    if (LUMPNUM(lump) >= wadfiles[WADFILENUM(lump)]->numlumps)
-        I_Error("W_LumpLength: index %i >= numlumps", lump);
+    if (LUMPNUM(lump) >= wadfiles[WADFILENUM(lump)]->num_lumps)
+        I_Error("W_LumpLength: index %i >= num_lumps", lump);
 #endif
     lumpinfo_t * lump_p = wadfiles[WADFILENUM(lump)]->lumpinfo;
     if( lump_p == NULL )
@@ -1023,8 +1023,8 @@ int  W_ReadLumpHeader ( lumpnum_t     lump,
     wf = wadfiles[ wn1 ];
    
 #ifdef PARANOIA
-    if( ln1 >= wf->numlumps )
-        I_Error ("W_ReadLumpHeader: %i >= numlumps",lump);
+    if( ln1 >= wf->num_lumps )
+        I_Error ("W_ReadLumpHeader: %i >= num_lumps",lump);
 #endif
 
     if( wf->lumpinfo == NULL )
@@ -1137,10 +1137,10 @@ void* W_CacheLumpNum ( lumpnum_t lumpnum, int ztag )
     //SoM: 4/8/2000: Do better checking. No more SIGSEGV's!
     if( ! VALID_LUMP(lumpnum) )  // [WDJ] must be first to protect use as index
       I_Error ("W_CacheLumpNum: not VALID_LUMP passed!\n");
-    if (lfile >= numwadfiles)
-      I_Error("W_CacheLumpNum: %i >= numwadfiles(%i)\n", lfile, numwadfiles);
-    if (llump >= wadfiles[lfile]->numlumps)
-      I_Error ("W_CacheLumpNum: %i >= numlumps", llump);
+    if (lfile >= num_wadfiles)
+      I_Error("W_CacheLumpNum: %i >= num_wadfiles(%i)\n", lfile, num_wadfiles);
+    if (llump >= wadfiles[lfile]->num_lumps)
+      I_Error ("W_CacheLumpNum: %i >= num_lumps", llump);
 #endif
 
     lumpcache = wadfiles[lfile]->lumpcache;
@@ -1284,8 +1284,8 @@ void* W_CachePatchNum ( lumpnum_t lumpnum, int ztag )
 #ifdef PARANOIA
     // check the return value of a previous W_CheckNumForName()
     if ( ( ! VALID_LUMP(lumpnum) )
-         || (LUMPNUM(lumpnum) >= wadfiles[WADFILENUM(lumpnum)]->numlumps) )
-        I_Error ("W_CachePatchNum: %i >= numlumps", LUMPNUM(lumpnum));
+         || (LUMPNUM(lumpnum) >= wadfiles[WADFILENUM(lumpnum)]->num_lumps) )
+        I_Error ("W_CachePatchNum: %i >= num_lumps", LUMPNUM(lumpnum));
 #endif
 
     grPatch = &(wadfiles[WADFILENUM(lumpnum)]->hwrcache[LUMPNUM(lumpnum)]);
@@ -1317,8 +1317,8 @@ void* W_CacheMappedPatchNum ( lumpnum_t lumpnum, uint32_t drawflags )
 #ifdef PARANOIA
     // check the return value of a previous W_CheckNumForName()
     if ( ( ! VALID_LUMP(lumpnum) )
-         || (LUMPNUM(lumpnum) >= wadfiles[WADFILENUM(lumpnum)]->numlumps) )
-        I_Error ("W_CacheMappedPatchNum: %i >= numlumps", LUMPNUM(lumpnum));
+         || (LUMPNUM(lumpnum) >= wadfiles[WADFILENUM(lumpnum)]->num_lumps) )
+        I_Error ("W_CacheMappedPatchNum: %i >= num_lumps", LUMPNUM(lumpnum));
 #endif
 
     grPatch = &(wadfiles[WADFILENUM(lumpnum)]->hwrcache[LUMPNUM(lumpnum)]);
@@ -1397,10 +1397,10 @@ void* W_CacheRawAsPic( lumpnum_t lumpnum, int width, int height, int ztag)
     //SoM: 4/8/2000: Do better checking. No more SIGSEGV's!
     if( ! VALID_LUMP(lumpnum) )
       I_Error ("W_CacheRawAsPic: not VALID_LUMP passed!\n");
-    if (lfile >= numwadfiles)
-      I_Error("W_CacheRawAsPic: %i >= numwadfiles(%i)\n", lfile, numwadfiles);
-    if (llump >= wadfiles[lfile]->numlumps)
-      I_Error ("W_CacheRawAsPic: %i >= numlumps", llump);
+    if (lfile >= num_wadfiles)
+      I_Error("W_CacheRawAsPic: %i >= num_wadfiles(%i)\n", lfile, num_wadfiles);
+    if (llump >= wadfiles[lfile]->num_lumps)
+      I_Error ("W_CacheRawAsPic: %i >= num_lumps", llump);
 #endif
 
     lumpcache = wadfiles[lfile]->lumpcache;
@@ -1540,7 +1540,7 @@ void W_Profile (void)
     char        name[9];
 
 
-    for (i=0 ; i<numlumps ; i++)
+    for (i=0 ; i<num_lumps ; i++)
     {
         ptr = lumpcache[i];
         if (!ptr)
@@ -1563,7 +1563,7 @@ void W_Profile (void)
     f = fopen ("waddump.txt","w");
     name[8] = 0;
 
-    for (i=0 ; i<numlumps ; i++)
+    for (i=0 ; i<num_lumps ; i++)
     {
         memcpy (name,lumpinfo[i].name,8);
 
@@ -1625,7 +1625,7 @@ int W_AddFile (char *filename)
     {
         filename++;
         reload_filename = filename;
-        reload_lumpnum = numlumps;
+        reload_lumpnum = num_lumps;
     }
 
     if ( (handle = open (filename,O_RDONLY | O_BINARY)) == -1)
@@ -1635,7 +1635,7 @@ int W_AddFile (char *filename)
     }
 
     CONS_Printf (" adding %s\n",filename);
-    startlump = numlumps;
+    startlump = num_lumps;
 
     if (strcasecmp (filename+strlen(filename)-3, "wad") )
     {
@@ -1644,7 +1644,7 @@ int W_AddFile (char *filename)
         singleinfo.filepos = 0;
         singleinfo.size = LE_SWAP32(filelen(handle));
         FIL_ExtractFileBase (filename, singleinfo.name);
-        numlumps++;
+        num_lumps++;
     }
     else
     {
@@ -1661,18 +1661,18 @@ int W_AddFile (char *filename)
 
             // ???modifiedgame = true;
         }
-        header.numlumps = LE_SWAP32(header.numlumps);
+        header.num_lumps = LE_SWAP32(header.num_lumps);
         header.infotableofs = LE_SWAP32(header.infotableofs);
-        length = header.numlumps*sizeof(filelump_t);
+        length = header.num_lumps*sizeof(filelump_t);
         fileinfo = alloca (length);
         lseek (handle, header.infotableofs, SEEK_SET);
         read (handle, fileinfo, length);
-        numlumps += header.numlumps;
+        num_lumps += header.num_lumps;
     }
 
 
     // Fill in lumpinfo
-    lumpinfo = realloc (lumpinfo, numlumps*sizeof(lumpinfo_t));
+    lumpinfo = realloc (lumpinfo, num_lumps*sizeof(lumpinfo_t));
 
     if (!lumpinfo)
         I_Error ("Couldn't realloc lumpinfo");
@@ -1681,7 +1681,7 @@ int W_AddFile (char *filename)
 
     storehandle = reload_filename ? -1 : handle;
 
-    for (i=startlump ; i<numlumps ; i++,lump_p++, fileinfo++)
+    for (i=startlump ; i<num_lumps ; i++,lump_p++, fileinfo++)
     {
         lump_p->handle = storehandle;
         lump_p->position = LE_SWAP32(fileinfo->filepos);

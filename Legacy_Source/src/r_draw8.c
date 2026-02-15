@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_draw8.c 1769 2026-01-13 15:59:53Z wesleyjohnson $
+// $Id: r_draw8.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 // Portions Copyright (C) 2000-2016 by DooM Legacy Team.
@@ -1367,7 +1367,7 @@ void R_DrawColumnShadowed_8(void)
     // SoM: This runs through the lightlist from top to bottom and cuts up
     // the column accordingly.
     unsigned int i;
-    for (i = 0; i < dc_numlights; i++)
+    for (i = 0; i < dc_num_lights; i++)
     {
         // If the height of the light is above the column, get the colormap
         // anyway because the lighting of the top should be effected.

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: win_vid.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: win_vid.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -137,7 +137,7 @@ vmode_t specialmodes[NUMSPECIALMODES] = {
             "Initial",
             INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT,
             INITIAL_WINDOW_WIDTH, 1,     // rowbytes, bytes per pixel
-            MODE_window, 2,  // windowed, numpages
+            MODE_window, 2,  // windowed, num_pages
             NULL,
             VID_SetWindowedDisplayMode,
             0          // misc
@@ -147,7 +147,7 @@ vmode_t specialmodes[NUMSPECIALMODES] = {
             "320x200",
             320, 200,   //(200.0/320.0)*(320.0/240.0),
             320, 1,     // rowbytes, bytes per pixel
-            MODE_window, 2,  // windowed, numpages
+            MODE_window, 2,  // windowed, num_pages
             NULL,
             VID_SetWindowedDisplayMode,
             0          // misc
@@ -490,7 +490,7 @@ static BOOL VID_DDModes_callback (int width, int height, int bpp)
     nmp->extradata = NULL;
     nmp->setmode_func = VID_SetDirectDrawMode;
 
-    nmp->numpages = 2;     // double-buffer (but this value is not used)
+    nmp->num_pages = 2;     // double-buffer (but this value is not used)
 
     nmp->bytesperpixel = (bpp+1)>>3;
 
@@ -1334,10 +1334,10 @@ static  void VID_Command_ModeInfo_f (void)
     {
         GenPrintf( EMSG_info, "bytes per scanline: %d\n"
                     "bytes per pixel: %d\n"
-                    "numpages: %d\n",
+                    "num_pages: %d\n",
                     pv->rowbytes,
                     pv->bytesperpixel,
-                    pv->numpages);
+                    pv->num_pages);
     }
 }
 

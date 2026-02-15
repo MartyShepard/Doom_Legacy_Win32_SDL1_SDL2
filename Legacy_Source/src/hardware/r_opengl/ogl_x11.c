@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: ogl_x11.c 1245 2016-08-04 14:21:00Z wesleyjohnson $
+// $Id: ogl_x11.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2000 by DooM Legacy Team.
 //
@@ -192,7 +192,7 @@ EXPORT Window HWRAPI( HookXwin ) (Display *dsp,int width,int height, boolean vid
 
     //lvid->buffer = NULL;   // unless we use the software view
     //lvid->direct = NULL;   // direct access to video memory, old DOS crap
-    //lvid->numpages = 2;    // this is normally not used
+    //lvid->num_pages = 2;    // this is normally not used
 
     return win; // on renvoie une valeur pour dire que cela s'est bien pass
 }

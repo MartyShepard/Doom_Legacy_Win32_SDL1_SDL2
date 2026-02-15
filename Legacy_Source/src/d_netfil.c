@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: d_netfil.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: d_netfil.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -201,7 +201,7 @@ byte * Put_Server_FileNeed(void)
     // Format: Series of file descriptor, number of file in packet field.
     // Dest buff length: fileneed[FILENEED_BUFF_LEN]
     p=(byte *)&netbuffer->u.serverinfo.fileneed;
-    for(i=0;i<numwadfiles;i++)
+    for(i=0;i<num_wadfiles;i++)
     {
         // Format: filesize uint32, filename str0, md5sum 16byte
         WRITEU32(p, wadfiles[i]->filesize);
@@ -212,7 +212,7 @@ byte * Put_Server_FileNeed(void)
         // char array, is endian safe
         WRITEMEM(p,wadfiles[i]->md5sum,16);
     }
-    netbuffer->u.serverinfo.num_fileneed = i;  // numwadfiles
+    netbuffer->u.serverinfo.num_fileneed = i;  // num_wadfiles
     return p;
 }
 

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_data.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_data.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -107,7 +107,7 @@
 #include "r_sky.h"
 #include "r_data.h"
 #include "w_wad.h"
-  // numwadfiles
+  // num_wadfiles
 #include "z_zone.h"
 #include "v_video.h" //pLocalPalette
 #include "m_swap.h"
@@ -142,26 +142,26 @@ int             firstpatch, lastpatch, numpatches;
 
 
 // textures
-unsigned int    numtextures = 0;
+unsigned int    num_textures = 0;
   // number of textures in textures array, and some following tables,
 
-// Array [ numtextures ], owned, Z_Malloc
+// Array [ num_textures ], owned, Z_Malloc
 texture_t**     textures = NULL;
 
 // [WDJ] To reduce the repeated indexing using texture id num, better locality of reference.
 // To allow creating a texture that was not loaded from textures[].
 // Holds all the software render information.
-// Array [ numtextures ], owned, Z_Malloc
+// Array [ num_textures ], owned, Z_Malloc
 texture_render_t * texture_render = NULL;
 
-// Array [ numtextures ], owned, Z_Malloc
+// Array [ num_textures ], owned, Z_Malloc
 fixed_t*        textureheight;      // needed for texture pegging
 
 
 #if 0
 int       *flattranslation;             // for global animation
 #endif
-// Array [ numtextures+1 ], owned, Z_Malloc
+// Array [ num_textures+1 ], owned, Z_Malloc
 int *  texturetranslation;
 
 // needed for pre rendering
@@ -1938,9 +1938,9 @@ void R_Flush_Texture_Cache (void)
 {
     unsigned int i;
 
-    if (numtextures>0)
+    if (num_textures>0)
     {
-        for (i=0; i<numtextures; i++)
+        for (i=0; i<num_textures; i++)
         {
             // Z_Free also sets the cache ptr to NULL
             if( texture_render[i].cache )
@@ -1984,18 +1984,18 @@ void R_Load_Textures (void)
     int                 maxoff;
     int                 maxoff2;
     unsigned int        nummappatches;
-    unsigned int        numtextures1;
-    unsigned int        numtextures2;
+    unsigned int        num_textures1;
+    unsigned int        num_textures2;
 
     unsigned int        i;
 
 
 
-    // free previous memory before numtextures change
+    // free previous memory before num_textures change
 
-    if (numtextures>0)
+    if (num_textures>0)
     {
-        for (i=0; i<numtextures; i++)
+        for (i=0; i<num_textures; i++)
         {
             // Z_Free also sets the cache ptr to NULL
             if (textures[i])
@@ -2025,28 +2025,28 @@ void R_Load_Textures (void)
     // The data is contained in one or two lumps,
     //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
     maptex = maptex1 = W_CacheLumpName ("TEXTURE1", PU_LUMP); // will be freed
-    numtextures1 = LE_SWAP32(*maptex);  // number of textures, lump[0..3]
+    num_textures1 = LE_SWAP32(*maptex);  // number of textures, lump[0..3]
     maxoff = W_LumpLength (W_GetNumForName ("TEXTURE1"));
     directory = maptex+1;  // after number of textures, at lump[4]
 
     if( VALID_LUMP( W_CheckNumForName ("TEXTURE2") ) )
     {
         maptex2 = W_CacheLumpName ("TEXTURE2", PU_LUMP); // will be freed
-        numtextures2 = LE_SWAP32(*maptex2); // number of textures, lump[0..3]
+        num_textures2 = LE_SWAP32(*maptex2); // number of textures, lump[0..3]
         maxoff2 = W_LumpLength (W_GetNumForName ("TEXTURE2"));
     }
     else
     {
         maptex2 = NULL;
-        numtextures2 = 0;
+        num_textures2 = 0;
         maxoff2 = 0;
     }
 #ifdef BUGFIX_TEXTURE0
 #define FIRST_TEXTURE  1
     // [WDJ] make room for using 0 as no-texture and keeping first texture
-    numtextures = numtextures1 + numtextures2 + 1;
+    num_textures = num_textures1 + num_textures2 + 1;
 #else   
-    numtextures = numtextures1 + numtextures2;
+    num_textures = num_textures1 + num_textures2;
 #define FIRST_TEXTURE  0
 #endif
 
@@ -2059,23 +2059,23 @@ void R_Load_Textures (void)
         Z_Free(textureheight);
     }
 
-    textures         = Z_Malloc(numtextures * sizeof(*textures),         PU_STATIC, 0);
-    texture_render   = Z_Malloc(numtextures * sizeof(texture_render_t),  PU_STATIC, 0);
+    textures         = Z_Malloc(num_textures * sizeof(*textures),         PU_STATIC, 0);
+    texture_render   = Z_Malloc(num_textures * sizeof(texture_render_t),  PU_STATIC, 0);
     // NULL the cache ptrs, format, and flags.
-    memset( texture_render, 0, sizeof(texture_render_t) * numtextures );
-    textureheight    = Z_Malloc(numtextures * sizeof(*textureheight),    PU_STATIC, 0);
+    memset( texture_render, 0, sizeof(texture_render_t) * num_textures );
+    textureheight    = Z_Malloc(num_textures * sizeof(*textureheight),    PU_STATIC, 0);
 
 #ifdef BUGFIX_TEXTURE0
-    for (i=0 ; i<numtextures-1 ; i++, directory++)
+    for (i=0 ; i<num_textures-1 ; i++, directory++)
 #else
-    for (i=0 ; i<numtextures ; i++, directory++)
+    for (i=0 ; i<num_textures ; i++, directory++)
 #endif
     {
         //only during game startup
         //if (!(i&63))
         //    CONS_Printf (".");
 
-        if (i == numtextures1)
+        if (i == num_textures1)
         {
             // Start looking in second texture file.
             maptex = maptex2;
@@ -2160,10 +2160,10 @@ void R_Load_Textures (void)
     free(patch_to_num);
 
 #ifdef BUGFIX_TEXTURE0
-    // Move texture[0] to texture[numtextures-1]
-    textures[numtextures-1] = textures[0];
-    texture_render[numtextures-1] = texture_render[0];
-    textureheight[numtextures-1] = textureheight[0];
+    // Move texture[0] to texture[num_textures-1]
+    textures[num_textures-1] = textures[0];
+    texture_render[num_textures-1] = texture_render[0];
+    textureheight[num_textures-1] = textureheight[0];
     // cannot have ptr to texture in two places, will deallocate twice
     textures[0] = NULL;	// force segfault on any access to textures[0]
 #endif   
@@ -2176,10 +2176,10 @@ void R_Load_Textures (void)
         Z_Free (texturetranslation);
 
     // texturetranslation is 1 larger than texture tables, for some unknown reason
-    texturetranslation = Z_Malloc ((numtextures+1)*sizeof(*texturetranslation),
+    texturetranslation = Z_Malloc ((num_textures+1)*sizeof(*texturetranslation),
                                    PU_STATIC, 0);
 
-    for (i=0 ; i<numtextures ; i++)
+    for (i=0 ; i<num_textures ; i++)
         texturetranslation[i] = i;
 }
 
@@ -2194,7 +2194,7 @@ lumpnum_t  R_CheckNumForNameList(const char *name, lumplist_t* list, int listsiz
     ln = W_CheckNumForNamePwad(name, list[i].wadfile, list[i].firstlump);
     if( ! VALID_LUMP(ln) )
       continue;  // not found
-    if(LUMPNUM(ln) > (list[i].firstlump + list[i].numlumps) )
+    if(LUMPNUM(ln) > (list[i].firstlump + list[i].num_lumps) )
       continue;  // not within START END
 
     return ln;
@@ -2218,7 +2218,7 @@ static void R_Load_ExtraColormaps()
     colormaplumps = NULL;
     cfile = 0;
 
-    for(; cfile < numwadfiles; cfile ++)
+    for(; cfile < num_wadfiles; cfile ++)
     {
         start_ln = W_CheckNumForNamePwad("C_START", cfile, 0);
         if( ! VALID_LUMP(start_ln) )
@@ -2243,7 +2243,7 @@ static void R_Load_ExtraColormaps()
         colormaplumps[numcolormaplumps].wadfile = WADFILENUM(start_ln);
         ln1++;
         colormaplumps[numcolormaplumps].firstlump = ln1;
-        colormaplumps[numcolormaplumps].numlumps = LUMPNUM(end_ln) - ln1;
+        colormaplumps[numcolormaplumps].num_lumps = LUMPNUM(end_ln) - ln1;
         numcolormaplumps++;
     }
 }
@@ -2264,7 +2264,7 @@ void R_Load_Flats ()
   flats = NULL;
   cfile = 0;
 
-  for(;cfile < numwadfiles; cfile ++)
+  for(;cfile < num_wadfiles; cfile ++)
   {
 #ifdef DEBUG_FLAT
     debug_Printf( "Flats in file %i\n", cfile );
@@ -2309,7 +2309,7 @@ save_flat_list:
     if(end_ln == NO_LUMP)
     {
       flats[numflatlists].firstlump = 0;
-      flats[numflatlists].numlumps = 0xffff; //Search the entire file!
+      flats[numflatlists].num_lumps = 0xffff; //Search the entire file!
     }
     else
     {
@@ -2318,7 +2318,7 @@ save_flat_list:
       if( ln2 <= ln1 )  // should not be able to happen
         ln2 = 0xffff;  // search entire wad
       flats[numflatlists].firstlump = ln1 + 1;
-      flats[numflatlists].numlumps = ln2 - (ln1 + 1);
+      flats[numflatlists].num_lumps = ln2 - (ln1 + 1);
     }
     numflatlists++;
     continue;
@@ -3677,7 +3677,7 @@ int  R_CheckTextureNumForName (const char *name)
     if (name[0] == '-')
         return 0;
 
-    for (i=FIRST_TEXTURE ; i<numtextures ; i++)
+    for (i=FIRST_TEXTURE ; i<num_textures ; i++)
         if (!strncasecmp (textures[i]->name, name, 8) )
             return i;
 #ifdef RANGECHECK
@@ -3760,10 +3760,10 @@ void R_PrecacheLevel (void)
     //
     // no need to precache all software textures in 3D mode
     // (note they are still used with the reference software view)
-    texturepresent = calloc(numtextures,sizeof(char));  // temp alloc, zeroed
+    texturepresent = calloc(num_textures,sizeof(char));  // temp alloc, zeroed
 
     unsigned int i;
-    for (i=0 ; i<numsides ; i++)
+    for (i=0 ; i<num_sides ; i++)
     {
         // for all sides
         // texture num 0=no-texture, otherwise is valid texture
@@ -3776,11 +3776,11 @@ void R_PrecacheLevel (void)
             texturepresent[sides[i].bottomtexture] = 1;
 #else 
         //Hurdler: huh, a potential bug here????
-        if (sides[i].toptexture < numtextures)
+        if (sides[i].toptexture < num_textures)
             texturepresent[sides[i].toptexture] = 1;
-        if (sides[i].midtexture < numtextures)
+        if (sides[i].midtexture < num_textures)
             texturepresent[sides[i].midtexture] = 1;
-        if (sides[i].bottomtexture < numtextures)
+        if (sides[i].bottomtexture < num_textures)
             texturepresent[sides[i].bottomtexture] = 1;
 #endif       
     }
@@ -3798,7 +3798,7 @@ void R_PrecacheLevel (void)
     //    GenPrintf(EMSG_dev, "Generating textures..\n");
 
     texturememory = 0;  // global
-    for (i=FIRST_TEXTURE ; i<numtextures ; i++)
+    for (i=FIRST_TEXTURE ; i<num_textures ; i++)
     {
         if (!texturepresent[i])
             continue;
@@ -3817,7 +3817,7 @@ void R_PrecacheLevel (void)
     //
     // Precache sprites.
     //
-    spritepresent = calloc(numsprites,sizeof(char));  // temp alloc, zeroed
+    spritepresent = calloc(num_sprites,sizeof(char));  // temp alloc, zeroed
 
     for (th = thinkercap.next ; th != &thinkercap ; th=th->next)
     {
@@ -3826,13 +3826,13 @@ void R_PrecacheLevel (void)
     }
 
     spritememory = 0;
-    for (i=0 ; i<numsprites ; i++)
+    for (i=0 ; i<num_sprites ; i++)
     {
         if (!spritepresent[i])
             continue;
 
         unsigned int j;
-        for (j=0 ; j<sprites[i].numframes ; j++)
+        for (j=0 ; j<sprites[i].num_frames ; j++)
         {
             spriteframe_t * sf = get_spriteframe( &sprites[i], j );
             byte n = srp_to_num_rot[ sf->rotation_pattern ];

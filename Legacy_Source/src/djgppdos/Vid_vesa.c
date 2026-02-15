@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: Vid_vesa.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: Vid_vesa.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -93,7 +93,7 @@ static vmode_t      vga_vidmodes[NUM_VGA_VIDMODES+1] = {
     "Initial",
     INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT,
     INITIAL_WINDOW_WIDTH, 1,     // rowbytes, bytes per pixel
-    MODE_window, 1,  // windowed, numpages
+    MODE_window, 1,  // windowed, num_pages
     NULL,
     VGA_InitMode
   },
@@ -147,7 +147,7 @@ typedef struct
     int blue_pos;           // (+36)
     int pptr;
     int pagesize;
-    int numpages;
+    int num_pages;
 } modeinfo_t;
 
 static vbeinfoblock_t vesainfo;
@@ -508,7 +508,7 @@ int VID_SetMode (modenum_t modenum)
     debug_Printf("vid.height   %d\n",vid.height);
     debug_Printf("vid.buffer   %x\n",vid.buffer);
     debug_Printf("vid.rowbytes %d\n",vid.rowbytes);
-    debug_Printf("vid.numpages %d\n",vid.numpages);
+    debug_Printf("vid.num_pages %d\n",vid.num_pages);
     debug_Printf("vid.recalc   %d\n",vid.recalc);
     debug_Printf("vid.direct   %x\n",vid.direct);
 #endif
@@ -787,7 +787,7 @@ void VID_VesaGetExtraModes ( byte select_bitpp )
             {
             // add linear bit to mode for linear modes
                 vesa_extra[nummodes].vesamode = vesamode | LINEAR_MODE;
-                vesa_modes[nummodes].numpages = 1; //vesamodeinfo.NumberOfImagePages;
+                vesa_modes[nummodes].num_pages = 1; //vesamodeinfo.NumberOfImagePages;
 
                 phys_mem_info.address = (int)vesamodeinfo.PhysBasePtr;
                 phys_mem_info.size = 0x400000;
@@ -814,7 +814,7 @@ void VID_VesaGetExtraModes ( byte select_bitpp )
                 vesa_extra[nummodes].linearmem =
                            real2ptr (vesamodeinfo.WinASegment<<4);
 
-                vesa_modes[nummodes].numpages = 1; //modeinfo.numpages;
+                vesa_modes[nummodes].num_pages = 1; //modeinfo.num_pages;
             }
 
             vesa_modes[nummodes].bytesperpixel = (vesamodeinfo.BitsPerPixel+1)/8;
@@ -909,7 +909,7 @@ int VGA_InitMode (viddef_t* lvid, vmode_t* currentmode_p)
     // here it is the standard VGA 64k window, not an LFB
     // (you could have 320x200x256c with LFB in the vesa modes)
     lvid->direct = (byte *) real2ptr (0xa0000);
-    lvid->numpages = 1;
+    lvid->num_pages = 1;
     lvid->bytepp = currentmode_p->bytesperpixel;
 
     return 1;
@@ -934,14 +934,14 @@ int VID_VesaInitMode (viddef_t* lvid, vmode_t* currentmode_p)
  debug_Printf("               height %d\n",currentmode_p->height);
  debug_Printf("               rowbytes %d\n",currentmode_p->rowbytes);
  debug_Printf("               windowed %d\n",currentmode_p->windowed);
- debug_Printf("               numpages %d\n",currentmode_p->numpages);
+ debug_Printf("               num_pages %d\n",currentmode_p->num_pages);
  debug_Printf(" currentmode_p->extradata :\n");
  debug_Printf("                ->vesamode %x\n",extra->vesamode);
  debug_Printf("                ->linearmem %x\n\n",extra->linearmem);
 #endif
 
     //added:20-01-98:no page flipping now... TO DO!!!
-    lvid->numpages = 1;
+    lvid->num_pages = 1;
 
     // clean up any old vid buffer lying around, alloc new if needed
     if (!VID_FreeAndAllocVidbuffer (lvid))
@@ -1014,12 +1014,12 @@ void VID_Command_ModeInfo_f (void)
                  "height: %d\n"
                  "bytes per scanline: %d\n"
                  "bytes per pixel: %d\n"
-                 "numpages: %d\n",
+                 "num_pages: %d\n",
                  pv->width,
                  pv->height,
                  pv->rowbytes,
                  pv->bytesperpixel,
-                 pv->numpages );
+                 pv->num_pages );
 }
 
 

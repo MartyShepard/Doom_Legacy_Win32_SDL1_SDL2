@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_setup.h 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: p_setup.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -70,7 +70,7 @@ typedef struct
     char        name[8];        // resource name from wad
 } levelflat_t;
 
-extern unsigned int    numlevelflats;
+extern unsigned int    num_levelflats;
 extern levelflat_t*    levelflats;
 
 uint16_t P_flatsize_to_index( int flatsize, const char * name );
@@ -78,7 +78,7 @@ uint16_t P_AddLevelFlat( const char* flatname );
 unsigned int P_PrecacheLevelFlats (void);
 char * P_FlatNameForNum(uint16_t id);
 
-extern uint16_t        nummapthings;
+extern uint16_t        num_mapthings;
 extern mapthing_t*     mapthings;
 
 // From P_SetupLevel

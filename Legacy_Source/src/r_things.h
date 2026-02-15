@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_things.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_things.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -140,7 +140,7 @@ typedef struct
     sfxid_t     soundsid[NUM_SKINSOUNDS]; // sound # in S_sfx table
 } skin_t;
 
-extern int       numskins;
+extern int       num_skins;
 extern skin_t *  skins[MAX_SKINS+1];
 extern consvar_t cv_skin[2];
 

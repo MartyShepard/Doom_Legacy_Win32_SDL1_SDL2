@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: hw_cache.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: hw_cache.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -932,12 +932,12 @@ void HWR_release_Patch ( MipPatch_t* grPatch, Mipmap_t* grMipmap )
 //             CACHING HANDLING
 // =================================================
 
-static int  gr_numtextures = 0;
+static int  gr_num_textures = 0;
 static MipTexture_t*  gr_textures = NULL;  // for ALL Doom textures, malloc
 
 void HWR_Init_TextureCache (void)
 {
-    gr_numtextures = 0;
+    gr_num_textures = 0;
     gr_textures = NULL;
 }
 
@@ -958,9 +958,9 @@ void HWR_Free_TextureCache (void)
     Z_FreeTags (PU_HWRCACHE, PU_HWRCACHE);
 
     // free all skin after each level: must be done after pfnClearMipMapCache!
-    for(wf=0; wf<numwadfiles; wf++)
+    for(wf=0; wf<num_wadfiles; wf++)
     {
-        for (i=0; i<wadfiles[wf]->numlumps; i++)
+        for (i=0; i<wadfiles[wf]->num_lumps; i++)
         {
             // Free all colormap mipmaps.
             MipPatch_t* grpatch = &(wadfiles[wf]->hwrcache[i]);
@@ -980,7 +980,7 @@ void HWR_Free_TextureCache (void)
     if (gr_textures)
     {
         // destroy all of gr_textures
-        for( i=0; i<gr_numtextures; i++ )
+        for( i=0; i<gr_num_textures; i++ )
         {
             // free alternate texture mipmap used for TF_Opaquetrans
             Mipmap_t * altmip = gr_textures[i].mipmap.nextcolormap;
@@ -997,7 +997,7 @@ void HWR_Free_TextureCache (void)
 }
 
 // Called from P_SetupLevel->HWR_Preload_Graphics
-void HWR_Prep_LevelCache (int numtextures)
+void HWR_Prep_LevelCache (int num_textures)
 {
     // problem: the mipmap cache management hold a list of mipmaps.. but they are
     //           reallocated on each level..
@@ -1005,14 +1005,14 @@ void HWR_Prep_LevelCache (int numtextures)
     //  1) just need re-download stuff in hardware cache VERY fast
     //  2) sprite/menu stuff mixed with level textures so can't do anything else
 
-    // we must free it since numtextures changed
+    // we must free it since num_textures changed
     HWR_Free_TextureCache ();
 
-    gr_numtextures = numtextures;
-    gr_textures = malloc (sizeof(MipTexture_t) * numtextures);
+    gr_num_textures = num_textures;
+    gr_textures = malloc (sizeof(MipTexture_t) * num_textures);
     if (!gr_textures)
         I_Error ("3D can't alloc gr_textures");
-    memset (gr_textures, 0, sizeof(MipTexture_t) * numtextures);
+    memset (gr_textures, 0, sizeof(MipTexture_t) * num_textures);
 }
 
 void HWR_SetPalette( RGBA_t* palette )
@@ -1096,8 +1096,8 @@ MipTexture_t* HWR_GetTexture (int tex, uint32_t drawflags)
     MipTexture_t * miptex;
     Mipmap_t * mipmap;
 #ifdef PARANOIA
-    if( tex>=gr_numtextures )
-        I_Error(" HWR_GetTexture : tex>=numtextures\n");
+    if( tex>=gr_num_textures )
+        I_Error(" HWR_GetTexture : tex>=num_textures\n");
 #endif
     miptex = &gr_textures[tex];
     mipmap = &(miptex->mipmap);  // mipmap in miptex

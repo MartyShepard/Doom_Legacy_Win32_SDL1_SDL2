@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_spec.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: p_spec.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -481,7 +481,7 @@ void P_FindAnimatedFlat (int animnum)
     // Search through the levelflats, find if this anim flat sequence is used.
     //
     foundflats = levelflats;
-    for (k = 0; k<numlevelflats; k++, foundflats++)
+    for (k = 0; k<num_levelflats; k++, foundflats++)
     {
         // is that levelflat from the flat anim sequence ?
         if( WADFILENUM(foundflats->lumpnum) != wadnum )  // rare
@@ -1191,7 +1191,7 @@ static void P_Init_TagLists(void)
   }
 
   // reversed for
-  for (i=numsectors-1; i>=0; i-- )
+  for (i=num_sectors-1; i>=0; i-- )
   {
       if( sectors[i].tag == 0 && !cv_zerotags.EV )  continue;
       unsigned int j = SECTOR_TAGHASH( sectors[i].tag );
@@ -1200,7 +1200,7 @@ static void P_Init_TagLists(void)
   }
 
   // reversed for
-  for (i=numlines-1; i>=0; i-- )
+  for (i=num_lines-1; i>=0; i-- )
   {
       if( lines[i].tag == 0 && !cv_zerotags.EV )  continue;
       unsigned int j = LINE_TAGHASH( lines[i].tag );
@@ -3097,22 +3097,22 @@ void P_AddFakeFloor(sector_t* taggedsec, sector_t* modsec, line_t* master, uint3
 
   // Make list of control sectors that affect this sector, and grow it
   {
-    // Initial condition numattached==0, is also handled by this code
+    // Initial condition num_attached==0, is also handled by this code
     // if already attached, then do not need to process again
     uint16_t  i;
-    for(i = 0; i < modsec->numattached; i++)
+    for(i = 0; i < modsec->num_attached; i++)
     {
       if(modsec->attached[i] == taggedindex)
         return;
     }
     // Init to NULL by P_LoadSectors, realloc will make initial allocation
     // or grow the list
-    int * new_attached = realloc(modsec->attached, sizeof(int) * (modsec->numattached + 1));
+    int * new_attached = realloc(modsec->attached, sizeof(int) * (modsec->num_attached + 1));
     // non-fatal handling, just ignore the new floor
     if( new_attached == NULL )  return;
     modsec->attached = new_attached;
-    modsec->attached[modsec->numattached] = taggedindex;	// sector index
-    modsec->numattached ++;
+    modsec->attached[modsec->num_attached] = taggedindex;	// sector index
+    modsec->num_attached ++;
   }
 
   //Add the floor
@@ -3240,7 +3240,7 @@ void P_SpawnSpecials (void)
     //  Init special SECTORs.
     sector = sectors;
     uint32_t si;
-    for (si=0 ; si<numsectors ; si++, sector++)
+    for (si=0 ; si<num_sectors ; si++, sector++)
     {
         sector->friction = FRICTION_NORM;  // defaults
         sector->movefactor = ORIG_FRICTION_FACTOR;
@@ -3342,7 +3342,7 @@ void P_SpawnSpecials (void)
 
     //  Init line EFFECTs
     uint32_t ki;
-    for (ki=0; ki < numlines; ki++)
+    for (ki=0; ki < num_lines; ki++)
     {
         line_t * effline = & lines[ki]; // effect line
         sector_t * model_secp = NULL; // model sector ptr (control sector)
@@ -3612,7 +3612,7 @@ void P_Config_FW_Specials (void)
 
     // all fake floor in all sectors
     uint32_t i;
-    for (i=0 ; i<numsectors ; i++, sector++)
+    for (i=0 ; i<num_sectors ; i++, sector++)
     {
         for(ffloor = sector->ffloors; ffloor; )
         {
@@ -3811,7 +3811,7 @@ static void P_SpawnScrollers(void)
   line_t * lnp = lines;  // line ptr
 
   uint32_t ki;
-  for (ki=0; ki<numlines; ki++,lnp++)
+  for (ki=0; ki<num_lines; ki++,lnp++)
   {
       // for all lines l
       fixed_t dx = lnp->dx >> SCROLL_SHIFT;  // direction and speed of scrolling
@@ -4077,7 +4077,7 @@ static void P_SpawnFriction( sector_t * sec )
     int movefactor; // applied to each player move to simulate inertia
 
     uint32_t ki;
-    for (ki = 0 ; ki < numlines ; ki++,lnp++)
+    for (ki = 0 ; ki < num_lines ; ki++,lnp++)
     {
         if (lnp->special == 223)  // Boom Friction by length linedef
         {
@@ -4677,7 +4677,7 @@ static void P_SpawnPushers(void)
     mobj_t* thing;
 
     uint32_t ki;
-    for (ki = 0 ; ki < numlines ; ki++,l++)
+    for (ki = 0 ; ki < num_lines ; ki++,l++)
     {
         fsecn = -1; // init search P_FindSector
         switch(l->special)

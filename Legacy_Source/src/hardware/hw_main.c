@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: hw_main.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: hw_main.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -1400,7 +1400,7 @@ void HWR_SplitWall(sector_t * sector, vxtx3d_t * vxtx, int texnum,
     realbot = bot = vxtx[0].y;
     pegmul = (sw_tow[0] - sw_tow[1]) / (top - bot);
 
-    for (i = 1; i < sector->numlights; i++)
+    for (i = 1; i < sector->num_lights; i++)
     {
         // check each fake floor for
         if (top < realbot)
@@ -1737,7 +1737,7 @@ static void HWR_StoreWallRange(float startfrac, float endfrac)
             vxtx[0].y = vxtx[1].y = FIXED_TO_FLOAT( worldbacktop );
 
             Surf.polyflags = PF_Environment;
-            if (gr_frontsector->numlights)
+            if (gr_frontsector->num_lights)
             {
                 Surf.polyflags = PF_Masked | PF_NoAlphaTest;
                 HWR_SplitWall(gr_frontsector, vxtx, toptexnum, &Surf,
@@ -1781,7 +1781,7 @@ static void HWR_StoreWallRange(float startfrac, float endfrac)
             vxtx[0].y = vxtx[1].y = FIXED_TO_FLOAT( worldbottom );
 
             Surf.polyflags = PF_Environment;
-            if (gr_frontsector->numlights)
+            if (gr_frontsector->num_lights)
             {
                 Surf.polyflags = PF_Masked | PF_NoAlphaTest;
                 HWR_SplitWall(gr_frontsector, vxtx, bottomtexnum, &Surf,
@@ -1961,7 +1961,7 @@ static void HWR_StoreWallRange(float startfrac, float endfrac)
 
             // I don't think that solid walls can use translucent linedef types...
             Surf.polyflags = PF_Environment;
-            if (gr_frontsector->numlights)
+            if (gr_frontsector->num_lights)
             {
                 HWR_SplitWall(gr_frontsector, vxtx, midtexnum, &Surf,
                               0, FF_CUTSOLIDS, PF_Masked | PF_NoAlphaTest);
@@ -2084,7 +2084,7 @@ static void HWR_StoreWallRange(float startfrac, float endfrac)
                     }
                 }
 
-                if (gr_frontsector->numlights)
+                if (gr_frontsector->num_lights)
                 {
 //		        if( midtexnum == 0 ) continue;  // no texture to display (when 3Dslab is missing side texture)
                     Surf.polyflags = blendmode;
@@ -2162,7 +2162,7 @@ static void HWR_StoreWallRange(float startfrac, float endfrac)
                     }
                 }
 
-                if (gr_backsector->numlights)
+                if (gr_backsector->num_lights)
                 {
 //		        if( midtexnum == 0 ) continue;  // no texture to display (when 3Dslab is missing side texture)
                     Surf.polyflags = blendmode;
@@ -2796,17 +2796,17 @@ static void HWR_Subsector(int num)
 //no risk while developing, enough debugging nights!
 #ifdef PARANOIA
     if (num >= num_poly_subsector)
-        I_Error("HWR_Subsector: ss %i with numss = %i, extrass = %d", num, numsubsectors, num_poly_subsector);
+        I_Error("HWR_Subsector: ss %i with num_ss = %i, num_poly_ss = %d", num, num_subsectors, num_poly_subsector);
 
     /*
-       if (num>=numsubsectors)
+       if (num>=num_subsectors)
        I_Error ("HWR_Subsector: ss %i with numss = %i",
        num,
-       numsubsectors );
+       num_subsectors );
      */
 #endif
 
-    if (num < numsubsectors)
+    if (num < num_subsectors)
     {
         sscount++;
         // subsector
@@ -2814,7 +2814,7 @@ static void HWR_Subsector(int num)
         // sector
         gr_frontsector = sub->sector;
         // how many linedefs
-        segcount = sub->numlines;
+        segcount = sub->num_lines;
         // first line seg
         lineseg = &segs[sub->firstline];
     }
@@ -2829,7 +2829,7 @@ static void HWR_Subsector(int num)
 
 #ifdef DEBUG_TRIG   
     if( ( num == trigger_draw_subsector )
-        || ( trigger_sector < numsectors
+        || ( trigger_sector < num_sectors
               && sub->sector == & sectors[trigger_sector] ) )
     {
         GenPrintf(EMSG_debug, "TRIGGER SECTOR %i SUBSECTOR %i: first line= %i\n", sub->sector - sectors, trigger_draw_subsector, sub->firstline );
@@ -2901,10 +2901,10 @@ static void HWR_Subsector(int num)
         if (gr_frontsector->moved)
 #endif
         {
-            gr_frontsector->numlights = sub->sector->numlights = 0;
+            gr_frontsector->num_lights = sub->sector->num_lights = 0;
             R_Prep3DFloors(gr_frontsector);
             sub->sector->lightlist = gr_frontsector->lightlist;
-            sub->sector->numlights = gr_frontsector->numlights;
+            sub->sector->num_lights = gr_frontsector->num_lights;
 #ifdef SECTOR_FLAGS
             gr_frontsector->flags &= ~(SCF_floor_moved);
             sub->sector->flags &= ~(SCF_floor_moved);
@@ -3069,7 +3069,7 @@ static void HWR_Subsector(int num)
         sub->sector->validcount = validcount;   //TODO: fix that in a better way
 
 #ifdef DEBUG_TRIG       
-        if( trigger_line < numlines
+        if( trigger_line < num_lines
             && lineseg->linedef == & lines[ trigger_line ] )
         {
             GenPrintf(EMSG_debug, "TRIGGER LINE %i: side=%i\n", trigger_line, lineseg->side );
@@ -3187,7 +3187,7 @@ static void HWR_RenderBSPNode(bsp_child_t bspnum)
     // Found a subsector
     {
         unsigned int  subsecnum = bspnum & (~NF_SUBSECTOR);  // subsector index
-        if( subsecnum >= numsubsectors )  goto bad_subsector;
+        if( subsecnum >= num_subsectors )  goto bad_subsector;
         //*(gr_drawsubsector_p++) = subsecnum;
         // HWR_Subsector->HWR_RenderPlane->HWR_PlaneLighting  which uses bsp_bbox.
         HWR_Subsector(subsecnum);
@@ -3590,7 +3590,7 @@ static void HWR_AddSprites(sector_t * sec, lightlev_t sprite_lightlevel)
     sec->validcount = validcount;
 
     // sprite lighting
-    if(!sec->numlights) // when numlights then light in DrawSprite
+    if(!sec->num_lights) // when num_lights then light in DrawSprite
     {
       lightlev_t lightlevel = sprite_lightlevel;
       if(sec->model < SM_fluid)   lightlevel = sec->lightlevel;
@@ -3641,7 +3641,7 @@ static void HWR_ProjectSprite(mobj_t * thing)
     tx = (tr_x * gr_viewsin) - (tr_y * gr_viewcos);  // view x
 
     // decide which patch to use for sprite relative to player
-    if ((unsigned) thing->sprite >= numsprites)
+    if ((unsigned) thing->sprite >= num_sprites)
     {
 #ifdef RANGECHECK
         I_SoftError("HWR_ProjectSprite: invalid sprite number %i \n", thing->sprite);
@@ -3656,7 +3656,7 @@ static void HWR_ProjectSprite(mobj_t * thing)
         sprdef = &sprites[thing->sprite];
 
     fr = thing->frame & FF_FRAMEMASK;
-    if(fr >= sprdef->numframes)
+    if(fr >= sprdef->num_frames)
     {
 #ifdef RANGECHECK
         I_SoftError("HWR_ProjectSprite: invalid sprite frame %i : %i for %s\n",
@@ -3762,7 +3762,7 @@ static void HWR_ProjectSprite(mobj_t * thing)
     fixed_t  gz_top = thing->z + sprlump->topoffset;
 #endif
     thingsector = thing->subsector->sector;	 // [WDJ] 11/14/2009
-    if(thingsector->numlights)
+    if(thingsector->num_lights)
     {
       ff_light_t * ff_light = R_GetPlaneLight(thingsector, gz_top);
       lightlev_t lightlevel = *ff_light->lightlevel;
@@ -3875,7 +3875,7 @@ void HWR_DrawPSprite(pspdef_t * psp,  byte lightlum)
 
     // decide which patch to use
 #ifdef RANGECHECK
-    if ((unsigned) psp->state->sprite >= numsprites)
+    if ((unsigned) psp->state->sprite >= num_sprites)
     {
         I_SoftError("HWR_ProjectSprite: invalid sprite number %i\n", psp->state->sprite);
         return;       
@@ -3884,7 +3884,7 @@ void HWR_DrawPSprite(pspdef_t * psp,  byte lightlum)
 
     sprdef = &sprites[psp->state->sprite];
 #ifdef RANGECHECK
-    if ((psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes)
+    if ((psp->state->frame & FF_FRAMEMASK) >= sprdef->num_frames)
     {
         I_SoftError("HWR_ProjectSprite: invalid sprite frame %i : %i\n", psp->state->sprite, psp->state->frame);
         return;
@@ -4043,7 +4043,7 @@ static void HWR_DrawPlayerSprites(void)
 
     // [WDJ] 11/14/2012 use viewer variables for viewplayer
 
-    if (viewer_sector->numlights)
+    if (viewer_sector->num_lights)
     {
         ff_light_t * ff_light =
           R_GetPlaneLight(viewer_sector, viewmobj->z + viewmobj->info->height);
@@ -4496,7 +4496,7 @@ void HWR_RenderPlayerView(byte pind, player_t * player)
     validcount++;
 
     // [WDJ] Intercept degenerate case, so BSP node is never -1.
-    bsp_child_t top_node = ( numnodes > 0 )? numnodes-1
+    bsp_child_t top_node = ( num_nodes > 0 )? num_nodes-1
        : ( 0 | NF_SUBSECTOR );  // Degenerate, sector 0
 
     HWR_RenderBSPNode( top_node );
@@ -4754,7 +4754,7 @@ void  HWR_SetupLevel( void )
 // Called after setup level, and when change drawmode to HWR draw.
 void  HWR_Preload_Graphics( void )
 {
-    HWR_Prep_LevelCache (numtextures);
+    HWR_Prep_LevelCache (num_textures);
     HWR_Create_StaticLightmaps();
 }
 

@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //----------------------------------------------------------------------------
 //
-// $Id: t_script.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: t_script.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright(C) 2000 Simon Howard
 // Copyright (C) 2001-2011 by DooM Legacy Team.
@@ -681,7 +681,7 @@ mobj_t * MobjForSvalue(fs_value_t svalue)
   // as the thing number of a thing in the level.
   
   intval = intvalue(svalue);        
-  if(intval < 0 || intval >= nummapthings || !mapthings[intval].mobj)
+  if(intval < 0 || intval >= num_mapthings || !mapthings[intval].mobj)
       goto err_mapthing;
 
   return mapthings[intval].mobj;

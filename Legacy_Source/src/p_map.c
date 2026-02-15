@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_map.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: p_map.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2012 by DooM Legacy Team.
@@ -4063,11 +4063,11 @@ boolean P_CheckSector(sector_t* sector, boolean crunch)
   // If node has been freed, then start over from touching_thinglist.
   // Usually makes 3 passes, no matter how many things.
 
-  if(sector->numattached)
+  if(sector->num_attached)
   {
     sector_t*      sec;
     uint16_t i;
-    for(i = 0; i < sector->numattached; i ++)
+    for(i = 0; i < sector->num_attached; i ++)
     {
       // for each sector attached to the moved sector
       sec = &sectors[sector->attached[i]];

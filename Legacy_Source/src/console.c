@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: console.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: console.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -454,7 +454,7 @@ static void CON_Init_Input (void)
 //
 static void CON_RecalcSize ( int width )
 {
-    int   new_conwidth, oldcon_width, oldnumlines, oldcon_cy;
+    int   new_conwidth, oldcon_width, old_num_lines, oldcon_cy;
     int   i, conw;
     char  con2[CON_BUFFERSIZE];
     char  line2[MAX_CONWIDTH+4]; // BP: it is a line but who know ([WDJ] 30..94)
@@ -503,7 +503,7 @@ static void CON_RecalcSize ( int width )
 
     // save current
     oldcon_width = con_width;
-    oldnumlines = con_totallines;
+    old_num_lines = con_totallines;
     oldcon_cy = con_cy;
     memcpy(con2, con_buffer, CON_BUFFERSIZE);
 
@@ -515,9 +515,9 @@ static void CON_RecalcSize ( int width )
     // re-arrange console text buffer to keep text
     if(oldcon_width) // not the first time
     {
-        for(i=oldcon_cy+1; i<oldcon_cy+oldnumlines; i++)
+        for(i=oldcon_cy+1; i<oldcon_cy+old_num_lines; i++)
         {
-            char * con2p = &con2[(i% oldnumlines)*oldcon_width];
+            char * con2p = &con2[(i% old_num_lines)*oldcon_width];
             if( *con2p )
             {
                 memcpy(line2, con2p, oldcon_width);

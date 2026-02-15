@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hw_bsp.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: hw_bsp.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -117,12 +117,12 @@ static
 void  create_poly_vert( void )
 {
     polyvertex_t * pv;
-    size_t size = sizeof(polyvertex_t) * numvertexes;
+    size_t size = sizeof(polyvertex_t) * num_vertexes;
     int i;
 
     poly_vert = Z_Malloc(size, PU_HWRPLANE, NULL);
     pv = &poly_vert[0];
-    for( i=0; i<numvertexes; i++)
+    for( i=0; i<num_vertexes; i++)
     {
         pv->x = FIXED_TO_FLOAT( vertexes[i].x );
         pv->y = FIXED_TO_FLOAT( vertexes[i].y );
@@ -134,7 +134,7 @@ void  create_poly_vert( void )
 static inline
 boolean  in_poly_vert( polyvertex_t * p1 )
 {
-    return( (p1 >= poly_vert) && (p1 < &poly_vert[numvertexes]) );
+    return( (p1 >= poly_vert) && (p1 < &poly_vert[num_vertexes]) );
 }
 
 
@@ -215,7 +215,7 @@ polyvertex_t *  find_close_polyvertex( float x, float y, float ep )
 
     // Search level map vertexes.
     polyvertex_t * pv = poly_vert;
-    for( i=numvertexes; i>0; i--)
+    for( i=num_vertexes; i>0; i--)
     {
         if( ( fabsf( pv->x - x ) < ep )
             && ( fabsf( pv->y - y ) < ep ) )
@@ -303,7 +303,7 @@ void  polyvertex_dump( polyvertex_t * pv )
     int j;
     fixed_t x1 = pv->x * FRACUNIT;
     fixed_t y1 = pv->y * FRACUNIT;
-    for(j=0; j<numvertexes; j++)
+    for(j=0; j<num_vertexes; j++)
     {
         vertex_t * vt = &vertexes[j];	    
         if( abs(x1 - vt->x) + abs(y1 - vt->y) < 2 )
@@ -1752,7 +1752,7 @@ boolean  apply_seg_chains( wpoly_t * poly )
 // the void space and is cut out.
 //
 //  poly : surrounding convex polygon, non-destructive
-//  ssindex : subsec index, 0..(numsubsectors-1)
+//  ssindex : subsec index, 0..(num_subsectors-1)
 // Called from: HWR_SubsecPoly
 static
 void  CutOutSubsecPoly ( int ssindex, /*INOUT*/ wpoly_t* poly)
@@ -1781,7 +1781,7 @@ void  CutOutSubsecPoly ( int ssindex, /*INOUT*/ wpoly_t* poly)
     
     poly_num_pts = poly->numpts;
     sub = &subsectors[ssindex];
-    segcount = sub->numlines;
+    segcount = sub->num_lines;
     lseg = &segs[sub->firstline];
 
     // For each seg of the subsector
@@ -2042,7 +2042,7 @@ void  CutOutSubsecPoly ( int ssindex, /*INOUT*/ wpoly_t* poly)
 // so continue to cut off the poly into smaller parts with
 // each seg of the subsector.
 //
-//  ssindex : subsec index, 0..(numsubsectors-1)
+//  ssindex : subsec index, 0..(num_subsectors-1)
 //  poly : surrounding convex polygon, non-destructive
 // Called from HWR_WalkBSPNode
 static void HWR_SubsecPoly (int ssindex, wpoly_t* poly)
@@ -2131,7 +2131,7 @@ void HWR_WalkBSPNode_degen (int bspnum)
     {
 #if 0
             // BP: i think this code is useless and wrong because
-            // - bspnum==-1 happens only when numsubsectors == 0
+            // - bspnum==-1 happens only when num_subsectors == 0
             // - it can't happens in bsp recursive call since bspnum is a int and children is unsigned short
             // - the BSP is complet !! (there just can have subsector without segs) (i am not sure of this point)
 
@@ -2192,10 +2192,10 @@ void HWR_WalkBSPNode (int bspnum, wpoly_t* poly, bsp_child_t * leafnode, fixed_t
     {
         // Subsector leaf: bspnum is a subsector number.
         subsecnum = bspnum & ~NF_SUBSECTOR;
-        if( subsecnum >= numsubsectors )  goto bad_subsector;
+        if( subsecnum >= num_subsectors )  goto bad_subsector;
 
 #ifdef DEBUG_TRACE
-        if( trigger_bsp_sector < numsectors
+        if( trigger_bsp_sector < num_sectors
 	    && subsectors[subsecnum].sector == & sectors[trigger_bsp_sector] )
         {
             GenPrintf(EMSG_debug, "BSP TRIGGER SECTOR %i: \n", trigger_bsp_sector );
@@ -2230,14 +2230,14 @@ void HWR_WalkBSPNode (int bspnum, wpoly_t* poly, bsp_child_t * leafnode, fixed_t
         //Hurdler: implement a loading status
         if (ls_count-- <= 0)
         {
-           ls_count = numsubsectors/50;
+           ls_count = num_subsectors/50;
            loading_status();
         }
         return;
     }
 
     // Node reference: bspnum is another node of the tree.
-    if( bspnum >= numnodes )  goto bad_node;
+    if( bspnum >= num_nodes )  goto bad_node;
    
     bsp = &nodes[bspnum];
     set_divline(bsp, /*OUT*/ &fdivline);
@@ -2321,13 +2321,13 @@ void HWR_WalkBSPNode (int bspnum, wpoly_t* poly, bsp_child_t * leafnode, fixed_t
     return;
 
 bad_subsector:
-    I_Error ("HWR_WalkBSPNode : bad secnum %i, numsectors=%i -1\n",
-              subsecnum, numsubsectors );
+    I_Error ("HWR_WalkBSPNode : bad secnum %i, num_sectors=%i -1\n",
+              subsecnum, num_subsectors );
             
 bad_node:
     // frontpoly and backpoly are empty, and were not init.
-    I_Error ("HWR_WalkBSPNode : bad node num %i, numnodes=%i -1\n",
-              bspnum, numnodes );
+    I_Error ("HWR_WalkBSPNode : bad node num %i, num_nodes=%i -1\n",
+              bspnum, num_nodes );
 }
 
 
@@ -2478,7 +2478,7 @@ void SearchSegInBSP(int bspnum, split_T_t * stp)
 
 got_subsector:
     subsecnum = bspnum & ~NF_SUBSECTOR;
-    if( subsecnum >= numsubsectors )  return;
+    if( subsecnum >= num_subsectors )  return;
 
     // For every subsector polygon different than poly
     wq = & wpoly_subsectors[subsecnum];
@@ -2566,7 +2566,7 @@ void SolveTProblem (void)
             splitt.after = wp->ppts[j];
 
             // Check added polyvertex due to SplitPoly.
-            SearchSegInBSP(numnodes-1, & splitt);
+            SearchSegInBSP(num_nodes-1, & splitt);
         }
     }
 #ifdef DEBUG_HWBSP
@@ -2614,7 +2614,7 @@ sector_t *  find_poly_sector( wpoly_t * ssp )
     // Find closest linedef to the test point, along x and y axis.
     // Testing only one axis would work.
     // But a linedef may be much closer along the other axis, so we test along both X and Y.
-    for( k=0; k < numlines; k++ )
+    for( k=0; k < num_lines; k++ )
     {
         line_t * lp = & lines[k];
         if( lp->frontsector == lp->backsector ) continue;  // self-ref lines lie.
@@ -2727,13 +2727,13 @@ void AdjustSegs(void)
     float nearv1, nearv2;
 
     // for all segs in all sectors
-    for(ssnum=0; ssnum<numsubsectors; ssnum++)
+    for(ssnum=0; ssnum<num_subsectors; ssnum++)
     {
         wp = & wpoly_subsectors[ssnum];
         if(wp->numpts == 0)
             continue;
 
-        segcount = subsectors[ssnum].numlines;
+        segcount = subsectors[ssnum].num_lines;
         ss_sector = subsectors[ssnum].sector;
         lseg = &segs[subsectors[ssnum].firstline];
 
@@ -2852,7 +2852,7 @@ void AdjustSegs(void)
     }
 
     // check for missed segs, not in any polygon
-    for( j=0; j<numsegs; j++ )
+    for( j=0; j<num_segs; j++ )
     {
         lseg = &segs[j];
         if( verbose )
@@ -2892,7 +2892,7 @@ void  finalize_polygons( void )
     int ssnum, ps;
 
     // For all segs in all sectors.
-    for(ssnum=0; ssnum<numsubsectors; ssnum++)
+    for(ssnum=0; ssnum<num_subsectors; ssnum++)
     {
         wpoly = & wpoly_subsectors[ssnum];
 
@@ -2936,14 +2936,14 @@ void HWR_Create_PlanePolygons ( void )
     // find min/max boundaries of map
     //CONS_Printf ("Looking for boundaries of map...\n");
     M_ClearBox(rootbbox);
-    for (i=0;i<numvertexes;i++)
+    for (i=0;i<num_vertexes;i++)
         M_AddToBox( rootbbox, vertexes[i].x, vertexes[i].y );
 
-    //CONS_Printf ("Generating subsector polygons... %d subsectors\n", numsubsectors);
+    //CONS_Printf ("Generating subsector polygons... %d subsectors\n", num_subsectors);
 
     HWR_Free_poly_subsectors ();
     // allocate extra data for each subsector present in map
-    num_alloc_poly_subsector = numsubsectors + NUM_EXTRA_SUBSECTORS;
+    num_alloc_poly_subsector = num_subsectors + NUM_EXTRA_SUBSECTORS;
     poly_subsectors = Z_Malloc( sizeof(poly_subsector_t) * num_alloc_poly_subsector, PU_STATIC, NULL);
     // set all data in to 0 or NULL !!!
     memset (poly_subsectors, 0, sizeof(poly_subsector_t) * num_alloc_poly_subsector);
@@ -2960,7 +2960,7 @@ void HWR_Create_PlanePolygons ( void )
     create_poly_vert();
 
     // number of the first new subsector that might be added
-    num_poly_subsector = numsubsectors;
+    num_poly_subsector = num_subsectors;
 
     // construct the initial convex poly that encloses the full map
     wpoly_init_alloc( 4, &rootp );  // alloc space for 4 pts
@@ -2984,7 +2984,7 @@ void HWR_Create_PlanePolygons ( void )
 
     // start at head node of bsp tree
     // [WDJ] Intercept degenerate case, so BSP node is never -1.
-    HWR_WalkBSPNode( ( (numnodes > 0)? numnodes-1
+    HWR_WalkBSPNode( ( (num_nodes > 0)? num_nodes-1
                        : ( 0 | NF_SUBSECTOR )),  // Degenerate, sector 0
                      &rootp, NULL, rootbbox );
 

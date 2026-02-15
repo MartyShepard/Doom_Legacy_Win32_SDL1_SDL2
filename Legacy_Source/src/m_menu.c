@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: m_menu.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: m_menu.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1926,7 +1926,7 @@ void M_MultiPlayer_Responder (int key)
         {
             // unsigned skin index
             if(setupm_skinindex == 0)
-                setupm_skinindex = numskins;
+                setupm_skinindex = num_skins;
 
             setupm_skinindex--;
             goto change_skin;
@@ -1976,7 +1976,7 @@ change_skin:
     S_StartSound(menu_sfx_val);
 
     // check skin
-    if( setupm_skinindex > numskins-1 )
+    if( setupm_skinindex > num_skins-1 )
         setupm_skinindex = 0;
 
     if( skins[setupm_skinindex] == NULL )  return;

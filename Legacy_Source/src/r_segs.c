@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_segs.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_segs.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -143,7 +143,7 @@ static texture_render_t * mid_texren = NULL;
 static texture_render_t * bottom_texren = NULL;
 
 
-static unsigned int      numthicksides;
+static unsigned int      num_thicksides;
 //static short*          thicksidecol;
 
 
@@ -449,7 +449,7 @@ draw_ffplane_t *  create_draw_ffplane( unsigned int num_req )
 {
     static const int aug_num_req = (sizeof(draw_ffplane_t) + DRAWMEM_ALIGN_MASK) & ~DRAWMEM_ALIGN_MASK;
     draw_ffplane_t * dffp = (draw_ffplane_t *) alloc_drawmem( aug_num_req + num_req );
-    dffp->numffloorplanes = num_req;
+    dffp->num_ffloorplanes = num_req;
     return dffp;
 }
 
@@ -458,7 +458,7 @@ draw_ffside_t *  create_draw_ffside( unsigned int num_req )
 {
     static const int aug_num_req = (sizeof(draw_ffside_t) + DRAWMEM_ALIGN_MASK) & ~DRAWMEM_ALIGN_MASK;
     draw_ffside_t * dffs = (draw_ffside_t *) alloc_drawmem( aug_num_req + num_req );
-    dffs->numthicksides = num_req;
+    dffs->num_thicksides = num_req;
     return dffs;
 }
 
@@ -916,18 +916,18 @@ static void R_DrawWallSplats (void)
 void  expand_lightlist( void )
 {
     struct r_lightlist_s *  newlist = 
-        realloc(dc_lightlist, sizeof(r_lightlist_t) * dc_numlights);
+        realloc(dc_lightlist, sizeof(r_lightlist_t) * dc_num_lights);
 
     if( newlist )
     {
         dc_lightlist = newlist;
-        dc_maxlights = dc_numlights;
+        dc_maxlights = dc_num_lights;
     }
     else
     {
         // non-fatal protection, allow savegame
         // realloc fail does not disturb existing allocation
-        dc_numlights = dc_maxlights;
+        dc_num_lights = dc_maxlights;
         I_SoftError( "Expand lightlist realloc failed.\n" );
     }
 }
@@ -1364,15 +1364,15 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
 #endif
 
     // Setup lighting based on the presence/lack-of 3D floors.
-    dc_numlights = frontsector->numlights;
-    if( dc_numlights )
+    dc_num_lights = frontsector->num_lights;
+    if( dc_num_lights )
     {
-      if(dc_numlights >= dc_maxlights)   expand_lightlist();
+      if(dc_num_lights >= dc_maxlights)   expand_lightlist();
 
       // setup lightlist
       // highest light to lowest light, [0] is sector light at top
       unsigned int gi;
-      for(gi = 0; gi < dc_numlights; gi++)
+      for(gi = 0; gi < dc_num_lights; gi++)
       {
         // setup a lightlist entry
         ff_light = &frontsector->lightlist[gi];
@@ -1416,7 +1416,7 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
     }
     else
     {
-      // frontsector->numlights == 0
+      // frontsector->num_lights == 0
       if(colfunc == fogcolfunc) // Legacy Fog sheet
         vlight = frontsector->lightlevel + extralight_fog;
       else if(frontsector->extra_colormap && frontsector->extra_colormap->fog)
@@ -1491,7 +1491,7 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
         {
           // if not masked
           // calculate 3Dfloor lighting
-          if(dc_numlights)
+          if(dc_num_lights)
           {
             // Where there are 3dfloors ...
             dm_bottom_patch = FIXED_MAX;
@@ -1508,7 +1508,7 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
             // for each 3Dfloor light
             // highest light to lowest light, [0] is sector light at top
             unsigned int gi;
-            for(gi = 0; gi < dc_numlights; gi++)
+            for(gi = 0; gi < dc_num_lights; gi++)
             {
               rlight = &dc_lightlist[gi];
 
@@ -1552,7 +1552,7 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
 
                 // Finish dc_lightlist height adjustments.
                 // highest light to lowest light, [0] is sector light at top
-                for(gi++ ; gi < dc_numlights; gi++)
+                for(gi++ ; gi < dc_num_lights; gi++)
                 {
                   rlight = &dc_lightlist[gi];
                   rlight->height += rlight->heightstep;
@@ -1565,7 +1565,7 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
               // for next draw, downward from this light height
               dm_windowtop = dm_windowbottom + 1;
               dc_colormap = rlight->rcolormap;
-            } // for( dc_numlights )
+            } // for( dc_num_lights )
             // draw down to sector floor
             dm_windowbottom = realbot;
             if(dm_windowtop < dm_windowbottom)
@@ -1574,7 +1574,7 @@ void R_RenderMaskedSegRange( drawseg_t* ds, int x1, int x2 )
           next_x:
             dm_yscale += rw_scalestep;
             continue;  // next x
-          }  // if( dc_numlights )
+          }  // if( dc_num_lights )
 
 
           // Where there are no 3Dfloors ...
@@ -1719,15 +1719,15 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
     rw_scalestep = ds->scalestep;
     dm_yscale = ds->scale1 + (x1 - ds->x1)*rw_scalestep;
 
-    dc_numlights = frontsector->numlights;
-    if( dc_numlights )
+    dc_num_lights = frontsector->num_lights;
+    if( dc_num_lights )
     {
-      if(dc_numlights > dc_maxlights)    expand_lightlist();
+      if(dc_num_lights > dc_maxlights)    expand_lightlist();
 
       cnt = 0; // cnt of rlight created, some ff_light will be skipped
       // highest light to lowest light, [0] is sector light at top
       unsigned int gi;
-      for(gi = 0; gi < dc_numlights; gi++)
+      for(gi = 0; gi < dc_num_lights; gi++)
       {
         // Limit list to lights that affect this thickside.
         ff_light = &frontsector->lightlist[gi];
@@ -1742,7 +1742,7 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
           // Ignore it if the next light down is also above the ffloor thickside, when
           // that light will block.
           unsigned int gi2 = gi + 1;
-          if( (gi2 < dc_numlights)
+          if( (gi2 < dc_num_lights)
              && frontsector->lightlist[gi2].height > *ffloor->topheight
              && !(frontsector->lightlist[gi2].flags & FF_NOSHADE) )
             continue;  // too high, next ff_light
@@ -1794,7 +1794,7 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
 
         cnt++;
       }
-      dc_numlights = cnt;
+      dc_num_lights = cnt;
     }
     else
     {
@@ -1889,7 +1889,7 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
 
         // SoM: New code does not rely on r_drawColumnShadowed_8 which
         // will (hopefully) put less strain on the stack.
-        if(dc_numlights)
+        if(dc_num_lights)
         {
           fixed_t        height;
           fixed_t        bheight = 0;
@@ -1902,7 +1902,7 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
             // Apply dc_lightlist height adjustments. The height at the following x are dependent upon this.
             // highest light to lowest light, [0] is sector light at top
             unsigned int gi;
-            for( gi = 0; gi < dc_numlights; gi++)
+            for( gi = 0; gi < dc_num_lights; gi++)
             {
               rlight = &dc_lightlist[gi];
               rlight->height += rlight->heightstep;
@@ -1923,7 +1923,7 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
           // Setup dc_lightlist as to the 3dfloor light sources and effects.
           // highest light to lowest light, [0] is sector light at top
           unsigned int gi;
-          for( gi = 0; gi < dc_numlights; gi++)
+          for( gi = 0; gi < dc_num_lights; gi++)
           {
             // Check if the current light affects the colormap/lightlevel
             rlight = &dc_lightlist[gi];
@@ -2005,7 +2005,7 @@ void R_RenderThickSideRange( drawseg_t* ds, int x1, int x2, ffloor_t* ffloor)
 
               // Finish dc_lightlist height adjustments.
               // highest light to lowest light, [0] is sector light at top
-              for( gi++ ; gi < dc_numlights; gi++)
+              for( gi++ ; gi < dc_num_lights; gi++)
               {
                 rlight = &dc_lightlist[gi];
                 rlight->height += rlight->heightstep;
@@ -2152,7 +2152,7 @@ void R_RenderFog( ffloor_t* fff, sector_t * intosec, lightlev_t foglight,
 //    heightstep = -FixedMul (rw_scalestep, sec_ceilingheight_viewrel);
 
     // Setup lighting based on the presence/lack-of 3D floors.
-    dc_numlights = 1;
+    dc_num_lights = 1;
 
     dm_floorclip = clip_screen_bot_max;  // noclip
     dm_ceilingclip = clip_screen_top_min;  // noclip
@@ -2293,7 +2293,7 @@ void R_RenderSegLoop (void)
     dc_y0 = centery;  // default ref to center, same scale for draw and position
 #endif
 
-    if( dc_numlights )
+    if( dc_num_lights )
     {
         r_lightlist_t * rlight;
         lightlev_t  vlight;
@@ -2303,7 +2303,7 @@ void R_RenderSegLoop (void)
         // NOTE: Due to StoreWallRange, the dc_lightlist entries do NOT correspond to
         // the sector lightlist[i].
         unsigned int gi;
-        for( gi = 0; gi < dc_numlights; gi++)
+        for( gi = 0; gi < dc_num_lights; gi++)
         {
             rlight = & dc_lightlist[gi];
 
@@ -2403,8 +2403,8 @@ void R_RenderSegLoop (void)
         }
 
 
-        // The ffplane and numffplane are of the subsector processed by BSP.
-        if (numffplane)
+        // The ffplane and num_ffplane are of the subsector processed by BSP.
+        if (num_ffplane)
         {
           // The backscale is the rw_scale from the previous SegLoop call.	   
           // It is the scale at the near edge of the ffloor.
@@ -2413,7 +2413,7 @@ void R_RenderSegLoop (void)
 
           // Over all ffloor planes.
           unsigned int fi;
-          for( fi = 0; fi < numffplane; fi++)
+          for( fi = 0; fi < num_ffplane; fi++)
           {
             ff_planemgr_t * ffp = & ffplane[fi];
             if( ffp->height < viewz)
@@ -2463,7 +2463,7 @@ void R_RenderSegLoop (void)
               }
             }
           }
-        } // if numffplane
+        } // if num_ffplane
 
         //SoM: Calculate offsets for Thick fake floors.
         // calculate texture offset
@@ -2495,14 +2495,14 @@ void R_RenderSegLoop (void)
             }
         }
 
-        if(dc_numlights)
+        if(dc_num_lights)
         {
           r_lightlist_t * rlight;
 
           // Setup dc_lightlist as to the 3dfloor light and colormaps.
           // highest light to lowest light, [0] is sector light at top
           unsigned int gi;
-          for( gi = 0; gi < dc_numlights; gi++)
+          for( gi = 0; gi < dc_num_lights; gi++)
           {
             rlight = & dc_lightlist[gi];
 
@@ -2524,7 +2524,7 @@ void R_RenderSegLoop (void)
             }
           }
           // The colfunc will step through dc_lightlist, and sets dc_colormap.
-        } // if dc_numlights
+        } // if dc_num_lights
 
         backscale[rw_x] = rw_scale;
 
@@ -2663,19 +2663,19 @@ void R_RenderSegLoop (void)
             }
         }
 
-        if (maskedtexture || numthicksides)
+        if (maskedtexture || num_thicksides)
         {
           // save texturecol
           //  for backdrawing of masked mid texture
           maskedtexturecol[rw_x] = texcol;
         }
 
-        if(dc_numlights)
+        if(dc_num_lights)
         {
           // Apply dc_lightlist height adjustments.
           // highest light to lowest light, [0] is sector light at top
           unsigned int gi;
-          for( gi = 0; gi < dc_numlights; gi++)
+          for( gi = 0; gi < dc_num_lights; gi++)
           {
             dc_lightlist[gi].height += dc_lightlist[gi].heightstep;
             if(dc_lightlist[gi].flags & FF_SOLID)
@@ -2789,7 +2789,7 @@ void R_StoreWallRange( int   start, int   stop)
 
 #ifdef DEBUG_STOREWALL   
     GenPrintf( EMSG_debug, "WALL:  drawseg[%i] (%i..%i)", (ds_p - drawsegs), start, stop );
-    if( numffplane )  GenPrintf( EMSG_debug, " numffplane=%i", numffplane );
+    if( num_ffplane )  GenPrintf( EMSG_debug, " num_ffplane=%i", num_ffplane );
     GenPrintf( EMSG_debug, "\n" );
 #endif
 
@@ -2843,7 +2843,7 @@ void R_StoreWallRange( int   start, int   stop)
     midtexture = toptexture = bottomtexture = maskedtexture = 0; // no-texture
     mid_texren = top_texren = bottom_texren = NULL;
 
-    numthicksides = 0;
+    num_thicksides = 0;
 
     ds_p->maskedtexturecol = NULL;
     ds_p->draw_ffplane = NULL;
@@ -2855,12 +2855,12 @@ void R_StoreWallRange( int   start, int   stop)
       ffplane[fi].valid_mark = false;
     }
 
-    // The ffplane and numffplane are of the subsector processed by BSP.
-    if(numffplane)
+    // The ffplane and num_ffplane are of the subsector processed by BSP.
+    if(num_ffplane)
     {
       // This should be in BSP
       unsigned int fi;
-      for( fi = 0; fi < numffplane; fi++)
+      for( fi = 0; fi < num_ffplane; fi++)
         ffplane[fi].front_pos = ffplane[fi].height - viewz;
     }
 
@@ -3266,7 +3266,7 @@ void R_StoreWallRange( int   start, int   stop)
             } // for fff
           }
 
-          numthicksides = thi;
+          num_thicksides = thi;
           if( thi )
           {
             // Create ffside_t only when there are ffloor and thicksides.
@@ -3298,7 +3298,7 @@ void R_StoreWallRange( int   start, int   stop)
     }
 
     // calculate rw_offset (only needed for textured lines)
-    segtextured = midtexture || toptexture || bottomtexture || maskedtexture || (numthicksides > 0);
+    segtextured = midtexture || toptexture || bottomtexture || maskedtexture || (num_thicksides > 0);
 
     if (segtextured)
     {
@@ -3375,16 +3375,16 @@ void R_StoreWallRange( int   start, int   stop)
        return;
     }
 
-    dc_numlights = frontsector->numlights;
-    if( dc_numlights )  // has ff_lights
+    dc_num_lights = frontsector->num_lights;
+    if( dc_num_lights )  // has ff_lights
     {
-      if(dc_numlights >= dc_maxlights)    expand_lightlist();
+      if(dc_num_lights >= dc_maxlights)    expand_lightlist();
 
       cnt = 0; // cnt of rlight created, some ff_light will be skipped
       // Setup dc_lightlist, as to 3dfloor heights, lights, and extra_colormap.
       // highest light to lowest light, [0] is sector light at top
       unsigned int gi;
-      for( gi = 0; gi < dc_numlights; gi++)
+      for( gi = 0; gi < dc_num_lights; gi++)
       {
         // [WDJ] This makes the dc_lightlist shorter in the render loop, but the resultant
         // entries dc_lightlist[i] will not correspond to the sector lightlist[i].
@@ -3398,7 +3398,7 @@ void R_StoreWallRange( int   start, int   stop)
             continue;
 
           if(ff_light->height > frontsector->ceilingheight)
-            if( (gi+1 < dc_numlights) && (frontsector->lightlist[gi+1].height > frontsector->ceilingheight) )
+            if( (gi+1 < dc_num_lights) && (frontsector->lightlist[gi+1].height > frontsector->ceilingheight) )
               continue;
         }
         rlight->height = FIXED_TO_HEIGHTFRAC(centeryfrac) - FixedMul( FIXED_TO_HEIGHTFRAC(ff_light->height - viewz), rw_scale );
@@ -3436,13 +3436,13 @@ void R_StoreWallRange( int   start, int   stop)
 
         cnt++;
       }
-      dc_numlights = cnt;
+      dc_num_lights = cnt;
     }
 
-    if(numffplane)
+    if(num_ffplane)
     {
       unsigned int fi;
-      for( fi = 0; fi < numffplane; fi++)
+      for( fi = 0; fi < num_ffplane; fi++)
       {
         ff_planemgr_t * ffp = & ffplane[fi];
         ffp->front_pos = FIXED_TO_HEIGHTFRAC( ffp->front_pos );
@@ -3583,24 +3583,24 @@ void R_StoreWallRange( int   start, int   stop)
 
     ds_p->sector_drawseg = first_subsec_seg;
 
-    if( numffplane )
+    if( num_ffplane )
     {
       if( first_subsec_seg == NULL )
       {
         first_subsec_seg = ds_p;
 #ifdef DEBUG_STOREWALL   
-        GenPrintf( EMSG_debug, "  FIRST SEG FFLOOR: first_subsec_seg=%i, num ffloors= %i\n", (first_subsec_seg - drawsegs), numffplane );
+        GenPrintf( EMSG_debug, "  FIRST SEG FFLOOR: first_subsec_seg=%i, num ffloors= %i\n", (first_subsec_seg - drawsegs), num_ffplane );
 #endif
         // Fill-in first_subsec_seg information.
         // Create the draw_ffplane.  Only where there are ffloor.
-        draw_ffplane_t *  dffp = create_draw_ffplane( numffplane );
+        draw_ffplane_t *  dffp = create_draw_ffplane( num_ffplane );
         ds_p->draw_ffplane = dffp;
 
         // Ref to ffloor
         // These ffloor will be further altered by R_ExpandPlane.
         // The ffplane[].plane also ref to ffloor.
         unsigned int fi;
-        for( fi = 0; fi < numffplane; fi++)
+        for( fi = 0; fi < num_ffplane; fi++)
         {
           ff_planemgr_t * ffp = & ffplane[fi];
           dffp->ffloorplanes[fi] = ffp->plane = R_CheckPlane(ffp->plane, rw_x, rw_stopx - 1);
@@ -3616,7 +3616,7 @@ void R_StoreWallRange( int   start, int   stop)
 #ifdef DEBUG_STOREWALL   
         GenPrintf( EMSG_debug, " EXPAND PLANE: first_subsec_seg= %i, [%i..%i]\n", (first_subsec_seg - drawsegs), rw_x, rw_stopx-1 );
 #endif
-        for(i = 0; i < numffplane; i++)
+        for(i = 0; i < num_ffplane; i++)
           R_ExpandPlane(ffplane[i].plane, rw_x, rw_stopx - 1);
       }
     }

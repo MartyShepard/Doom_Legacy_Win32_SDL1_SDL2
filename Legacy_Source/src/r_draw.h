@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: r_draw.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_draw.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -133,7 +133,7 @@ extern byte*            dc_skintran;  // ptr to selected skin table
 
 
 extern struct r_lightlist_s*      dc_lightlist;
-extern unsigned int               dc_numlights;
+extern unsigned int               dc_num_lights;
 extern unsigned int               dc_maxlights;
 
 //Fix TUTIFRUTI

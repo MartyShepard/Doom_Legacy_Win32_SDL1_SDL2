@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: d_net.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: d_net.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -1237,7 +1237,7 @@ static void DebugPrintpacket(char *header)
     byte num_txt = netbuffer->u.serverpak.num_textcmd;
     byte * bp;
     fprintf(debugfile, "    firsttic %8d num_tics %d cmd_player_mask %X flags %X cmds_offset %i num_cmd %i num_textcmd %i\n",
-      ExpandTics (netbuffer->u.serverpak.starttic), netbuffer->u.serverpak.numtics,
+      ExpandTics (netbuffer->u.serverpak.starttic), netbuffer->u.serverpak.num_tics,
       DN_read_N32(&netbuffer->u.serverpak.cmd_player_mask), netbuffer->u.serverpak.flags,
       netbuffer->u.serverpak.cmds_offset, num_cmd, num_txt );
     // textcmd
@@ -1581,7 +1581,7 @@ byte  HSendPacket(byte to_node, byte flags, byte acknum, int packetlength)
 #ifdef DOSNET_SUPPORT
 # if DOSNET_VERSION < 1507
     // removed in rev1507
-    doomcom->numplayers = num_player_slot;
+    doomcom->num_players = num_player_slot;
 # endif
 #endif
 
@@ -1980,7 +1980,7 @@ boolean D_Startup_NetGame(void)
 #endif
 
     // Bring up higher level functions.
-    D_Init_ClientServer(); // inits numplayers=0
+    D_Init_ClientServer(); // inits num_players=0
 
     // Last because these need dedicated and server flags.
     SV_ResetServer();

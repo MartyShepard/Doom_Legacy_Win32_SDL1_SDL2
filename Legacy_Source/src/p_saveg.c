@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: p_saveg.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: p_saveg.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2017 by DooM Legacy Team.
@@ -949,7 +949,7 @@ void P_ArchiveWorld(void)
     put = save_p;
 
     uint32_t i;
-    for (i = 0; i < numsectors; i++, ss++, ms++)
+    for (i = 0; i < num_sectors; i++, ss++, ms++)
     {
         // Save only how the sector differs from the wad.
         diff = 0;
@@ -1042,7 +1042,7 @@ void P_ArchiveWorld(void)
     // [WDJ] Fix endian as compare temp to internal.
     li = lines;
     // do lines
-    for (i = 0; i < numlines; i++, mld++, li++)
+    for (i = 0; i < num_lines; i++, mld++, li++)
     {
         diff = 0;
         diff2 = 0;
@@ -1128,7 +1128,7 @@ void P_ArchiveWorld(void)
     }
     WRITEU16(put, 0xffff);  // mark end of world linedef section
 
-    //debug_Printf("sector saved %d/%d, line saved %d/%d\n",statsec,numsectors,statline,numlines);
+    //debug_Printf("sector saved %d/%d, line saved %d/%d\n",statsec,num_sectors,statline,num_lines);
     save_p = put;
     Z_ChangeTags_To( PU_IN_USE, PU_CACHE ); // now can free
 }
@@ -1162,7 +1162,7 @@ void P_UnArchiveWorld(void)
         if (i == 0xffff) // end of world sector section
             break;
 
-        if( i >= numsectors )  goto bad_sec_id_err;
+        if( i >= num_sectors )  goto bad_sec_id_err;
         secp = & sectors[i];
 
         diff = READBYTE(get);
@@ -1227,7 +1227,7 @@ void P_UnArchiveWorld(void)
         if (i == 0xffff)  // end of world linedef section
             break;
 
-        if( i >= numlines )  goto bad_line_id_err;
+        if( i >= num_lines )  goto bad_line_id_err;
         li = &lines[i];
        
         diff = READBYTE(get);
@@ -1483,7 +1483,7 @@ static uint32_t  Get_Mapthing_ID( mapthing_t * mtp )
   uint32_t id = MAPTHING_NULLVALUE;
   if ( mtp )
   {
-    if ((mtp >= mapthings) && (mtp <= &mapthings[nummapthings-1]))
+    if ((mtp >= mapthings) && (mtp <= &mapthings[num_mapthings-1]))
     {
       id = mtp - mapthings;  // index mapthings array
     }
@@ -1544,7 +1544,7 @@ static mapthing_t * Get_Mapthing_Ptr( unsigned int mtid )
   mapthing_t * mtp = NULL;
   if ( mtid != MAPTHING_NULLVALUE )
   {
-    if (mtid < nummapthings)
+    if (mtid < num_mapthings)
     {
       mtp = &mapthings[mtid];  // in mapthings array
     }
@@ -3828,7 +3828,7 @@ const char * level_wad( void )
     char * mapwad;
     // level_lumpnum contains index to the wad containing current map.
     unsigned int mapwadnum = WADFILENUM( level_lumpnum );
-    if( mapwadnum >= numwadfiles )  goto defname;
+    if( mapwadnum >= num_wadfiles )  goto defname;
     mapwad = wadfiles[ mapwadnum ]->filename;
     if( mapwad == NULL )  goto defname;
     return FIL_Filename_of( mapwad );  // ignore directories
@@ -3844,7 +3844,7 @@ boolean  check_have_wad( char * ckwad )
 {
     int i;
     // search all known wad names for a match
-    for( i=0; i<numwadfiles; i++ )
+    for( i=0; i<num_wadfiles; i++ )
     {
         char * tt = FIL_Filename_of( wadfiles[i]->filename );
         if( strcmp( tt, ckwad ) == 0 )  return true;

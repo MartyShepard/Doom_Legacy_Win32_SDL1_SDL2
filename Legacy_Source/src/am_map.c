@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: am_map.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: am_map.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -594,7 +594,7 @@ void AM_findMinMaxBoundaries(void)
     max_x = max_y = -FIXED_MAX;
 
     uint32_t i;
-    for (i=0;i<numvertexes;i++)
+    for (i=0;i<num_vertexes;i++)
     {
         if (vertexes[i].x < min_x)
             min_x = vertexes[i].x;
@@ -1440,7 +1440,7 @@ void AM_drawWalls(void)
     byte wallcolor = 0;
 
     int i;
-    for (i=0; i<numlines; i++)
+    for (i=0; i<num_lines; i++)
     {
         line_t * ln = & lines[i];
         l.a.x = ln->v1->x;
@@ -1709,7 +1709,7 @@ void AM_drawThings ( byte colors, byte colorrange )
 #endif
 
     uint32_t i;
-    for (i=0; i<numsectors; i++)
+    for (i=0; i<num_sectors; i++)
     {
         mo = sectors[i].thinglist;
         while (mo)

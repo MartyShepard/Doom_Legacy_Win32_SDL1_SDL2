@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: r_state.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_state.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -125,28 +125,28 @@ extern int*             texturetranslation;
 //
 // Lookup tables for map data.
 //
-extern uint16_t         numsprites;
+extern uint16_t         num_sprites;
 extern spritedef_t*     sprites;
 
-extern uint32_t         numvertexes;
+extern uint32_t         num_vertexes;
 extern vertex_t*        vertexes;
 
-extern uint32_t         numsegs;
+extern uint32_t         num_segs;
 extern seg_t*           segs;
 
-extern uint32_t         numsectors;
-extern sector_t*        sectors;  // [0..(numsectors-1)]
+extern uint32_t         num_sectors;
+extern sector_t*        sectors;  // [0..(num_sectors-1)]
 
-extern uint32_t         numsubsectors;
+extern uint32_t         num_subsectors;
 extern subsector_t*     subsectors;
 
-extern uint32_t         numnodes;
+extern uint32_t         num_nodes;
 extern node_t*          nodes;
 
-extern uint32_t         numlines;
+extern uint32_t         num_lines;
 extern line_t*          lines;
 
-extern uint32_t         numsides;
+extern uint32_t         num_sides;
 extern side_t*          sides;
 
 

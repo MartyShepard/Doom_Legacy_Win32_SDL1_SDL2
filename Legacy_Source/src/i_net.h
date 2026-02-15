@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: i_net.h 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: i_net.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -105,7 +105,7 @@ typedef struct
     // Info specific to this node.
     int16_t             consoleplayer;
     // Number total of players
-    uint16_t            numplayers;
+    uint16_t            num_players;
 
     // These are related to the 3-display mode,
     //  in which two drones looking left and right

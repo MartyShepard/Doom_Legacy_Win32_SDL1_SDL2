@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: hw_trick.c 1759 2025-11-20 11:46:24Z wesleyjohnson $
+// $Id: hw_trick.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -142,7 +142,7 @@ static void releaseLineChains(void)
     sector_t* sector;
     int i;
     
-    for(i=0; i<numsectors; i++) 
+    for(i=0; i<num_sectors; i++) 
     {
         sector = &sectors[i];
         nextElem = sector->sectorLines;
@@ -385,7 +385,7 @@ static void generateStacklist(sector_t* thisSector)
     
     stackCnt = 0;
     
-    for(i=0; i<numsectors; i++)
+    for(i=0; i<num_sectors; i++)
     {
         checkSector = &sectors[i];
 
@@ -521,7 +521,7 @@ static void freeStacklists(void)
 {
     int i;
     
-    for(i=0; i<numsectors; i++)
+    for(i=0; i<num_sectors; i++)
     {
         if(sectors[i].stackList)
         {
@@ -835,7 +835,7 @@ void HWR_CorrectSWTricks(void)
         return;
     
     // determine lines for sectors
-    for(i=0; i<numlines; i++)
+    for(i=0; i<num_lines; i++)
     {
         ld = &lines[i];
         secr = ld->frontsector;
@@ -858,7 +858,7 @@ void HWR_CorrectSWTricks(void)
     }
     
     // preprocessing
-    for(i=0; i<numsectors; i++)
+    for(i=0; i<num_sectors; i++)
     {
         sector_t* checkSector;
 
@@ -896,7 +896,7 @@ void HWR_CorrectSWTricks(void)
     
     // set virtual floor heights for pseudo sectors
     // required for deep water effect e.g.
-    for(i=0; i<numsectors; i++)
+    for(i=0; i<num_sectors; i++)
     {
 #ifdef SECTOR_FLAGS
         if( sectors[i].flags & SCF_pseudo_sector )
@@ -930,7 +930,7 @@ void HWR_CorrectSWTricks(void)
     }
 #ifdef CORRECT_FLOAT_EXPERIMENTAL
     // correct ceiling/floor heights of totally floating sectors
-    for(i=0; i<numsectors; i++)
+    for(i=0; i<num_sectors; i++)
     {
         sector_t* floatSector;
 
@@ -965,7 +965,7 @@ void HWR_CorrectSWTricks(void)
 #endif
 
     // now for the missing textures
-    for(i=0; i<numlines; i++)
+    for(i=0; i<num_lines; i++)
     {
         ld = &lines[i];
         sdr = &sides[ld->sidenum[0]];
@@ -1056,7 +1056,7 @@ void HWR_CorrectSWTricks(void)
                 }
             }
         } // if(NULL != secl)
-    } // for(i=0; i<numlines; i++)
+    } // for(i=0; i<num_lines; i++)
 
     // release all linechains
     releaseLineChains();

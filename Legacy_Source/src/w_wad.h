@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: w_wad.h 1756 2025-11-20 11:41:32Z wesleyjohnson $
+// $Id: w_wad.h 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -79,7 +79,7 @@
 typedef struct
 {
     char       identification[4];   // should be "IWAD" or "PWAD"
-    uint16_t   numlumps;            // how many resources
+    uint16_t   num_lumps;            // how many resources
     uint32_t   infotableofs;        // the 'directory' of resources
 } wadinfo_t;
 
@@ -186,13 +186,13 @@ typedef struct wadfile_s
     byte             archive_parent;    // archive wadfile index,  0xFF= unused
     byte             archive_num_wadfile; // number of wadfile in this archive, 0= unused
 #endif
-    uint16_t         numlumps;   // this wad's number of resources
+    uint16_t         num_lumps;   // this wad's number of resources
     int              handle;     // from system
     uint32_t         filesize;   // for network
     unsigned char    md5sum[16];
 } wadfile_t;
 
-extern  int          numwadfiles;
+extern  int          num_wadfiles;
 extern  wadfile_t*   wadfiles[MAX_WADFILES];
 
 // Return the wadfile info for the lumpnum
@@ -306,7 +306,7 @@ uint64_t  W_lump_checksum( void* lumpptr );
 typedef struct {
   uint16_t    wadfile;
   uint16_t    firstlump;
-  uint16_t    numlumps;
+  uint16_t    num_lumps;
 } lumplist_t;
                     
 

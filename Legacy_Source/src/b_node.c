@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_node.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: b_node.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 2002 by DooM Legacy Team.
 //
@@ -601,7 +601,7 @@ void B_Init_Nodes( void )
     SearchNode_t* tempNode;
 
     uint32_t iv;
-    for (iv=0; iv<numvertexes; iv++)
+    for (iv=0; iv<num_vertexes; iv++)
     {
         vertex_t * vert = & vertexes[iv];
         if (vert->x < xMin)

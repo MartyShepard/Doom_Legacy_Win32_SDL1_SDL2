@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: hw_light.c 1773 2026-01-13 16:03:27Z wesleyjohnson $
+// $Id: hw_light.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2015 by DooM Legacy Team.
 //
@@ -844,7 +844,7 @@ void HWR_CheckSubsector( int num, fixed_t* bbox )
     p2.x=FIXED_TO_FLOAT( bbox[BOXRIGHT] );
 
 
-    if (num < numsubsectors)
+    if (num < num_subsectors)
     {
         sub = &subsectors[num];         // subsector
         for(lightnum=0; lightnum<dynlights->nb; lightnum++)
@@ -858,7 +858,7 @@ void HWR_CheckSubsector( int num, fixed_t* bbox )
                 continue;
 #endif
 
-            count = sub->numlines;          // how many linedefs
+            count = sub->num_lines;          // how many linedefs
             line = &segs[sub->firstline];   // first line seg
             while (count--)
             {
@@ -951,7 +951,7 @@ void HWR_Create_StaticLightmaps( void )
 
     // Second: Build all lightmap for walls covered by lights
     validcount++; // to be sure
-    HWR_ComputeLightMapsInBSPNode( numnodes-1, NULL);
+    HWR_ComputeLightMapsInBSPNode( num_nodes-1, NULL);
 
     dynlights->nb = 0;
 #endif

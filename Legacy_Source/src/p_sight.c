@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_sight.c 1735 2025-03-14 08:14:39Z wesleyjohnson $
+// $Id: p_sight.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -241,9 +241,9 @@ static boolean P_CrossSubsector (int num)
     int   count;
 
 #ifdef RANGECHECK
-    if (num>=numsubsectors)
+    if (num>=num_subsectors)
         I_Error ("P_CrossSubsector: ss %i with numss = %i",
-                 num, numsubsectors);
+                 num, num_subsectors);
 #endif
 
     sub = &subsectors[num];
@@ -267,7 +267,7 @@ static boolean P_CrossSubsector (int num)
     }
 
     // check lines
-    count = sub->numlines;
+    count = sub->num_lines;
     seg = &segs[sub->firstline];
 
     for ( ; count ; seg++, count--)
@@ -452,7 +452,7 @@ boolean P_CheckSight( mobj_t* t1, mobj_t* t2 )
     uint32_t s2 = (s2p - sectors);
     if( rejectmatrix && ((s1|s2) & 0xFFFF0000L) == 0 )  // sector indexes are reasonable.
     {
-        uint64_t pnum = s1*((uint64_t)numsectors) + s2;
+        uint64_t pnum = s1*((uint64_t)num_sectors) + s2;
         uint32_t bytenum = pnum>>3;
         // [WDJ] Have added num_rejectmatrix, to protect against segfault.
         // Also handle when no rejectmatrix.
@@ -567,7 +567,7 @@ boolean P_CheckSight( mobj_t* t1, mobj_t* t2 )
     prev_frac = 0;
 
     // the head node is the last node output
-    return P_CrossBSPNode (numnodes-1);
+    return P_CrossBSPNode (num_nodes-1);
 
 ret_true:
     return true;
@@ -595,7 +595,7 @@ boolean P_CheckSight2( mobj_t* t1, mobj_t* t2, fixed_t px, fixed_t py, fixed_t p
     uint32_t s2 = (s2p - sectors);
     if( rejectmatrix && ((s1|s2) & 0xFFFF0000L) == 0 )  // sector indexes are reasonable.
     {
-        uint64_t pnum = s1*((uint64_t)numsectors) + s2;
+        uint64_t pnum = s1*((uint64_t)num_sectors) + s2;
         uint32_t bytenum = pnum>>3;
         // [WDJ] Have added num_rejectmatrix, to protect against segfault.
         // Also handle when no rejectmatrix.
@@ -707,7 +707,7 @@ boolean P_CheckSight2( mobj_t* t1, mobj_t* t2, fixed_t px, fixed_t py, fixed_t p
     prev_frac = 0;
     
     // the head node is the last node output
-    return P_CrossBSPNode (numnodes-1);
+    return P_CrossBSPNode (num_nodes-1);
 
 ret_true:
     return true;

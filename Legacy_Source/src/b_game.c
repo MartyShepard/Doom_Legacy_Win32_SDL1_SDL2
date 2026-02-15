@@ -1,7 +1,7 @@
 // Emacs style mode select -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: b_game.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: b_game.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 2002 by DooM Legacy Team.
 //
@@ -239,9 +239,9 @@ int botcolors[NUM_SKINCOLORS] =
 static
 char * bot_skinname( int skinrand )
 {
-    if( cv_bot_skin.EV && (numskins > 1) )
+    if( cv_bot_skin.EV && (num_skins > 1) )
     {
-        skinrand = (skinrand % (numskins-1)) + 1;
+        skinrand = (skinrand % (num_skins-1)) + 1;
     }
     else
     {

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
-// $Id: p_hsight.c 1761 2025-11-20 11:48:04Z wesleyjohnson $
+// $Id: p_hsight.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by Raven Software, Corp.
 // Portions Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -359,7 +359,7 @@ boolean P_CheckSight (mobj_t* t1, mobj_t* t2)
     //
     s1 = (t1->subsector->sector - sectors);
     s2 = (t2->subsector->sector - sectors);
-    pnum = s1*numsectors + s2;
+    pnum = s1*num_sectors + s2;
     bytenum = pnum>>3;
     bitnum = 1 << (pnum&7);
     

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: d_main.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: d_main.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2024 by DooM Legacy Team.
@@ -1472,22 +1472,22 @@ void  Print_search_directories( byte emf, byte enables )
 static
 void D_AddFile(const char *filename)
 {
-    int numwadfiles;
+    int num_wadfiles;
     char *newfile;
 
     if( filename == NULL )
         return;
 
     // find end of wad files by counting
-    for (numwadfiles = 0; startupwadfiles[numwadfiles]; numwadfiles++)
+    for (num_wadfiles = 0; startupwadfiles[num_wadfiles]; num_wadfiles++)
         ;
-    if( numwadfiles >= MAX_WADFILES )
+    if( num_wadfiles >= MAX_WADFILES )
         I_Error ( "Too many wadfiles, max=%i.\n", MAX_WADFILES );
 
     newfile = malloc(strlen(filename) + 1);
     strcpy(newfile, filename);
 
-    startupwadfiles[numwadfiles] = newfile;
+    startupwadfiles[num_wadfiles] = newfile;
 }
 
 
@@ -1737,7 +1737,7 @@ byte  Check_lumps( const char * wadname, const char * lumpnames[], int count )
         goto not_a_wad;
 
     // find directory
-    header.numlumps = LE_SWAP32(header.numlumps);
+    header.num_lumps = LE_SWAP32(header.num_lumps);
     header.infotableofs = LE_SWAP32(header.infotableofs);
 
 #ifdef ZIPWAD
@@ -1749,7 +1749,7 @@ byte  Check_lumps( const char * wadname, const char * lumpnames[], int count )
         goto read_err;
 
     // Check the directory as it is read out of the system file cache.
-    for( hli=0; hli<header.numlumps; hli++ )
+    for( hli=0; hli<header.num_lumps; hli++ )
     {
 #ifdef ZIPWAD
         bc = WZ_read( zhand, sizeof(lumpx), /*OUT*/ (byte*)&lumpx );

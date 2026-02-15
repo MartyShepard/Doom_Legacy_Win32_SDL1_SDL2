@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 // Include: Win32 Fixes/ Win32 Compile Fixes
 //
-// $Id: r_things.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: r_things.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Portions Copyright (C) 1998-2016 by DooM Legacy Team.
@@ -178,7 +178,7 @@ lighttable_t**  spritelights;	// selected scalelight for the sprite draw
 // variables used to look up
 //  and range check thing_t sprites patches
 spritedef_t*    sprites;
-uint16_t        numsprites;
+uint16_t        num_sprites;
 
 static char*    spritename;
 // For quick comparisons of the first 4 characters of the name.
@@ -231,7 +231,7 @@ static const byte rotation_char_to_draw[16] =
 static
 void  transfer_to_spritetmp( const spritedef_t * spritedef )
 {
-    int   src_frames =  spritedef->numframes;
+    int   src_frames =  spritedef->num_frames;
     byte  src_frame_rot = spritedef->frame_rot;
     spriteframe_t * fmv, * fmp, * fmp_end;
     sprite_frot_t * rtv, * rtv_nxt, * rtp, * rtp_nxt;
@@ -292,7 +292,7 @@ static
 void  transfer_from_spritetmp( spritedef_t * spritedef,
                                const byte dst_srp, const byte dst_frame_rot )
 {
-    int   dst_frames =  spritedef->numframes;
+    int   dst_frames =  spritedef->num_frames;
     spriteframe_t * fmv, * fmp, * fmp_end;
     sprite_frot_t * rtv, * rtv_nxt, * rtp, * rtp_nxt;
     byte srp;
@@ -574,12 +574,12 @@ int R_AddSingleSpriteDef (char* sprname, spritedef_t* spritedef, int wadnum, int
 
     // are we 'patching' a sprite already loaded ?
     // if so, it might patch only certain frames, not all
-    if (spritedef->numframes) // (then spriteframes is not null)
+    if (spritedef->num_frames) // (then spriteframes is not null)
     {
         // copy the already defined sprite frames
         // Extract to sprfrot format.
         transfer_to_spritetmp( spritedef );
-        install_frame_cnt = spritedef->numframes;
+        install_frame_cnt = spritedef->num_frames;
     }
 
     // scan the lumps,
@@ -588,8 +588,8 @@ int R_AddSingleSpriteDef (char* sprname, spritedef_t* spritedef, int wadnum, int
     if( lumpinfo == NULL )
         return 0;
 
-    if( endlump > wadfiles[wadnum]->numlumps )
-        endlump = wadfiles[wadnum]->numlumps;
+    if( endlump > wadfiles[wadnum]->num_lumps )
+        endlump = wadfiles[wadnum]->num_lumps;
 
     numname = NAME4_AS_NUM(sprname);
  
@@ -677,7 +677,7 @@ int R_AddSingleSpriteDef (char* sprname, spritedef_t* spritedef, int wadnum, int
         // they have already have been initially defined (original wad)
 
         //check only after all initial pwads added
-        //if (spritedef->numframes == 0)
+        //if (spritedef->num_frames == 0)
         //    I_SoftError("R_AddSpriteDefs: no initial frames found for sprite %s\n",
         //             namelist[i]);
 
@@ -761,8 +761,8 @@ int R_AddSingleSpriteDef (char* sprname, spritedef_t* spritedef, int wadnum, int
     frame_rot = srp_to_num_rot[ array_srp ];
    
     // allocate space for the frames present and copy spritetmp to it
-    if( spritedef->numframes                // has been allocated
-        && (spritedef->numframes < install_frame_cnt  // more frames are defined
+    if( spritedef->num_frames                // has been allocated
+        && (spritedef->num_frames < install_frame_cnt  // more frames are defined
             || spritedef->frame_rot < frame_rot) ) // more rotations are defined
     {
         Z_Free (spritedef->spriteframe);
@@ -780,7 +780,7 @@ int R_AddSingleSpriteDef (char* sprname, spritedef_t* spritedef, int wadnum, int
             Z_Malloc (((size_t)install_frame_cnt) * frame_rot * sizeof(sprite_frot_t), PU_STATIC, NULL);
     }
 
-    spritedef->numframes = install_frame_cnt;
+    spritedef->num_frames = install_frame_cnt;
     spritedef->frame_rot = frame_rot;
     transfer_from_spritetmp( spritedef, array_srp, frame_rot );
 
@@ -858,7 +858,7 @@ void R_AddSpriteDefs (char** namelist, int wadnum)
     {
         char * sprname;
 
-        if( i < numsprites )
+        if( i < num_sprites )
         {
 #ifdef ENABLE_DEH_REMAP
             // Only those that are predef for this game mode.
@@ -1048,7 +1048,7 @@ void R_Init_Sprites (char** namelist)
 
 #if 1
     // namelist is always sprnames, the length is known.
-    numsprites = NUM_SPRITES_DEF;
+    num_sprites = NUM_SPRITES_DEF;
 #else
 // [WDJ] This does not always work because there could be a NULL in the sprite table.
 // Dehacked has done that.  See wotdoom3.wad.
@@ -1058,17 +1058,17 @@ void R_Init_Sprites (char** namelist)
     char** check = namelist;
     while (*check != NULL)
         check++;
-    numsprites = check - namelist;
+    num_sprites = check - namelist;
 
-    if (!numsprites)
+    if (!num_sprites)
         I_Error ("R_AddSpriteDefs: no sprites in namelist\n");
 #endif
 
-    sprites = Z_Malloc(((size_t)numsprites) * sizeof(*sprites), PU_STATIC, NULL);
-    memset (sprites, 0, ((size_t)numsprites) * sizeof(*sprites));
+    sprites = Z_Malloc(((size_t)num_sprites) * sizeof(*sprites), PU_STATIC, NULL);
+    memset (sprites, 0, ((size_t)num_sprites) * sizeof(*sprites));
 
     // find sprites in each -file added pwad
-    for (i=0; i<numwadfiles; i++)
+    for (i=0; i<num_wadfiles; i++)
         R_AddSpriteDefs (namelist, i);
 
     //
@@ -1077,7 +1077,7 @@ void R_Init_Sprites (char** namelist)
 
     // all that can be before loading config is to load possible skins
     R_Init_Skins ();
-    for (i=0; i<numwadfiles; i++)
+    for (i=0; i<num_wadfiles; i++)
         R_AddSkins (i);
 
 
@@ -1085,8 +1085,8 @@ void R_Init_Sprites (char** namelist)
     // check if all sprites have frames
     //
     /*
-    for (i=0; i<numsprites; i++)
-         if (sprites[i].numframes<1)
+    for (i=0; i<num_sprites; i++)
+         if (sprites[i].num_frames<1)
              I_SoftError("R_Init_Sprites: sprite %s has no frames at all\n", sprite_name(i));
     */
     
@@ -1555,7 +1555,7 @@ void R_Split_Sprite_over_FFloor (vissprite_t* sprite, mobj_t* thing)
 
   sector = sprite->sector;
   uint16_t  gi;
-  for( gi = 1; gi < sector->numlights; gi++)	// from top to bottom
+  for( gi = 1; gi < sector->num_lights; gi++)	// from top to bottom
   {
     ff_light = &frontsector->lightlist[gi];
     lightheight = ff_light->height;
@@ -1686,7 +1686,7 @@ static void R_ProjectSprite (mobj_t* thing)
         return;
 
     // decide which patch to use for sprite relative to player
-    if(sprite_id >= numsprites)
+    if(sprite_id >= num_sprites)
     {
 #ifdef RANGECHECK
         // [WDJ] Give msg and don't draw it
@@ -1702,7 +1702,7 @@ static void R_ProjectSprite (mobj_t* thing)
         sprdef = &sprites[sprite_id];
 
     fr = thing->frame & FF_FRAMEMASK;
-    if( fr >= sprdef->numframes )
+    if( fr >= sprdef->num_frames )
     {
 #ifdef RANGECHECK
         // [WDJ] Give msg and don't draw it
@@ -1822,7 +1822,7 @@ static void R_ProjectSprite (mobj_t* thing)
 #endif
 
     thingsector = thing->subsector->sector;	 // [WDJ] 11/14/2009
-    if(thingsector->numlights)
+    if(thingsector->num_lights)
     {
       lightlev_t  vlight;
       ff_light = R_GetPlaneLight(thingsector, gz_top);
@@ -2019,7 +2019,7 @@ static void R_ProjectSprite (mobj_t* thing)
         }
     }
 
-    if(thingsector->numlights)
+    if(thingsector->num_lights)
         R_Split_Sprite_over_FFloor(vis, thing);
 }
 
@@ -2047,7 +2047,7 @@ void R_AddSprites (sector_t* sec, int lightlevel)
     // Well, now it will be done.
     sec->validcount = validcount;
 
-    if(!sec->numlights)  // otherwise see ProjectSprite
+    if(!sec->num_lights)  // otherwise see ProjectSprite
     {
       if(sec->model < SM_fluid)   lightlevel = sec->lightlevel;
 
@@ -2103,7 +2103,7 @@ void R_DrawPSprite (pspdef_t* psp)
 
     // decide which patch to use
 #ifdef RANGECHECK
-    if ( p_sprite_id >= numsprites) {
+    if ( p_sprite_id >= num_sprites) {
         // [WDJ] Give msg and don't draw it, (** Heretic **)
         I_SoftError ("R_DrawPSprite: invalid sprite number %i\n", p_sprite_id );
         return;
@@ -2114,7 +2114,7 @@ void R_DrawPSprite (pspdef_t* psp)
     uint16_t fr = p_state->frame & FF_FRAMEMASK;
 
 #ifdef RANGECHECK
-    if ( fr >= sprdef->numframes) {
+    if ( fr >= sprdef->num_frames) {
         // [WDJ] Give msg and don't draw it
         I_SoftError ("R_DrawPSprite: invalid sprite frame %i : %i for %s\n",
                  p_sprite_id, fr, sprite_name(p_sprite_id) );
@@ -2247,7 +2247,7 @@ void R_DrawPSprite (pspdef_t* psp)
         vis->colormap = spritelights[MAX_LIGHTSCALE-1];
     }
 
-    if(viewer_sector->numlights)
+    if(viewer_sector->num_lights)
     {
       lightlev_t  vlight;  // 0..255
       ff_light_t * ff_light =
@@ -2285,7 +2285,7 @@ void R_DrawPlayerSprites (void)
     // [WDJ] 11/14/2012 use viewer variables for viewplayer
 
     // get light level
-    if(viewer_sector->numlights)
+    if(viewer_sector->num_lights)
     {
       ff_light_t * ff_light =
         R_GetPlaneLight(viewer_sector, viewmobj->z + viewmobj->info->height);
@@ -3432,7 +3432,7 @@ void R_sort_drawseg_masked( void )
 //      scale_far = ( ds->scale2 > ds->scale1 )? ds->scale1 : ds->scale2;
 
         dffp = ds->draw_ffplane;
-        if( dffp && dffp->numffloorplanes )
+        if( dffp && dffp->num_ffloorplanes )
         {
             // plane boundaries are independent of this seg.
             visplane_t * plane;
@@ -3440,7 +3440,7 @@ void R_sort_drawseg_masked( void )
             byte  num_plane = 0; // number of planes in plane_draw
 
             byte p;  // max floors 40
-            for(p = 0; p < dffp->numffloorplanes; p++)
+            for(p = 0; p < dffp->num_ffloorplanes; p++)
             {
                 plane = dffp->ffloorplanes[p];
                 if( ! plane )
@@ -3483,7 +3483,7 @@ void R_sort_drawseg_masked( void )
             }  // planes
 
             // Store sorted planes back in the drawseg
-            dffp->numffloorplanes = num_plane;
+            dffp->num_ffloorplanes = num_plane;
             memcpy( & dffp->ffloorplanes[0], & plane_draw[0], (sizeof(visplane_t*) * num_plane) );
 
             // Calculate nearest_scale for this ffloor.
@@ -3508,7 +3508,7 @@ void R_sort_drawseg_masked( void )
 
             } // if num_plane
 
-        }  // if dffp && dffp->numffloorplanes
+        }  // if dffp && dffp->num_ffloorplanes
     }  // for drawsegs
 
     // Sprites
@@ -3899,7 +3899,7 @@ void drawseg_vrs_sprites( drawseg_t * ds )
                 {
                     // Is sprite occluded by any thickside.
                     int tsi;
-                    for( tsi = 0; tsi < dffs->numthicksides; tsi++ )
+                    for( tsi = 0; tsi < dffs->num_thicksides; tsi++ )
                     {
                         ffloor_t * ffloor = dffs->thicksides[tsi];
                         fixed_t topheight = *(ffloor->topheight);
@@ -3925,7 +3925,7 @@ void drawseg_vrs_sprites( drawseg_t * ds )
             // However, part of it may also be behind a floor plane, so just splitting it now
             // may leave a portion that has not been checked for conflict with the planes.
             // This is an optimization that also eliminates a check for conflict when no ffloor.
-            if( dffp && dffp->numffloorplanes )
+            if( dffp && dffp->num_ffloorplanes )
               goto check_floor_planes;  // might also be in conflict with the ffloor planes
 
             goto sprite_before_drawseg;
@@ -3944,7 +3944,7 @@ void drawseg_vrs_sprites( drawseg_t * ds )
     check_ffloor:
         // Check if the sprite is within the effects of a ffloor and its planes.
         // Otherwise, it will be left in the list for the next drawseg.
-        if( (dffp == NULL) || (dffp->numffloorplanes == 0) )
+        if( (dffp == NULL) || (dffp->num_ffloorplanes == 0) )
         {
             // No ffloor.
             // Because DSO_before_drawseg bypasses this test, do not have to check conflict here.
@@ -4022,7 +4022,7 @@ void drawseg_vrs_sprites( drawseg_t * ds )
 
   sprite_touches_ffloor:
             // The sprite touches a plane (by scale).  Check for draw occlusion, and which plane.
-            for( p = 0; p < dffp->numffloorplanes; p++ )
+            for( p = 0; p < dffp->num_ffloorplanes; p++ )
             {
                 // A ffplane is minx to maxx.
                 // The far distance is bounded by several drawseg.
@@ -4275,18 +4275,18 @@ void R_Draw_Masked (void)
         // Draw thicksides before planes, because some thicksides are hidden
         // behind the planes.
         dffs = ds->draw_ffside;
-        if( dffs && dffs->numthicksides )
+        if( dffs && dffs->num_thicksides )
         {
             int tsi;
-            for( tsi = 0; tsi < dffs->numthicksides; tsi++)
+            for( tsi = 0; tsi < dffs->num_thicksides; tsi++)
             {
                 // draw thickside
                 R_RenderThickSideRange( ds, ds->x1, ds->x2, dffs->thicksides[tsi] );
             }
-        }  // if numthicksides
+        }  // if num_thicksides
 
         dffp = ds->draw_ffplane;
-        if( dffp && dffp->numffloorplanes )
+        if( dffp && dffp->num_ffloorplanes )
         {
             // [WDJ] Floor planes are combined subsectors with the same flat.
             // They are split into drawable planes by bsp, with a vertical cut at each offending vertex.
@@ -4299,7 +4299,7 @@ void R_Draw_Masked (void)
 
             // Floor planes are sorted by vertical distance from viewz, farthest from viewz first.
             byte p;
-            for(p = 0; p < dffp->numffloorplanes; p++)   // far planes to near planes
+            for(p = 0; p < dffp->num_ffloorplanes; p++)   // far planes to near planes
             {
                 plane = dffp->ffloorplanes[p];
                 dffp->ffloorplanes[p] = NULL;  // remove from floorplanes
@@ -4323,7 +4323,7 @@ void R_Draw_Masked (void)
                 R_DrawSinglePlane( plane );
             } // for planes
 
-            dffp->numffloorplanes = 0;
+            dffp->num_ffloorplanes = 0;
 
         } // if draw_ffplane
 
@@ -4377,7 +4377,7 @@ void R_Draw_Masked (void)
 
 // This does not deallocate the skins memory.
 #define SKIN_ALLOC   8
-int         numskins = 0;
+int         num_skins = 0;
 skin_t *    skins[MAX_SKINS+1];
 skin_t *    skin_free = NULL;
 skin_t      marine;
@@ -4390,7 +4390,7 @@ int  get_skin_slot(void)
     int si, i;
 
     // Find unused skin slot, or add one.
-    for(si=0; si<numskins; si++ )
+    for(si=0; si<num_skins; si++ )
     {
         if( skins[si] == NULL )  break;
     }
@@ -4413,7 +4413,7 @@ int  get_skin_slot(void)
     sk = skin_free;
     skin_free = *(skin_t**)sk;  // unlink
     skins[si] = sk;
-    if( si >= numskins )  numskins = si+1;
+    if( si >= num_skins )  num_skins = si+1;
     return si;
 
 none:
@@ -4433,9 +4433,9 @@ void  free_skin( int skin_num )
     *(skin_t**)sk = skin_free;  // Link into free list
     skin_free = sk;
 
-    while( numskins>0 && (skins[numskins-1] == NULL) )
+    while( num_skins>0 && (skins[num_skins-1] == NULL) )
     {
-        numskins --;
+        num_skins --;
     }
     // Cannot move existing skins
 }
@@ -4476,7 +4476,7 @@ void R_Init_Skins (void)
     skins[0] = & marine;
     Skin_SetDefaultValue( & marine );
     memcpy(&marine.spritedef, &sprites[SPR_PLAY], sizeof(spritedef_t));
-    numskins = 1;
+    num_skins = 1;
 }
 
 // Returns the skin index if the skin name is found (loaded from pwad).
@@ -4485,7 +4485,7 @@ int R_SkinAvailable (const char* name)
 {
     int  i;
 
-    for (i=0;i<numskins;i++)
+    for (i=0;i<num_skins;i++)
     {
         if( skins[i] && strcasecmp(skins[i]->name, name)==0)
             return i;
@@ -4498,7 +4498,7 @@ void SetPlayerSkin_by_index( player_t * player, int index )
 {
     skin_t * sk;
 
-    if( index >= numskins )   goto default_skin;
+    if( index >= num_skins )   goto default_skin;
    
     sk = skins[index];
     if( sk == NULL )   goto default_skin;
@@ -4535,7 +4535,7 @@ void  SetPlayerSkin (int playernum, const char *skinname)
 {
     int   i;
 
-    for(i=0;i<numskins;i++)
+    for(i=0;i<num_skins;i++)
     {
         // search in the skin list
         if( skins[i] && strcasecmp(skins[i]->name,skinname)==0)
@@ -4564,7 +4564,7 @@ int W_CheckForSkinMarkerInPwad (int wadid, int startlump)
 {
     lump_name_t name8;
     uint64_t mask6;  // big endian, little endian
-    int  numlumps = wadfiles[wadid]->numlumps;
+    int  num_lumps = wadfiles[wadid]->num_lumps;
     lumpinfo_t * lumpinfo = wadfiles[wadid]->lumpinfo;
 
     name8.namecode = -1; // make 6 char mask
@@ -4574,11 +4574,11 @@ int W_CheckForSkinMarkerInPwad (int wadid, int startlump)
     numerical_name( "S_SKIN", & name8 );  // fast compares
 
     // scan forward, start at <startlump>
-    if( (startlump < numlumps) && lumpinfo )
+    if( (startlump < num_lumps) && lumpinfo )
     {
         lumpinfo_t * lump_p = & lumpinfo[ startlump ];
         int i;
-        for (i = startlump; i < numlumps; i++,lump_p++)
+        for (i = startlump; i < num_lumps; i++,lump_p++)
         {
             // Only check first 6 characters.
             if( (*(uint64_t *)lump_p->name & mask6) == name8.namecode )
@@ -4637,7 +4637,7 @@ void R_AddSkins (int wadnum)
 
         // set defaults
         Skin_SetDefaultValue(sk);
-        sprintf (sk->name,"skin %d", numskins-1);
+        sprintf (sk->name,"skin %d", num_skins-1);
 
         buf  = W_CacheLumpNum (lumpnum, PU_CACHE);
         size = W_LumpLength (lumpnum);

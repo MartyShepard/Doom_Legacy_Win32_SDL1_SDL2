@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: d_clisrv.c 1774 2026-02-07 13:46:24Z wesleyjohnson $
+// $Id: d_clisrv.c 1776 2026-02-07 13:53:48Z wesleyjohnson $
 //
 // Copyright (C) 1998-2016 by DooM Legacy Team.
 //
@@ -5080,7 +5080,7 @@ static void SV_Send_Tics (void)
         // Header
         netbuffer->packettype = PT_SERVERTICS;
         netbuffer->u.serverpak.starttic = start_tic;
-        netbuffer->u.serverpak.numtics = (end_tic - start_tic); // num tics
+        netbuffer->u.serverpak.num_tics = (end_tic - start_tic); // num tics
         write_N32( &netbuffer->u.serverpak.cmd_player_mask, ticcmd_player_mask );  // players that send ticcmd
 
         // init
@@ -5217,7 +5217,7 @@ static void servertic_handler( byte nnode )
     byte   cmds_offset, num_cmds, num_txt;
 
     start_tic = ExpandTics (netbuffer->u.serverpak.starttic);
-    end_tic   = start_tic + netbuffer->u.serverpak.numtics;
+    end_tic   = start_tic + netbuffer->u.serverpak.num_tics;
 
     if( end_tic > (gametic + BACKUPTICS))
         end_tic = (gametic + BACKUPTICS);  // limit to backup capability
